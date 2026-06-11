@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { usePipelines, useCRMGoals, useCRMForecast } from "@/hooks/crm/use-deals";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,9 @@ export const CRMView = () => {
   const activePipeline = pipelines?.find(p => p.id === selectedPipelineId) || pipelines?.[0];
   const activeGoal = goals?.[0];
   const activeForecast = forecast?.[0];
+
+  const pipelineTitle = activePipeline?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
+
 
   return (
     <GlobalErrorBoundary name="CRM">
