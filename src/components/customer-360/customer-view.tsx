@@ -80,7 +80,7 @@ export function Customer360({ contactId }: { contactId?: string }) {
           <CardContent className="px-6 pb-6 -mt-10 relative">
             <div className="w-20 h-20 rounded-2xl bg-[#020617] p-1 mb-4">
               <div className="w-full h-full rounded-xl bg-indigo-500 flex items-center justify-center text-white text-3xl font-black">
-                {(displayContact.name || "UN").substring(0, 2).toUpperCase()}
+                {(contact?.name || "UN").substring(0, 2).toUpperCase()}
               </div>
             </div>
             <h3 className="text-xl font-black text-white">{displayContact.name}</h3>
