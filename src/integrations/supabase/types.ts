@@ -444,6 +444,71 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_executions_v2: {
+        Row: {
+          contact_id: string
+          current_node_id: string | null
+          execution_status: string | null
+          finished_at: string | null
+          id: string
+          organization_id: string
+          started_at: string | null
+          variables_context: Json | null
+          workflow_id: string
+        }
+        Insert: {
+          contact_id: string
+          current_node_id?: string | null
+          execution_status?: string | null
+          finished_at?: string | null
+          id?: string
+          organization_id: string
+          started_at?: string | null
+          variables_context?: Json | null
+          workflow_id: string
+        }
+        Update: {
+          contact_id?: string
+          current_node_id?: string | null
+          execution_status?: string | null
+          finished_at?: string | null
+          id?: string
+          organization_id?: string
+          started_at?: string | null
+          variables_context?: Json | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_executions_v2_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_executions_v2_current_node_id_fkey"
+            columns: ["current_node_id"]
+            isOneToOne: false
+            referencedRelation: "automation_nodes_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_executions_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_executions_v2_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       automation_logs: {
         Row: {
           action_type: string
@@ -492,6 +557,102 @@ export type Database = {
           },
         ]
       }
+      automation_nodes_v2: {
+        Row: {
+          branch_name: string | null
+          config: Json | null
+          created_at: string | null
+          id: string
+          node_title: string | null
+          node_type: string
+          parent_node_id: string | null
+          ui_position: Json | null
+          workflow_id: string
+        }
+        Insert: {
+          branch_name?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          node_title?: string | null
+          node_type: string
+          parent_node_id?: string | null
+          ui_position?: Json | null
+          workflow_id: string
+        }
+        Update: {
+          branch_name?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          node_title?: string | null
+          node_type?: string
+          parent_node_id?: string | null
+          ui_position?: Json | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_nodes_v2_parent_node_id_fkey"
+            columns: ["parent_node_id"]
+            isOneToOne: false
+            referencedRelation: "automation_nodes_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_nodes_v2_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_step_logs_v2: {
+        Row: {
+          created_at: string | null
+          execution_id: string
+          id: string
+          log_message: string | null
+          metadata: Json | null
+          node_id: string
+          step_result: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          execution_id: string
+          id?: string
+          log_message?: string | null
+          metadata?: Json | null
+          node_id: string
+          step_result?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          execution_id?: string
+          id?: string
+          log_message?: string | null
+          metadata?: Json | null
+          node_id?: string
+          step_result?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_step_logs_v2_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "automation_executions_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_step_logs_v2_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "automation_nodes_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       automation_workflows: {
         Row: {
           created_at: string | null
@@ -526,6 +687,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "automation_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_workflows_v2: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          title: string
+          trigger_config: Json | null
+          trigger_type_code: string
+          updated_at: string | null
+          version_number: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          title: string
+          trigger_config?: Json | null
+          trigger_type_code: string
+          updated_at?: string | null
+          version_number?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          title?: string
+          trigger_config?: Json | null
+          trigger_type_code?: string
+          updated_at?: string | null
+          version_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_workflows_v2_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2955,6 +3163,91 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      marketing_campaigns_v2: {
+        Row: {
+          budget: number | null
+          campaign_name: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          organization_id: string
+          start_date: string | null
+          status_code: string | null
+        }
+        Insert: {
+          budget?: number | null
+          campaign_name: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id: string
+          start_date?: string | null
+          status_code?: string | null
+        }
+        Update: {
+          budget?: number | null
+          campaign_name?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id?: string
+          start_date?: string | null
+          status_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_templates_v2: {
+        Row: {
+          category_code: string | null
+          channel_type: string
+          content_body: string | null
+          created_at: string | null
+          id: string
+          organization_id: string
+          subject_line: string | null
+          template_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_code?: string | null
+          channel_type: string
+          content_body?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          subject_line?: string | null
+          template_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_code?: string | null
+          channel_type?: string
+          content_body?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          subject_line?: string | null
+          template_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_templates_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
