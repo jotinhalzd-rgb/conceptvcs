@@ -188,19 +188,28 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          limits: Json | null
           name: string
+          plan_type: string | null
+          status: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          limits?: Json | null
           name: string
+          plan_type?: string | null
+          status?: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          limits?: Json | null
           name?: string
+          plan_type?: string | null
+          status?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -398,6 +407,7 @@ export type Database = {
         Row: {
           campaign_id: string | null
           channel: string
+          company_id: string | null
           created_at: string | null
           customer_id: string
           event_type: string
@@ -407,6 +417,7 @@ export type Database = {
         Insert: {
           campaign_id?: string | null
           channel: string
+          company_id?: string | null
           created_at?: string | null
           customer_id: string
           event_type: string
@@ -416,6 +427,7 @@ export type Database = {
         Update: {
           campaign_id?: string | null
           channel?: string
+          company_id?: string | null
           created_at?: string | null
           customer_id?: string
           event_type?: string
@@ -428,6 +440,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -621,32 +640,45 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string | null
           created_at: string | null
           full_name: string | null
           id: string
+          impersonated_by: string | null
           organization_id: string | null
           role: string
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string | null
           full_name?: string | null
           id: string
+          impersonated_by?: string | null
           organization_id?: string | null
           role: string
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
+          impersonated_by?: string | null
           organization_id?: string | null
           role?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_organization_id_fkey"
             columns: ["organization_id"]
@@ -687,6 +719,7 @@ export type Database = {
         Row: {
           agent_id: string | null
           comment: string | null
+          company_id: string | null
           conversation_id: string | null
           created_at: string | null
           customer_id: string
@@ -698,6 +731,7 @@ export type Database = {
         Insert: {
           agent_id?: string | null
           comment?: string | null
+          company_id?: string | null
           conversation_id?: string | null
           created_at?: string | null
           customer_id: string
@@ -709,6 +743,7 @@ export type Database = {
         Update: {
           agent_id?: string | null
           comment?: string | null
+          company_id?: string | null
           conversation_id?: string | null
           created_at?: string | null
           customer_id?: string
@@ -717,7 +752,15 @@ export type Database = {
           score?: number
           type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "satisfaction_surveys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stages: {
         Row: {
@@ -780,7 +823,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_company: { Args: never; Returns: string }
+      get_user_role: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
