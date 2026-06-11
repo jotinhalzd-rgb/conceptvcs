@@ -23,7 +23,8 @@ export function useAuth() {
           return true;
         }
       } catch (e) {
-        console.error("Error parsing bypass session", e);
+        console.error("Critical error parsing bypass session. Clearing cache.", e);
+        localStorage.removeItem("onecontact_bypass_session");
       }
       return false;
     };
