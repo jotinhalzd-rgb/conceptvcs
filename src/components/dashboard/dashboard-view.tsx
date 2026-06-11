@@ -238,4 +238,3 @@ export function Dashboard() {
   );
 }
 
-import { cn } from "@/lib/utils";
