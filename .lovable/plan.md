@@ -1,31 +1,34 @@
 text
-# PLANO DE REPROJETO: INBOX OPERACIONAL PREMIUM (LINEAR/INTERCOM STYLE)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 4 (CAMPANHAS & CDP)
 
-Transformação da Inbox em uma ferramenta de alta performance, eliminando desperdícios de espaço e focando na produtividade do operador.
+Transformação do sistema em uma plataforma central de inteligência de dados (CDP) e motor de engajamento multicanal de alta escala.
 
-## 1. Reestruturação do Grid & Viewport
-*   **Aplicação 100vh:** Ajustar o `AppLayout` para que a área de conteúdo principal possa ocupar 100% da altura disponível sem paddings excessivos.
-*   **CSS Grid Operacional:** Implementar o grid fixo: `[Sidebar 80px] | [Lista 360px] | [Chat 1fr] | [Customer 360 420px]`.
-*   **Scroll Isolado:** Garantir que apenas as colunas internas possuam scroll (`overflow-y-auto`), travando o scroll da página.
+## 1. Infraestrutura de Dados & CDP (Customer Data Platform)
+*   **Esquema de Campanhas:** Criar tabelas `campaigns`, `campaign_batches` e `campaign_logs` para rastreamento granular.
+*   **Motor de Eventos:** Implementar uma tabela central de `events` que unifica disparos, aberturas, cliques e conversões, alimentando a timeline 360 do cliente.
+*   **Segmentação Dinâmica:** Criar sistema de "Audiências" baseado em metadados (tags, ticket médio, última compra, health score).
 
-## 2. Refinamento das Colunas
-*   **Coluna 2 (Lista de Conversas):** Aumento da densidade de informação. Redução de paddings, tipografia otimizada e inclusão de mini-badges de Fila e Sentimento sem poluição visual.
-*   **Coluna 3 (Chat Principal - Core):** Expansão da largura para 55-65%. Interface de mensagens inspirada no Slack/Linear (foco no conteúdo, bolhas de chat discretas).
-*   **Coluna 4 (Customer 360):** Painel compacto com cabeçalho fixo, timeline vertical densa e insights de IA em blocos de alto contraste.
+## 2. Módulo de Campanhas 2.0
+*   **Interface de Criação:** Workflow passo a passo: [Definição] -> [Público/Audiência] -> [Conteúdo Multicanal] -> [Agendamento].
+*   **Canais Suportados:** Implementar seletores para WhatsApp, Email, SMS e Push, preparados para integração com provedores (Twilio, SendGrid, etc).
+*   **Validação de Lista:** Processo de "Sanitização" na importação (limpeza de duplicados e verificação de formato).
 
-## 3. Experiência de Usuário & Responsividade
-*   **Brekpoints Inteligentes:** 
-    *   < 1440px: Customer 360 torna-se um painel flutuante (Drawer) acionável por ícone.
-    *   < 1024px: Sidebar e Lista de Conversas entram em modo compacto/recolhido.
-*   **Estética "Enterprise SaaS":** 
-    *   Remoção de glows e sombras agressivas.
-    *   Uso de bordas sutis (`border-white/5`).
-    *   Background sólido `#020617` com variações mínimas para separação de áreas.
-    *   Tipografia Inter/Sans de alta legibilidade.
+## 3. Inteligência Artificial de Engajamento
+*   **IA Copywriter:** Integração com LLM para gerar variações de mensagens e CTAs baseados no objetivo da campanha.
+*   **Predição de Melhor Horário:** Algoritmo que sugere o envio baseado no histórico de engajamento do cliente.
+*   **Análise de ROI:** Painel que cruza dados de disparos com eventos de conversão no CRM.
 
-## 4. Detalhes de Produtividade
-*   **Área de Input:** Fixada no rodapé do chat, com comandos rápidos visíveis e suporte a mídias sem expandir excessivamente a altura.
-*   **Cabeçalhos:** Fixos com metadados do contato e status de atendimento sempre visíveis.
+## 4. Governança & Auditoria (Compliance)
+*   **Audit Log Central:** Registrar todas as ações administrativas (quem criou a campanha, quem exportou contatos, quem alterou permissões).
+*   **Sistema de Pesquisa (CSAT/NPS):** Automação pós-atendimento que dispara pesquisas e vincula resultados ao Atendente e à Fila.
+
+## 5. Dashboard Executivo (CEO View)
+*   **Métricas de Funil:** Visualização clara do ROI por canal e performance de conversão por equipe.
+*   **Relatórios de Crescimento:** Gráficos de retenção (Churn) versus novas oportunidades geradas por campanhas.
 
 ---
-**Resultado Esperado:** Uma interface que desaparece para dar lugar ao trabalho, transmitindo a sensação de um sistema robusto, rápido e confiável para uso contínuo.
+
+### Detalhes Técnicos (Para Desenvolvedores)
+*   **Escalabilidade:** Migração de logs de eventos para uma estrutura otimizada para leitura (indexes compostos em `campaign_id` + `status`).
+*   **Edge Functions:** Processamento de disparos em massa via Supabase Edge Functions com filas de processamento para evitar gargalos.
+*   **Multi-tenancy:** RLS (Row Level Security) rigoroso para garantir isolamento total entre empresas em um ambiente de milhões de registros.
