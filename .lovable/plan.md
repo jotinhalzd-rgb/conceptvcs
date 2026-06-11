@@ -1,68 +1,74 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 9 (BUSINESS AI - EXECUTIVE BRAIN)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 10 (BILLING, SUBSCRIPTIONS & WHITE LABEL)
 
-Este plano detalha a criação da camada de inteligência central que interpretará dados operacionais para fornecer recomendações estratégicas, alertas de risco e visibilidade executiva em tempo real.
+Este plano detalha a transformação do ONECONTACT OS em uma plataforma SaaS comercialmente viável, escalável e multi-marca.
 
 ---
 
-## 1. ARQUITETURA BUSINESS AI (DATA HUB)
+## 1. ARQUITETURA FINANCEIRA E SUBSCRIPTIONS
 
-A Business AI atuará como um orquestrador que consome eventos de todas as fases anteriores para gerar uma camada de conhecimento executivo.
+Implementaremos uma camada de gestão de planos e assinaturas que controla o acesso a recursos baseado no nível de contrato.
 
 ### Novas Entidades de Dados
-- **`business_health_scores`**: Mapeamento diário de saúde por empresa/departamento baseado em (Atendimento + Vendas + SLA + NPS).
-- **`executive_insights`**: Recomendações geradas pela IA (ex: "Aumentar time de suporte entre 14h-16h").
-- **`churn_risk_signals`**: Registro de padrões de comportamento que indicam risco de cancelamento.
-- **`ai_analytical_queries`**: Log de perguntas feitas pelos gestores para aprendizado contínuo do modelo.
+- **`subscription_plans`**: `name`, `price`, `interval` (monthly/yearly), `features` (JSON com limites: max_users, max_messages, max_channels, ai_enabled).
+- **`subscriptions`**: `company_id` (FK), `plan_id` (FK), `status` (trial, active, past_due, canceled), `current_period_end`, `trial_ends_at`.
+- **`invoices`**: `subscription_id`, `amount`, `status` (paid, pending, failed), `pdf_url`, `billing_reason`.
+- **`usage_logs`**: Rastreamento de consumo em tempo real para controle de limites (mensagens enviadas, minutos de voz).
 
 ---
 
-## 2. EXECUTIVE COMMAND CENTER (VISUAL)
+## 2. WHITE LABEL E MULTI-TENANCY CORE
 
-Interface exclusiva para tomadores de decisão, focada em "O que precisa de ação agora?".
+O sistema será preparado para assumir a identidade visual de parceiros ou grandes empresas.
 
-### Componentes Principais
-- **Executive Smart Feed:** Timeline cronológica de eventos críticos (ROI de campanha, queda de conversão, meta atingida).
-- **Revenue Intelligence Widget:** Gráficos dinâmicos de faturamento por canal, comparando performance real vs. forecast.
-- **Decision Support System:** Botões de ação sugeridos pela IA abaixo de cada insight (ex: Insight "SLA baixo no Suporte" -> Ação "Habilitar transbordo para Comercial").
-
----
-
-## 3. MOTORES DE PREVISÃO E ANÁLISE
-
-Utilizaremos modelos LLM avançados integrados aos dados do Supabase.
-
-- **Predictive Churn Engine:** Analisa tempo sem contato e sentimento histórico para classificar o risco do cliente no Customer 360.
-- **Opportunity Engine:** Varredura em contatos inativos e deals perdidos para sugerir reativação com base no Lead Score.
-- **Linguagem Natural (Ask Business AI):** Interface de chat para gestores consultarem dados do banco sem conhecer SQL (text-to-query dinâmico).
+### Extensão: `companies` / `tenant_configs`
+- **Branding:** `logo_url`, `primary_color`, `custom_domain`, `company_name`.
+- **Login:** Customização da tela de autenticação baseada no host da requisição.
 
 ---
 
-## 4. ESTRATÉGIA DE CUSTOS E CACHE
+## 3. ÁREA DO PARCEIRO E COMISSÕES
 
-- **Batch Processing:** A maioria das análises de tendência será feita em lotes (ex: 1x por hora) para reduzir custos de tokens.
-- **Realtime Critical:** Apenas eventos de alto risco (ex: SLA estourado para cliente VIP) dispararão análise imediata.
-- **Embeddings Históricos:** Armazenamento de tendências mensais em vetores para busca rápida de padrões sazonais.
+Módulo para revendedores e consultores gerenciarem sua carteira.
+
+- **Partner Hub:** Dashboard para parceiros visualizarem suas empresas cadastradas e faturamento total.
+- **`commissions_log`**: Registro de valores devidos a parceiros baseado em cada pagamento aprovado (recorrência).
+
+---
+
+## 4. EXECUTIVE FINANCIAL DASHBOARD (CEO MASTER)
+
+Visibilidade total da saúde financeira da plataforma.
+
+- **Metrics:** MRR (Monthly Recurring Revenue), ARR, Churn Rate, LTV (Lifetime Value).
+- **Billing Health Score:** Identificação de inadimplência e empresas prontas para upgrade baseado em uso (Upsell Signals).
 
 ---
 
 ## 5. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
 
-**Passo 1: Business Intelligence Schema**  
-Criação das tabelas de health score, tendências e logs analíticos.
+**Passo 1: Billing Schema & Security**  
+Criação das tabelas de planos, faturas e auditoria financeira.
 
-**Passo 2: Executive Command Center UI**  
-Construção da tela "Master View" para CEOs com o Smart Feed integrado.
+**Passo 2: Subscription Management UI**  
+Desenvolvimento da tela de "Assinatura e Planos" dentro das configurações da empresa.
 
-**Passo 3: Módulo de Revenue Intelligence**  
-Implementação dos dashboards de faturamento cruzado entre CRM e Canais.
+**Passo 3: Módulo White Label Engine**  
+Implementação do hook `useTheme` e `useTenant` que injeta cores e logos baseados na empresa logada.
 
-**Passo 4: Motor de Churn & Oportunidade**  
-Desenvolvimento da lógica de classificação preditiva no Customer 360.
+**Passo 4: Integração Gateway (Abstração)**  
+Criação do `PaymentService` preparado para Stripe/Asaas, tratando webhooks de pagamento.
 
-**Passo 5: IA Conversacional Analítica**  
-Interface de perguntas e respostas para dados corporativos via linguagem natural.
+**Passo 5: Partner & Commission Hub**  
+Interface para parceiros e automação de cálculo de comissões.
+
+---
+
+## RISCOS E CUSTOS ESTIMADOS
+- **Custo Gateway:** ~3% a 5% por transação.
+- **Infraestrutura:** Aumento marginal de processamento para workers de cobrança.
+- **Risco:** Bloqueios indevidos por erro de processamento de webhook (mitigado com logs extensivos).
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para transformar o ONECONTACT OS no cérebro estratégico da sua empresa para os próximos 10 anos.
+Aguardando seu "sim" para transformar o ONECONTACT OS em uma potência comercial automatizada.
