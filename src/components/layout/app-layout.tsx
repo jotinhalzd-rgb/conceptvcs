@@ -154,13 +154,17 @@ export function AppLayout() {
 
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-white/5 space-y-4 bg-[#030712]/50 backdrop-blur-sm">
-            <div className={cn("flex items-center gap-3 p-2 rounded-2xl hover:bg-white/[0.03] transition-colors group cursor-pointer", collapsed && "justify-center")}>
-              <Avatar className="h-10 w-10 border-2 border-indigo-500/20 group-hover:border-indigo-500/50 transition-all">
+            <div className={cn(
+              "flex items-center gap-3 p-2 rounded-2xl hover:bg-white/[0.03] transition-all group cursor-pointer relative",
+              collapsed && "justify-center"
+            )}>
+              <Avatar className="h-10 w-10 border-2 border-indigo-500/20 group-hover:border-indigo-500/50 transition-all shrink-0">
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-indigo-600 text-white font-bold">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
+              
               <AnimatePresence mode="wait">
                 {!collapsed && (
                   <motion.div 
@@ -176,6 +180,22 @@ export function AppLayout() {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Botão de Logout Rápido acoplado ao perfil */}
+              {!collapsed && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      id="sidebar-quick-logout"
+                      onClick={handleLogout}
+                      className="absolute right-2 p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Sair do Perfil</TooltipContent>
+                </Tooltip>
+              )}
             </div>
             
             <div className="flex flex-col gap-1">
