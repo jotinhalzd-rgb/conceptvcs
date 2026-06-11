@@ -73,7 +73,7 @@ export function DealList({ pipelineId }: DealListProps) {
                   </span>
                 </TableCell>
                 <TableCell className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">
-                  {format(new Date(deal.created_at), "dd/MM/yyyy")}
+                  {deal.created_at ? format(new Date(deal.created_at), "dd/MM/yyyy") : "N/A"}
                 </TableCell>
               </TableRow>
             ))}
