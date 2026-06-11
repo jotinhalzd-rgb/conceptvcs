@@ -53,6 +53,8 @@ export function AppLayout() {
     ...(isCEOMaster ? [
       { icon: Briefcase, label: "Gestão de Empresas", href: "/admin/companies", group: "Governança" },
       { icon: ShieldCheck, label: "Auditoria Global", href: "/admin/audit", group: "Governança" },
+      { icon: Globe, label: "Gestão de Canais", href: "/admin/channels", group: "Governança" },
+
     ] : []),
     { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
     { icon: LifeBuoy, label: "Filas de Atendimento", href: "/queues", group: "Operação" },
