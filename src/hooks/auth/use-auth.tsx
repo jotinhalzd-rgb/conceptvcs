@@ -14,9 +14,15 @@ export function useAuth() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(`Auth event: ${event}`);
       setSession(session);
       setLoading(false);
+      
+      if (event === 'SIGNED_OUT') {
+        // Garantir que a limpeza seja completa no logout
+        setSession(null);
+      }
     });
 
     return () => subscription.unsubscribe();

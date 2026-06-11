@@ -55,8 +55,23 @@ export function AppLayout() {
   }, [user, loading, navigate]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
+    try {
+      console.log("Iniciando logout...");
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        // Se houver erro de sessão inválida, forçamos o redirecionamento
+        if (error.message.includes("session_not_found") || error.message.includes("not found")) {
+          console.warn("Sessão já inválida, redirecionando para login.");
+        } else {
+          throw error;
+        }
+      }
+      navigate({ to: "/auth" });
+    } catch (error: any) {
+      console.error("Erro ao fazer logout:", error);
+      // Fallback: redirecionar mesmo com erro
+      navigate({ to: "/auth" });
+    }
   };
 
   const groups = [...new Set(navItems.map(item => item.group))];
