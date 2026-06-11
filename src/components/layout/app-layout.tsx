@@ -35,6 +35,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const navItems = [
   { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
   { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
+  { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
   { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
   { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
   { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
