@@ -44,12 +44,13 @@ export function AppLayout() {
             <Link
               key={item.href}
               to={item.href}
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                isActive 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              )}
+              activeProps={{
+                className: "bg-primary text-primary-foreground",
+              }}
+              inactiveProps={{
+                className: "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+              }}
+              className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               <item.icon className="h-4 w-4" />
               {item.label}
