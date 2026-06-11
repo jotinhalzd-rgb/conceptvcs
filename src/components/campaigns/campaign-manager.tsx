@@ -58,7 +58,8 @@ export const CampaignManager = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="h-full w-full bg-[#020617] overflow-y-auto no-scrollbar p-8">
+      <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight">Motor de <span className="text-indigo-500">Campanhas 2.0</span></h1>
