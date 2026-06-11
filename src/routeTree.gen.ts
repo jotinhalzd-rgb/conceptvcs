@@ -13,10 +13,16 @@ import { Route as QueuesRouteImport } from './routes/queues'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomersRouteImport } from './routes/customers'
+import { Route as CrmRouteImport } from './routes/crm'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
+import { Route as SettingsDeveloperRouteImport } from './routes/settings.developer'
+import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
+import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
+import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 
 const QueuesRoute = QueuesRouteImport.update({
   id: '/queues',
@@ -36,6 +42,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const CustomersRoute = CustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrmRoute = CrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignsRoute = CampaignsRouteImport.update({
@@ -58,24 +69,61 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const SettingsMarketplaceRoute = SettingsMarketplaceRouteImport.update({
+  id: '/settings/marketplace',
+  path: '/settings/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsDeveloperRoute = SettingsDeveloperRouteImport.update({
+  id: '/settings/developer',
+  path: '/settings/developer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsBillingRoute = SettingsBillingRouteImport.update({
+  id: '/settings/billing',
+  path: '/settings/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAiStudioRoute = DashboardAiStudioRouteImport.update({
+  id: '/ai-studio',
+  path: '/ai-studio',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const AdminChannelsRoute = AdminChannelsRouteImport.update({
+  id: '/admin/channels',
+  path: '/admin/channels',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/campaigns': typeof CampaignsRoute
+  '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
   '/queues': typeof QueuesRoute
+  '/admin/channels': typeof AdminChannelsRoute
+  '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/settings/billing': typeof SettingsBillingRoute
+  '/settings/developer': typeof SettingsDeveloperRoute
+  '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/campaigns': typeof CampaignsRoute
+  '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
   '/inbox': typeof InboxRoute
   '/queues': typeof QueuesRoute
+  '/admin/channels': typeof AdminChannelsRoute
+  '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/settings/billing': typeof SettingsBillingRoute
+  '/settings/developer': typeof SettingsDeveloperRoute
+  '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -83,10 +131,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/campaigns': typeof CampaignsRoute
+  '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
   '/queues': typeof QueuesRoute
+  '/admin/channels': typeof AdminChannelsRoute
+  '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/settings/billing': typeof SettingsBillingRoute
+  '/settings/developer': typeof SettingsDeveloperRoute
+  '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -95,29 +149,47 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/campaigns'
+    | '/crm'
     | '/customers'
     | '/dashboard'
     | '/inbox'
     | '/queues'
+    | '/admin/channels'
+    | '/dashboard/ai-studio'
+    | '/settings/billing'
+    | '/settings/developer'
+    | '/settings/marketplace'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/campaigns'
+    | '/crm'
     | '/customers'
     | '/inbox'
     | '/queues'
+    | '/admin/channels'
+    | '/dashboard/ai-studio'
+    | '/settings/billing'
+    | '/settings/developer'
+    | '/settings/marketplace'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/campaigns'
+    | '/crm'
     | '/customers'
     | '/dashboard'
     | '/inbox'
     | '/queues'
+    | '/admin/channels'
+    | '/dashboard/ai-studio'
+    | '/settings/billing'
+    | '/settings/developer'
+    | '/settings/marketplace'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -125,10 +197,15 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   CampaignsRoute: typeof CampaignsRoute
+  CrmRoute: typeof CrmRoute
   CustomersRoute: typeof CustomersRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   InboxRoute: typeof InboxRoute
   QueuesRoute: typeof QueuesRoute
+  AdminChannelsRoute: typeof AdminChannelsRoute
+  SettingsBillingRoute: typeof SettingsBillingRoute
+  SettingsDeveloperRoute: typeof SettingsDeveloperRoute
+  SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -161,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/crm': {
+      id: '/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof CrmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/campaigns': {
       id: '/campaigns'
       path: '/campaigns'
@@ -189,14 +273,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/settings/marketplace': {
+      id: '/settings/marketplace'
+      path: '/settings/marketplace'
+      fullPath: '/settings/marketplace'
+      preLoaderRoute: typeof SettingsMarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/developer': {
+      id: '/settings/developer'
+      path: '/settings/developer'
+      fullPath: '/settings/developer'
+      preLoaderRoute: typeof SettingsDeveloperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/billing': {
+      id: '/settings/billing'
+      path: '/settings/billing'
+      fullPath: '/settings/billing'
+      preLoaderRoute: typeof SettingsBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/ai-studio': {
+      id: '/dashboard/ai-studio'
+      path: '/ai-studio'
+      fullPath: '/dashboard/ai-studio'
+      preLoaderRoute: typeof DashboardAiStudioRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/admin/channels': {
+      id: '/admin/channels'
+      path: '/admin/channels'
+      fullPath: '/admin/channels'
+      preLoaderRoute: typeof AdminChannelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardAiStudioRoute: typeof DashboardAiStudioRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAiStudioRoute: DashboardAiStudioRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -208,11 +329,26 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   CampaignsRoute: CampaignsRoute,
+  CrmRoute: CrmRoute,
   CustomersRoute: CustomersRoute,
   DashboardRoute: DashboardRouteWithChildren,
   InboxRoute: InboxRoute,
   QueuesRoute: QueuesRoute,
+  AdminChannelsRoute: AdminChannelsRoute,
+  SettingsBillingRoute: SettingsBillingRoute,
+  SettingsDeveloperRoute: SettingsDeveloperRoute,
+  SettingsMarketplaceRoute: SettingsMarketplaceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
