@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useChannels } from "@/hooks/channels/use-channels";
 import { ChannelCard } from "./channel-card";
 import { 
@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
+import { ConnectModal } from "./connect-modal";
 
 export const ChannelsView = () => {
   const { data: channels, isLoading, refetch } = useChannels();
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 
   return (
     <GlobalErrorBoundary name="Channels">
@@ -56,7 +58,10 @@ export const ChannelsView = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button className="h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-6 gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
+            <Button 
+              onClick={() => setIsConnectModalOpen(true)}
+              className="h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-6 gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+            >
               <Plus className="w-4 h-4" />
               <span>Conectar Novo Canal</span>
             </Button>
@@ -102,8 +107,10 @@ export const ChannelsView = () => {
                 />
               ))}
 
-              {/* Placeholder para Novo Canal */}
-              <button className="h-[280px] border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-indigo-500/20 hover:bg-white/[0.01] transition-all group">
+              <button 
+                onClick={() => setIsConnectModalOpen(true)}
+                className="h-[280px] border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-indigo-500/20 hover:bg-white/[0.01] transition-all group"
+              >
                 <div className="w-12 h-12 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Plus className="w-6 h-6 text-slate-600 group-hover:text-indigo-400" />
                 </div>
@@ -112,6 +119,7 @@ export const ChannelsView = () => {
             </div>
           )}
         </div>
+        <ConnectModal isOpen={isConnectModalOpen} onOpenChange={setIsConnectModalOpen} />
       </div>
     </GlobalErrorBoundary>
   );
