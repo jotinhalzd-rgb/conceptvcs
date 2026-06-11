@@ -1,52 +1,44 @@
-# Plano de Implementação: White Label, Franquias e Canais
+# Plano de Implementação: Global Expansion Platform (Fase 11)
 
-O objetivo é transformar o OneContact OS em um ecossistema multi-camada, permitindo que a plataforma seja distribuída sob diferentes marcas e hierarquias (Franquias, Revendas, White Label).
+O objetivo é transformar o ONECONTACT OS em uma infraestrutura global resiliente, capaz de operar em múltiplos idiomas, moedas e regiões, respeitando regulamentações locais de privacidade e residência de dados.
 
-## 1. Arquitetura de Canais (Distribution Schema)
+## 1. Arquitetura de Internacionalização & Localização (i18n & l10n)
 
-A fundação de dados será estendida para suportar relações de parentesco e personalização visual:
+Implementaremos uma camada de tradução dinâmica e formatação sensível ao contexto:
+- `public.global_translations`: Repositório central de chaves de tradução (`pt-BR`, `en-US`, `es-ES`, etc).
+- `public.global_regions_config`: Definição de formatos por país (moeda, fuso horário, formato de data, impostos).
+- **Dynamic Context Hook**: O frontend detectará a localidade do navegador ou a preferência do usuário e injetará as configurações via `Context API`.
 
-- `public.white_label_configs`: Configurações visuais por marca (Logo, Cores, Domínio, Nome).
-- `public.channel_networks`: Estrutura de redes (ex: Franquia X, Rede de Consultoria Y).
-- `public.channel_hierarchy`: Mapeamento de relações (Parent/Child) entre organizações.
-    - `parent_org_id` -> `child_org_id`.
-    - Níveis: 'Master', 'Franchise', 'Unit', 'Partner'.
-- `public.channel_permissions`: Escopo de visibilidade (ex: Master vê agregados de todas as Units).
+## 2. Multi-Moeda & Faturamento Global (Universal Billing Adapter)
 
-## 2. White Label Engine (Dynamic Branding)
+Integração profunda com a Billing Platform (Fase 9):
+- `public.global_currency_rates`: Tabela de conversão cambial atualizada via API (ex: Fixer/ExchangeRate).
+- `public.global_tax_rules`: Motor de cálculo de impostos locais (VAT, GST, ISS) baseado na residência da organização.
+- **Gateway Region Routing**: Mapeamento dinâmico para gateways locais (ex: Stripe para Global, Mercado Pago para LATAM, Adyen para Europa).
 
-Implementaremos um sistema de injeção de marca em tempo real:
-- **Theme Provider**: Lê a `white_label_config` baseada no `window.location.hostname`.
-- **Asset Resolver**: Alterna logos, favicons e e-mails de sistema dinamicamente.
-- **Subdomain Routing**: Mapeamento de `marca-a.onecontact.os` para o perfil visual correspondente.
+## 3. Compliance & Data Privacy (GDPR/LGPD/CCPA Ready)
 
-## 3. Painéis Hierárquicos (The Network Views)
+A fundação de privacidade será automatizada:
+- `public.global_privacy_consents`: Registro centralizado de aceites de termos e políticas (com hash de integridade).
+- `public.global_retention_policies`: Regras de expiração automática de dados por região.
+- **Right to Erasure (Motor de Exclusão)**: Scripts de deleção em cascata para garantir o "Direito ao esquecimento".
 
-### A. Franchise Dashboard (Master View)
-- Visão agregada de receita (MRR) de toda a rede.
-- Ranking de performance entre unidades.
-- Benchmark interno (EIN focado na rede).
+## 4. Infraestrutura Multi-Region & Performance
 
-### B. Unit/Partner Dashboard (Local View)
-- Interface operacional padrão, mas com indicação da rede vinculada.
-- Gestão de carteira para consultores e agências.
+Preparação para deployment distribuído:
+- **Region-Aware RLS**: Marcação de registros com `region_id` para permitir migração futura entre clusters físicos (Data Residency).
+- **Global CDN & Edge**: Otimização de entrega de ativos estáticos e execução de lógica de borda (Edge Functions) para latência < 100ms em grandes centros mundiais.
 
-## 4. Governança e Repasses (Billing Integration)
+## 5. Inteligência Global (OIL & EIN World View)
 
-- **Revenue Split**: Integração com a `Billing Platform` para automatizar o split de pagamentos.
-- **Certification Badges**: Visualização do nível de parceria no perfil do Hub.
+- **Language-Agnostic IA**: Prompts adaptativos que traduzem intenções mantendo o contexto cultural.
+- **Global Benchmarking**: Expansão do EIN para permitir comparativos "Brasil vs. Resto do Mundo" ou "Setor X em escala LATAM".
 
-## 5. Escalabilidade e Segurança (RLS Cross-Tenant)
+## Roadmap de Expansão (Estratégia)
 
-- **Hierarchical RLS**: Política que permite ao `parent_org_id` ler (SELECT) dados agregados de seus filhos, sem permitir escrita direta.
-- **Isolation**: Garantia de que a Marca A nunca acesse a configuração de marca B.
+1.  **Infra i18n Core**: Estrutura de tabelas e hooks de tradução.
+2.  **LATAM Expansion**: Localização para Espanhol e moedas da região (MXN, ARS, CLP).
+3.  **GDPR Compliance**: Implementação dos módulos de retenção e portabilidade exigidos pela Europa.
+4.  **Global Scale**: Deploy em clusters USA/EU e balanceamento de tráfego.
 
-## Detalhes da Hierarquia
-
-```text
-MASTER FRANQUIA (Vê Tudo)
-   └── FRANQUEADO REGIONAL (Vê sua Região)
-       └── UNIDADE LOCAL (Vê sua Unidade)
-```
-
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das tabelas de configuração White Label e a infraestrutura de hierarquia de organizações.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das tabelas de traduções globais e o sistema de localização dinâmica da interface.

@@ -2875,6 +2875,261 @@ export type Database = {
           },
         ]
       }
+      global_audit_tracing: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          latency_ms: number | null
+          metadata: Json | null
+          organization_id: string
+          profile_id: string
+          region_executed: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          latency_ms?: number | null
+          metadata?: Json | null
+          organization_id: string
+          profile_id: string
+          region_executed?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          latency_ms?: number | null
+          metadata?: Json | null
+          organization_id?: string
+          profile_id?: string
+          region_executed?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_audit_tracing_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "global_audit_tracing_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_currencies: {
+        Row: {
+          currency_code: string
+          currency_name: string
+          currency_symbol: string
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          currency_code: string
+          currency_name: string
+          currency_symbol: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          currency_code?: string
+          currency_name?: string
+          currency_symbol?: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
+      global_data_retention_rules: {
+        Row: {
+          created_at: string | null
+          entity_type: string
+          id: string
+          legal_base: string | null
+          region_code: string
+          retention_days: number
+        }
+        Insert: {
+          created_at?: string | null
+          entity_type: string
+          id?: string
+          legal_base?: string | null
+          region_code: string
+          retention_days: number
+        }
+        Update: {
+          created_at?: string | null
+          entity_type?: string
+          id?: string
+          legal_base?: string | null
+          region_code?: string
+          retention_days?: number
+        }
+        Relationships: []
+      }
+      global_exchange_rates: {
+        Row: {
+          from_currency: string
+          id: string
+          measured_at: string | null
+          provider_source: string | null
+          rate: number
+          to_currency: string
+        }
+        Insert: {
+          from_currency: string
+          id?: string
+          measured_at?: string | null
+          provider_source?: string | null
+          rate: number
+          to_currency: string
+        }
+        Update: {
+          from_currency?: string
+          id?: string
+          measured_at?: string | null
+          provider_source?: string | null
+          rate?: number
+          to_currency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_exchange_rates_from_currency_fkey"
+            columns: ["from_currency"]
+            isOneToOne: false
+            referencedRelation: "global_currencies"
+            referencedColumns: ["currency_code"]
+          },
+          {
+            foreignKeyName: "global_exchange_rates_to_currency_fkey"
+            columns: ["to_currency"]
+            isOneToOne: false
+            referencedRelation: "global_currencies"
+            referencedColumns: ["currency_code"]
+          },
+        ]
+      }
+      global_privacy_consents: {
+        Row: {
+          consent_type: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          is_given: boolean | null
+          organization_id: string
+          policy_version: string
+          profile_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          consent_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_given?: boolean | null
+          organization_id: string
+          policy_version: string
+          profile_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          consent_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_given?: boolean | null
+          organization_id?: string
+          policy_version?: string
+          profile_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_privacy_consents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "global_privacy_consents_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_regions_config: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          date_format: string
+          default_currency: string
+          default_lang: string
+          id: string
+          is_active: boolean | null
+          number_format_config: Json | null
+          timezone_default: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          date_format?: string
+          default_currency: string
+          default_lang: string
+          id?: string
+          is_active?: boolean | null
+          number_format_config?: Json | null
+          timezone_default: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          date_format?: string
+          default_currency?: string
+          default_lang?: string
+          id?: string
+          is_active?: boolean | null
+          number_format_config?: Json | null
+          timezone_default?: string
+        }
+        Relationships: []
+      }
+      global_translations: {
+        Row: {
+          category: string | null
+          id: string
+          lang_code: string
+          last_updated_at: string | null
+          translation_key: string
+          translation_value: string
+        }
+        Insert: {
+          category?: string | null
+          id?: string
+          lang_code: string
+          last_updated_at?: string | null
+          translation_key: string
+          translation_value: string
+        }
+        Update: {
+          category?: string | null
+          id?: string
+          lang_code?: string
+          last_updated_at?: string | null
+          translation_key?: string
+          translation_value?: string
+        }
+        Relationships: []
+      }
       hub_assets_marketplace: {
         Row: {
           asset_category_code: string
