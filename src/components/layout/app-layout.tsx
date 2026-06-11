@@ -1,5 +1,7 @@
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useUIStore } from "@/hooks/core/use-ui-store";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, 
   Inbox, 
@@ -43,7 +45,7 @@ const navItems = [
 export function AppLayout() {
   const { user, loading } = useAuth();
   const { data: profile } = useProfile();
-  const [collapsed, setCollapsed] = useState(false);
+  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -133,12 +135,19 @@ export function AppLayout() {
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              {!collapsed && (
-                <div className="flex-1 min-w-0 animate-in fade-in duration-300">
-                  <p className="text-sm font-bold text-white truncate leading-none mb-1">{profile?.full_name || "CEO DEMO"}</p>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">CEO / Founder</p>
-                </div>
-              )}
+              <AnimatePresence mode="wait">
+                {!collapsed && (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="flex-1 min-w-0"
+                  >
+                    <p className="text-sm font-bold text-white truncate leading-none mb-1">{profile?.full_name || "CEO DEMO"}</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">CEO / Founder</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             
             <div className="flex flex-col gap-1">
