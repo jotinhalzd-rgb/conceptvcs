@@ -32,9 +32,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function AppLayout() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { data: profile } = useProfile();
   const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const navigate = useNavigate();
   const location = typeof window !== 'undefined' ? window.location.pathname : '';
   const isInbox = location.startsWith("/inbox");
@@ -64,28 +65,52 @@ export function AppLayout() {
   ];
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
+      console.log("Nenhum usuário detectado, redirecionando para /auth");
       navigate({ to: "/auth" });
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   const handleLogout = async () => {
     try {
-      console.log("Iniciando logout...");
+      setLogoutLoading(true);
+      console.log("Logout button clicked");
+      console.log("Starting logout process...");
+      
+      // 1. Encerrar sessão no Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
-        // Se houver erro de sessão inválida, forçamos o redirecionamento
-        if (error.message.includes("session_not_found") || error.message.includes("not found")) {
-          console.warn("Sessão já inválida, redirecionando para login.");
-        } else {
-          throw error;
-        }
+        console.warn("Supabase signOut error (expected if bypass is active):", error.message);
       }
-      navigate({ to: "/auth" });
+      console.log("Supabase signOut completed");
+
+      // 2. Limpar Bypass Session
+      localStorage.removeItem("onecontact_bypass_session");
+      console.log("Bypass session removed");
+
+      // 3. Limpar Tokens do Supabase manualmente (garantia extra)
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      console.log("Supabase tokens cleared from localStorage");
+
+      // 4. Limpar SessionStorage
+      sessionStorage.clear();
+      console.log("Session storage cleared");
+
+      // 5. Redirecionar com reload para garantir limpeza de estados em memória
+      console.log("Redirecting to login...");
+      window.location.href = "/auth";
+      
     } catch (error: any) {
-      console.error("Erro ao fazer logout:", error);
-      // Fallback: redirecionar mesmo com erro
-      navigate({ to: "/auth" });
+      console.error("Critical error during logout:", error);
+      // Fallback radical
+      window.location.href = "/auth";
+    } finally {
+      console.log("Logout process finalized");
+      setLogoutLoading(false);
     }
   };
 
@@ -110,6 +135,7 @@ export function AppLayout() {
                   <ShieldCheck className="w-6 h-6 text-white" />
                 </div>
               </div>
+
               {!collapsed && (
                 <div className="animate-in fade-in slide-in-from-left-2 duration-500">
                   <h1 className="text-lg font-bold tracking-tight text-white leading-none">ONECONTACT</h1>
@@ -193,9 +219,17 @@ export function AppLayout() {
                     <button 
                       id="sidebar-quick-logout"
                       onClick={handleLogout}
-                      className="absolute right-2 p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100"
+                      disabled={logoutLoading}
+                      className={cn(
+                        "absolute right-2 p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50",
+                        logoutLoading && "opacity-100"
+                      )}
                     >
-                      <LogOut className="h-4 w-4" />
+                      {logoutLoading ? (
+                        <div className="w-4 h-4 border-2 border-rose-400/20 border-t-rose-400 rounded-full animate-spin" />
+                      ) : (
+                        <LogOut className="h-4 w-4" />
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top">Sair do Perfil</TooltipContent>
@@ -230,8 +264,13 @@ export function AppLayout() {
                       size="sm" 
                       className="w-full justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl"
                       onClick={handleLogout}
+                      disabled={logoutLoading}
                     >
-                      <LogOut className="h-5 w-5" />
+                      {logoutLoading ? (
+                        <div className="w-5 h-5 border-2 border-rose-400/20 border-t-rose-400 rounded-full animate-spin" />
+                      ) : (
+                        <LogOut className="h-5 w-5" />
+                      )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="right">Sair do Perfil</TooltipContent>
