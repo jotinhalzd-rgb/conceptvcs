@@ -31,7 +31,7 @@ export function useCurrentSubscription() {
         .eq("id", profile.user.id)
         .single();
 
-      if (!userProfile) return null;
+      if (!userProfile?.company_id) return null;
 
       const { data, error } = await supabase
         .from("subscriptions")
@@ -40,6 +40,7 @@ export function useCurrentSubscription() {
           plan:subscription_plans(*)
         `)
         .eq("company_id", userProfile.company_id)
+
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
