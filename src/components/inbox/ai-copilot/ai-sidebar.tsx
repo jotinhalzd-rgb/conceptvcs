@@ -22,9 +22,18 @@ interface AISidebarProps {
 }
 
 export const AISidebar = ({ chat, onApplyReply }: AISidebarProps) => {
+  const { agents } = useAgents();
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [insights, setInsights] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'copilot' | 'knowledge'>('copilot');
+
+  useEffect(() => {
+    if (agents && agents.length > 0 && !selectedAgentId) {
+      setSelectedAgentId(agents[0].id);
+    }
+  }, [agents]);
+
 
   useEffect(() => {
     if (chat?.last_message_preview) {
