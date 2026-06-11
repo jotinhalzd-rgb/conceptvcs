@@ -34,6 +34,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
   const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
 
+export function AppLayout() {
+  const { user, loading } = useAuth();
+  const { data: profile } = useProfile();
+  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
+  const navigate = useNavigate();
+  const location = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isInbox = location.startsWith("/inbox");
+  const isCampaigns = location.startsWith("/campaigns");
+
+  const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
+
   const navItems = [
     { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
     ...(isCEOMaster ? [
@@ -49,15 +60,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
     { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
   ];
-
-export function AppLayout() {
-  const { user, loading } = useAuth();
-  const { data: profile } = useProfile();
-  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
-  const navigate = useNavigate();
-  const location = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isInbox = location.startsWith("/inbox");
-  const isCampaigns = location.startsWith("/campaigns");
 
   useEffect(() => {
     if (!loading && !user) {
