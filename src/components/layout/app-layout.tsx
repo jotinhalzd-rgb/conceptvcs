@@ -50,8 +50,9 @@ export function AppLayout() {
   const { data: profile } = useProfile();
   const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
   const navigate = useNavigate();
-  const location = window.location.pathname;
+  const location = typeof window !== 'undefined' ? window.location.pathname : '';
   const isInbox = location.startsWith("/inbox");
+  const isCampaigns = location.startsWith("/campaigns");
 
   useEffect(() => {
     if (!loading && !user) {
