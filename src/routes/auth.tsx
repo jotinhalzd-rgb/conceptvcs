@@ -52,15 +52,62 @@ function AuthPage() {
 
   const handleDemoAccess = async () => {
     setLoading(true);
-    setEmail("demo@onecontact.ai");
-    setPassword("demo123456");
+    const demoEmail = "demo@onecontact.ai";
+    const demoPassword = "demo123456";
     
-    // In a real scenario, we'd sign in. For now, we simulate the experience
-    setTimeout(() => {
+    console.log("Iniciando acesso CEO Demo...");
+    
+    try {
+      // 1. Tentar login direto
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+
+      if (signInError) {
+        console.warn("Usuário demo não encontrado ou erro no login. Tentando criar automaticamente...", signInError.message);
+        
+        // 2. Se falhar, tentar cadastrar
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPassword,
+          options: {
+            data: {
+              full_name: "CEO Demo",
+              role: "ceo",
+              organization_name: "ONECONTACT DEMO COMPANY",
+            }
+          }
+        });
+
+        if (signUpError) {
+          // Se o erro for que o usuário já existe mas a senha está errada, reportamos
+          if (signUpError.message.includes("already registered")) {
+            throw new Error("O usuário demo já existe mas as credenciais falharam. Por favor, contate o administrador.");
+          }
+          throw signUpError;
+        }
+
+        console.log("Usuário demo criado com sucesso. Realizando login...");
+        
+        // 3. Login após cadastro
+        const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password: demoPassword,
+        });
+
+        if (finalSignInError) throw finalSignInError;
+      }
+
+      console.log("Login demo realizado com sucesso!");
       toast.success("Acesso DEMO CEO ativado!");
       navigate({ to: "/dashboard" });
+    } catch (error: any) {
+      console.error("Erro crítico no acesso demo:", error);
+      toast.error(`Falha no acesso demo: ${error.message}`);
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   return (
