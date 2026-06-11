@@ -2,12 +2,14 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { MessageSquare, MessageCircle, Mail, Globe } from "lucide-react";
 
 interface ChatListProps {
   conversations: any[];
   selectedId: string | null;
   onSelect: (id: string) => void;
 }
+
 
 export const ChatList = ({ conversations, selectedId, onSelect }: ChatListProps) => {
   return (
@@ -28,10 +30,17 @@ export const ChatList = ({ conversations, selectedId, onSelect }: ChatListProps)
                   {chat.contacts?.name?.charAt(0) || "U"}
                 </AvatarFallback>
               </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#030712] border border-white/10 flex items-center justify-center">
+                {chat.channels?.provider === 'whatsapp' ? <MessageSquare className="w-2.5 h-2.5 text-emerald-500" /> :
+                 chat.channels?.provider === 'instagram' ? <MessageCircle className="w-2.5 h-2.5 text-pink-500" /> :
+                 chat.channels?.provider === 'email' ? <Mail className="w-2.5 h-2.5 text-indigo-500" /> :
+                 <Globe className="w-2.5 h-2.5 text-slate-500" />}
+              </div>
               {chat.status === 'new' && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full border-2 border-[#030712] flex items-center justify-center text-[8px] font-black text-white" />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-[#030712]" />
               )}
             </div>
+
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">
                 <span className={cn(
