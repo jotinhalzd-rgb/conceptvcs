@@ -533,6 +533,57 @@ export type Database = {
           },
         ]
       }
+      billing_transactions: {
+        Row: {
+          amount: number
+          contact_id: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          organization_id: string
+          payment_method: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          contact_id: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          organization_id: string
+          payment_method?: string | null
+          status: string
+        }
+        Update: {
+          amount?: number
+          contact_id?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string
+          payment_method?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_transactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_health_scores: {
         Row: {
           calculated_at: string | null
@@ -1305,6 +1356,54 @@ export type Database = {
           },
         ]
       }
+      customer_events_unified: {
+        Row: {
+          contact_id: string
+          created_at: string | null
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          title: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string | null
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          title: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string | null
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_events_unified_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_events_unified_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_identities: {
         Row: {
           contact_id: string
@@ -1336,6 +1435,57 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_insights_enterprise: {
+        Row: {
+          churn_risk_score: number | null
+          contact_id: string
+          id: string
+          interests: string[] | null
+          next_best_action: string | null
+          organization_id: string
+          purchase_probability: number | null
+          summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          churn_risk_score?: number | null
+          contact_id: string
+          id?: string
+          interests?: string[] | null
+          next_best_action?: string | null
+          organization_id: string
+          purchase_probability?: number | null
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          churn_risk_score?: number | null
+          contact_id?: string
+          id?: string
+          interests?: string[] | null
+          next_best_action?: string | null
+          organization_id?: string
+          purchase_probability?: number | null
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_insights_enterprise_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_insights_enterprise_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1377,6 +1527,73 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_tickets: {
+        Row: {
+          assigned_to: string | null
+          contact_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          nps_score: number | null
+          organization_id: string
+          priority: string
+          sla_due: string | null
+          status: string
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          nps_score?: number | null
+          organization_id: string
+          priority?: string
+          sla_due?: string | null
+          status?: string
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          nps_score?: number | null
+          organization_id?: string
+          priority?: string
+          sla_due?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_tickets_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tickets_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
