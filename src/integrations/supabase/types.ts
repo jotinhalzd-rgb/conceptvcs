@@ -2282,6 +2282,59 @@ export type Database = {
           },
         ]
       }
+      hub_assets_marketplace: {
+        Row: {
+          asset_category_code: string
+          asset_description: string | null
+          asset_icon_url: string | null
+          asset_price: number | null
+          asset_pricing_model: string
+          asset_status_code: string | null
+          asset_title: string
+          asset_type_code: string
+          created_at: string | null
+          id: string
+          publisher_org_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_category_code: string
+          asset_description?: string | null
+          asset_icon_url?: string | null
+          asset_price?: number | null
+          asset_pricing_model?: string
+          asset_status_code?: string | null
+          asset_title: string
+          asset_type_code: string
+          created_at?: string | null
+          id?: string
+          publisher_org_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_category_code?: string
+          asset_description?: string | null
+          asset_icon_url?: string | null
+          asset_price?: number | null
+          asset_pricing_model?: string
+          asset_status_code?: string | null
+          asset_title?: string
+          asset_type_code?: string
+          created_at?: string | null
+          id?: string
+          publisher_org_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_assets_marketplace_publisher_org_id_fkey"
+            columns: ["publisher_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hub_connections: {
         Row: {
           commission_rate: number | null
@@ -2327,6 +2380,55 @@ export type Database = {
           {
             foreignKeyName: "hub_connections_target_org_id_fkey"
             columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hub_installs_marketplace: {
+        Row: {
+          asset_id: string
+          current_install_status: string | null
+          id: string
+          installed_at: string | null
+          installed_by_profile_id: string | null
+          organization_id: string
+        }
+        Insert: {
+          asset_id: string
+          current_install_status?: string | null
+          id?: string
+          installed_at?: string | null
+          installed_by_profile_id?: string | null
+          organization_id: string
+        }
+        Update: {
+          asset_id?: string
+          current_install_status?: string | null
+          id?: string
+          installed_at?: string | null
+          installed_by_profile_id?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_installs_marketplace_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "hub_assets_marketplace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hub_installs_marketplace_installed_by_profile_id_fkey"
+            columns: ["installed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hub_installs_marketplace_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -2386,6 +2488,47 @@ export type Database = {
           },
         ]
       }
+      hub_partners_marketplace: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_partner_public: boolean | null
+          organization_id: string
+          partner_bio: string | null
+          partner_certification_level: string | null
+          partner_display_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_partner_public?: boolean | null
+          organization_id: string
+          partner_bio?: string | null
+          partner_certification_level?: string | null
+          partner_display_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_partner_public?: boolean | null
+          organization_id?: string
+          partner_bio?: string | null
+          partner_certification_level?: string | null
+          partner_display_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_partners_marketplace_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hub_profiles: {
         Row: {
           created_at: string
@@ -2435,6 +2578,135 @@ export type Database = {
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hub_revenue_marketplace: {
+        Row: {
+          asset_id: string | null
+          created_at: string | null
+          id: string
+          organization_id: string
+          revenue_share_status: string | null
+          total_transaction_amount: number
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          revenue_share_status?: string | null
+          total_transaction_amount: number
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          revenue_share_status?: string | null
+          total_transaction_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_revenue_marketplace_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "hub_assets_marketplace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hub_revenue_marketplace_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hub_reviews_marketplace: {
+        Row: {
+          asset_id: string | null
+          created_at: string | null
+          id: string
+          organization_id: string
+          partner_id: string | null
+          rating_score: number | null
+          review_comment: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          partner_id?: string | null
+          rating_score?: number | null
+          review_comment?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          partner_id?: string | null
+          rating_score?: number | null
+          review_comment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_reviews_marketplace_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "hub_assets_marketplace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hub_reviews_marketplace_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hub_reviews_marketplace_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "hub_partners_marketplace"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hub_services_marketplace: {
+        Row: {
+          created_at: string | null
+          id: string
+          partner_id: string
+          service_price: number | null
+          service_title: string
+          service_type_code: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          partner_id: string
+          service_price?: number | null
+          service_title: string
+          service_type_code: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          partner_id?: string
+          service_price?: number | null
+          service_title?: string
+          service_type_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_services_marketplace_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "hub_partners_marketplace"
             referencedColumns: ["id"]
           },
         ]
