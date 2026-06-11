@@ -110,12 +110,12 @@ const InboxContent = () => {
       lastMsg: "Ainda não recebi o boleto.", 
       time: "2h", 
       sentiment: "neutral", 
-      urgency: "medium", 
+      urgency: "Alta",
       unread: 1, 
       channel: "whatsapp",
       queue: "Financeiro",
       agent: "IA Copilot",
-      urgencyLabel: "Alta"
+    },
     },
   ];
 
@@ -174,7 +174,8 @@ const InboxContent = () => {
                     
                     <div className="flex flex-wrap gap-1">
                         <Badge className="bg-white/5 text-slate-500 border-none text-[8px] font-bold px-1 py-0">{chat.queue}</Badge>
-                        <Badge className="bg-white/5 text-slate-500 border-none text-[8px] font-bold px-1 py-0">{chat.agent}</Badge>
+                        <Badge className="bg-indigo-500/10 text-indigo-400 border-none text-[8px] font-black px-1 py-0">IA</Badge>
+                        {chat.urgency === 'Crítica' && <Badge className="bg-rose-500/10 text-rose-400 border-none text-[8px] font-bold px-1 py-0">Urgente</Badge>}
                         {chat.sentiment === 'negative' && <div className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1" title="Sentimento Negativo" />}
                         {chat.sentiment === 'positive' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1" title="Sentimento Positivo" />}
                     </div>
