@@ -155,13 +155,17 @@ export const InboxView = () => {
           <div className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 backdrop-blur-xl bg-[#020617]/50 sticky top-0 z-10">
             <div className="flex items-center gap-4">
               <Avatar className="h-10 w-10 border border-white/10">
-                <AvatarFallback className="bg-indigo-600 text-white font-bold">R</AvatarFallback>
+                <AvatarFallback className="bg-indigo-600 text-white font-bold">
+                  {currentChat?.name.charAt(0) || "R"}
+                </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-sm font-bold text-white leading-none">Roberto Almeida</h3>
+                <h3 className="text-sm font-bold text-white leading-none">
+                  {currentChat?.name || "Cliente"}
+                </h3>
                 <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Digitando via WhatsApp
+                  Digitando via {currentChat?.channel === 'whatsapp' ? 'WhatsApp' : currentChat?.channel || 'Chat'}
                 </p>
               </div>
             </div>
