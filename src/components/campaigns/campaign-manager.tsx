@@ -159,7 +159,7 @@ export const CampaignManager = () => {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <Badge variant="outline" className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full", statusColors[campaign.status as keyof typeof statusColors])}>
+                      <Badge variant="outline" className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full", statusColors[campaign.status as keyof typeof statusColors] || "bg-slate-500/10 text-slate-400 border-slate-500/20")}>
                         {campaign.status}
                       </Badge>
                     </td>
