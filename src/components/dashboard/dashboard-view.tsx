@@ -64,10 +64,10 @@ export function Dashboard() {
   if (!user) return <Navigate to="/auth" />;
 
   const stats = [
-    { label: "Clientes Ativos", value: "1,284", trend: "+12.5%", icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-    { label: "Leads Qualificados", value: "456", trend: "+18.2%", icon: Target, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Receita (Simulada)", value: "R$ 45.2k", trend: "+5.4%", icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { label: "NPS Médio", value: "9.2", trend: "+2.1%", icon: Activity, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Receita Prevista", value: "R$ 142.8k", trend: "+24.5%", icon: DollarSign, color: "text-indigo-400", bg: "bg-indigo-500/10" },
+    { label: "Qualidade IA (CSAT)", value: "98.2%", trend: "+2.2%", icon: Activity, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Oportunidades", value: "84", trend: "+12.1%", icon: Target, color: "text-amber-400", bg: "bg-amber-500/10" },
+    { label: "Economia IA", value: "420h", trend: "+15.4%", icon: Zap, color: "text-purple-400", bg: "bg-purple-500/10" },
   ];
 
   return (
@@ -81,24 +81,24 @@ export function Dashboard() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-1">
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
-            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Sistema Operacional Ativo</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Célula de Inteligência Executiva</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Executivo <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Dashboard</span>
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+            OneContact <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Enterprise OS</span>
           </h1>
           <p className="text-slate-400 font-medium max-w-xl">
-            Olá, {profile?.full_name || "Líder"}. Sua operação está rodando com <span className="text-emerald-400 font-bold">98% de eficiência</span> hoje.
+            Olá, {profile?.full_name || "Líder"}. A IA identificou <span className="text-indigo-400 font-bold">12 novas oportunidades</span> e <span className="text-rose-400 font-bold">2 riscos de churn</span> hoje.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-2xl flex items-center gap-2.5 backdrop-blur-md shadow-sm">
-            <Clock className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-bold text-slate-300">Tempo Real</span>
+          <div className="px-4 py-2.5 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center gap-2.5 backdrop-blur-md shadow-lg shadow-indigo-500/5">
+            <Zap className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-black text-indigo-100 uppercase tracking-wider">Modo Supervisor IA</span>
           </div>
-          <Button className="h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-xl shadow-indigo-600/20 font-bold px-8 transition-all hover:scale-[1.02] active:scale-[0.98]">
+          <Button className="h-11 bg-white text-[#020617] hover:bg-slate-200 rounded-2xl shadow-xl font-black px-8 transition-all hover:scale-[1.02] active:scale-[0.98] uppercase text-[11px] tracking-widest">
             <TrendingUp className="w-4 h-4 mr-2" />
-            Exportar BI
+            Dashboard BI
           </Button>
         </div>
       </header>

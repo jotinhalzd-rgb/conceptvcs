@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_performance: {
+        Row: {
+          agent_id: string
+          avg_response_time: number | null
+          conversion_rate: number | null
+          csat_score: number | null
+          date: string | null
+          id: string
+          resolved_chats: number | null
+          revenue_generated: number | null
+          total_chats: number | null
+        }
+        Insert: {
+          agent_id: string
+          avg_response_time?: number | null
+          conversion_rate?: number | null
+          csat_score?: number | null
+          date?: string | null
+          id?: string
+          resolved_chats?: number | null
+          revenue_generated?: number | null
+          total_chats?: number | null
+        }
+        Update: {
+          agent_id?: string
+          avg_response_time?: number | null
+          conversion_rate?: number | null
+          csat_score?: number | null
+          date?: string | null
+          id?: string
+          resolved_chats?: number | null
+          revenue_generated?: number | null
+          total_chats?: number | null
+        }
+        Relationships: []
+      }
       channels: {
         Row: {
           created_at: string | null
@@ -149,34 +185,88 @@ export type Database = {
           },
         ]
       }
+      conversation_tags: {
+        Row: {
+          conversation_id: string
+          tag_id: string
+        }
+        Insert: {
+          conversation_id: string
+          tag_id: string
+        }
+        Update: {
+          conversation_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_tags_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
+          ai_intent: string | null
+          ai_sentiment: string | null
+          ai_summary: string | null
+          ai_urgency_score: number | null
           channel_id: string
+          churn_risk_probability: number | null
           contact_id: string
+          conversion_probability: number | null
           created_at: string | null
           id: string
           last_message_at: string | null
           organization_id: string
+          priority: string | null
+          queue_id: string | null
           status: string | null
           updated_at: string | null
         }
         Insert: {
+          ai_intent?: string | null
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          ai_urgency_score?: number | null
           channel_id: string
+          churn_risk_probability?: number | null
           contact_id: string
+          conversion_probability?: number | null
           created_at?: string | null
           id?: string
           last_message_at?: string | null
           organization_id: string
+          priority?: string | null
+          queue_id?: string | null
           status?: string | null
           updated_at?: string | null
         }
         Update: {
+          ai_intent?: string | null
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          ai_urgency_score?: number | null
           channel_id?: string
+          churn_risk_probability?: number | null
           contact_id?: string
+          conversion_probability?: number | null
           created_at?: string | null
           id?: string
           last_message_at?: string | null
           organization_id?: string
+          priority?: string | null
+          queue_id?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -202,7 +292,44 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "conversations_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      knowledge_base: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          id: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -210,8 +337,10 @@ export type Database = {
           conversation_id: string
           created_at: string | null
           id: string
+          is_edited: boolean | null
           metadata: Json | null
           organization_id: string
+          original_content: string | null
           read_at: string | null
           sender_profile_id: string | null
           type: string | null
@@ -221,8 +350,10 @@ export type Database = {
           conversation_id: string
           created_at?: string | null
           id?: string
+          is_edited?: boolean | null
           metadata?: Json | null
           organization_id: string
+          original_content?: string | null
           read_at?: string | null
           sender_profile_id?: string | null
           type?: string | null
@@ -232,8 +363,10 @@ export type Database = {
           conversation_id?: string
           created_at?: string | null
           id?: string
+          is_edited?: boolean | null
           metadata?: Json | null
           organization_id?: string
+          original_content?: string | null
           read_at?: string | null
           sender_profile_id?: string | null
           type?: string | null
@@ -261,6 +394,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      omnichannel_events: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
       }
       organizations: {
         Row: {
@@ -362,6 +522,33 @@ export type Database = {
           },
         ]
       }
+      queues: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       stages: {
         Row: {
           created_at: string | null
@@ -396,6 +583,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
     }
     Views: {

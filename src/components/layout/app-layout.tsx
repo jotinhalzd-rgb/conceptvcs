@@ -31,15 +31,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", group: "Principal" },
-  { icon: Inbox, label: "Inbox", href: "/inbox", group: "Comunicação" },
-  { icon: Ticket, label: "Tickets", href: "/tickets", group: "Comunicação" },
-  { icon: Users, label: "Clientes", href: "/customers", group: "CRM" },
-  { icon: Briefcase, label: "CRM", href: "/crm", group: "CRM" },
-  { icon: Zap, label: "Automações", href: "/automations", group: "Inteligência" },
-  { icon: MessageSquare, label: "IA Agents", href: "/ia", group: "Inteligência" },
-  { icon: Globe, label: "Integrações", href: "/integrations", group: "Ecossistema" },
-  { icon: BarChart3, label: "Relatórios", href: "/reports", group: "Análise" },
+  { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
+  { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
+  { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
+  { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
+  { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
+  { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
+  { icon: Rocket, label: "Gamificação", href: "/gamification", group: "Operação" },
+  { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
+  { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
 ];
 
 export function AppLayout() {
