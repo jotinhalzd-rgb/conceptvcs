@@ -19,10 +19,13 @@ import { OILCommandCenter } from "./oil-command-center";
 import { CEOAdvisorView } from "./ceo-advisor-view";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDashboardStats } from "@/hooks/dashboard/use-dashboard-stats";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export const CEODashboard = () => {
   const [activeTab, setActiveTab] = useState("advisor");
+  const { data: stats, isLoading } = useDashboardStats();
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -89,14 +92,16 @@ export const CEODashboard = () => {
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Revenue Intelligence</h4>
                     <div className="space-y-4">
                       <div>
-                        <p className="text-2xl font-black text-white">R$ 1.240.000,00</p>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Faturamento Mensal (Forecast)</p>
+                        <p className="text-2xl font-black text-white">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats?.totalRevenue || 0)}
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Faturamento Real (Ganhos)</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                          <div className="h-full w-[68%] bg-indigo-500 rounded-full" />
+                          <div className="h-full bg-indigo-500 rounded-full" style={{ width: '100%' }} />
                         </div>
-                        <span className="text-[10px] font-black text-indigo-400">68%</span>
+                        <span className="text-[10px] font-black text-indigo-400">100%</span>
                       </div>
                       <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-slate-600">
                         <span>Meta: R$ 1.8M</span>
@@ -117,10 +122,10 @@ export const CEODashboard = () => {
               {/* Grid de Canais e Operação */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { label: 'Uptime Global', val: '99.98%', icon: ShieldCheck, color: 'text-emerald-400' },
-                  { label: 'Msgs Processadas', val: '1.2M', icon: Zap, color: 'text-indigo-400' },
-                  { label: 'Empresas Ativas', val: '482', icon: Globe, color: 'text-indigo-400' },
-                  { label: 'SLA Médio', val: '94.2%', icon: BarChart3, color: 'text-amber-400' }
+                  { label: 'Uptime Global', val: stats?.uptime || '99.9%', icon: ShieldCheck, color: 'text-emerald-400' },
+                  { label: 'Msgs Processadas', val: stats?.messagesCount.toLocaleString() || '0', icon: Zap, color: 'text-indigo-400' },
+                  { label: 'Empresas Ativas', val: stats?.companiesCount.toString() || '0', icon: Globe, color: 'text-indigo-400' },
+                  { label: 'Clientes na Base', val: stats?.contactsCount.toString() || '0', icon: Users, color: 'text-amber-400' }
                 ].map((stat, i) => (
                   <div key={i} className="bg-white/[0.02] border border-white/5 p-6 rounded-3xl hover:border-white/10 transition-all group">
                     <div className="flex items-center gap-4 mb-4">
