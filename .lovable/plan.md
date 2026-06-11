@@ -1,59 +1,42 @@
-# Plano de Implementação: OIL (OneContact Intelligence Layer)
+# Plano de Implementação: EIN (Executive Intelligence Network)
 
-O OIL é o "cérebro" do OneContact OS, transformando o fluxo bruto de dados em sinais estratégicos e ações preditivas.
+O EIN representa o topo da pirâmide de inteligência do OneContact OS, transformando o ecossistema em uma rede de conhecimento compartilhado e anonimizado que atua como um "CEO Advisor" em tempo real.
 
-## 1. Arquitetura de Dados (Intelligence Schema)
+## 1. Arquitetura de Conhecimento (Global Aggregation)
 
-Para suportar análises em tempo real sem degradar a performance operacional, o OIL utilizará tabelas de agregação e sinais:
+Para garantir anonimato absoluto e performance em escala de milhões de empresas, o EIN utilizará uma estrutura desacoplada da operação:
 
-- `public.oil_signals`: Captura de eventos brutos de todos os módulos (CRM, Inbox, Tickets).
-- `public.oil_insights`: Tabela de resultados processados (Riscos, Oportunidades, Recomendações).
-- `public.oil_health_scores`: Histórico de scores (Customer, Team, Organization).
-- `public.oil_alerts`: Central de notificações críticas geradas automaticamente.
-- `public.oil_prediction_models`: Metadados e versões dos modelos de IA aplicados a cada tenant.
+- `public.ein_benchmarks`: Tabela global de agregados por indústria/porte (Segmento, SLA Médio, Conversão Média, Ticket Médio).
+- `public.ein_sector_trends`: Registro de tendências macro (Ex: Queda de demanda em "Varejo" na região "Sudeste").
+- `public.ein_best_practices`: Repositório de ações recomendadas validadas estatisticamente.
+- `public.ein_advisor_logs`: Cache de conselhos personalizados gerados para cada CEO/Executivo.
 
-## 2. Motores de Análise (Logic Engine)
+## 2. Camada de Anonimização & Compliance
 
-O processamento será dividido em três camadas:
+O fluxo de dados OIL -> EIN seguirá regras rígidas:
+- **K-Anonymity**: Só gera benchmarks para segmentos com no mínimo $N$ empresas ativas.
+- **Differential Privacy**: Adição de ruído estatístico em métricas sensíveis para evitar engenharia reversa de dados.
+- **Isolation**: O EIN lê do OIL apenas agregados numéricos, nunca metadados ou PII (Personally Identifiable Information).
 
-### A. Real-Time Monitor (SLA & Riscos)
-- Monitoramento de filas e SLAs.
-- Gatilhos instantâneos para "Atendimento Sobrecarregado" ou "Negócio Esquecido".
+## 3. Componentes Executivos (CEO Advisor UI)
 
-### B. Analytical Engine (Tendências & Performance)
-- Agregadores diários de conversão, ticket médio e produtividade.
-- Comparação histórica para detectar anomalias (quedas ou picos repentinos).
+### A. Executive Dashboard (EIN View)
+- `MarketComparisonCard`: Gráficos de "Sua Empresa vs. Mercado" para métricas chave.
+- `SectorTrendFeed`: Feed de notícias e mudanças de comportamento no segmento da empresa.
 
-### C. Predictive Engine (IA Strategy)
-- Modelos de propensão de Churn e Probabilidade de Fechamento.
-- Sugestão de "Next Best Action" (Próxima melhor ação) personalizada por cliente.
+### B. CEO Advisor Chat/Feed
+- `AdvisorInsightCard`: Recomendações práticas e diretas (Ex: "Aumente seu time em 1 pessoa para bater a média de SLA do mercado").
+- `OpportunityHeatmap`: Mapa de calor de onde a empresa está perdendo para concorrentes anônimos.
 
-## 3. Componentes Frontend (Intelligence UI)
+## 4. Motores Analíticos (Cross-Tenant Engine)
 
-### A. OIL Command Center (Painel Executivo)
-- `OilInsightsFeed`: Feed dinâmico de cards (Alerta, Oportunidade, Sugestão).
-- `OilHealthMap`: Visualização de radar do score global da empresa (Vendas, Atendimento, Retenção).
+- **Peer Grouping**: Agrupamento automático de empresas por perfil (Ex: Clínicas com 10-20 funcionários).
+- **Correlation Engine**: Identifica quais práticas em empresas líderes de segmento podem ser replicadas (Ex: Automação de WhatsApp aumenta conversão em 15% no setor de Franquias).
 
-### B. Widgets de Contexto (Injetados)
-- Indicador de "Risco de Perda" no detalhe do CRM.
-- Resumo de "Interesses do Cliente" no Inbox.
+## Fluxo de Inteligência
 
-## 4. Estratégia de Escalabilidade e IA
-
-- **Aggregation**: Uso de tabelas de resumo (Materialized Views ou Agregadores) para suportar 100k+ empresas.
-- **Isolamento**: RLS absoluto por `organization_id`. Dados anônimos para benchmarks setoriais (EIN).
-- **Asynchronous Processing**: Toda análise complexa será executada em background via Edge Functions ou Workers dedicados.
-
-## Detalhes Técnicos do Sinal (OIL Signal)
-
-```json
-{
-  "source": "crm",
-  "event": "deal_stagnated",
-  "severity": "high",
-  "entities": ["deal_id", "contact_id"],
-  "inference": "Probabilidade de perda aumentou 30% devido a 5 dias sem contato."
-}
+```text
+DADOS BRUTOS -> OIL (Análise por Tenant) -> AGREGADOR ANONIMIZADO -> EIN (Benchmark de Rede) -> CONSELHO EXECUTIVO
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de sinais e o painel de controle do OIL.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de benchmarks globais e a interface do CEO Advisor.

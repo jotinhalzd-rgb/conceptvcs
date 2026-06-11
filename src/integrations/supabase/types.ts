@@ -2026,6 +2026,47 @@ export type Database = {
           },
         ]
       }
+      ein_advisor_logs_v2: {
+        Row: {
+          comparison_data: Json | null
+          created_at: string | null
+          id: string
+          insight_type: string
+          is_read: boolean | null
+          message: string
+          organization_id: string
+          recommendation: string | null
+        }
+        Insert: {
+          comparison_data?: Json | null
+          created_at?: string | null
+          id?: string
+          insight_type: string
+          is_read?: boolean | null
+          message: string
+          organization_id: string
+          recommendation?: string | null
+        }
+        Update: {
+          comparison_data?: Json | null
+          created_at?: string | null
+          id?: string
+          insight_type?: string
+          is_read?: boolean | null
+          message?: string
+          organization_id?: string
+          recommendation?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ein_advisor_logs_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ein_best_practices: {
         Row: {
           config_payload: Json
@@ -2053,6 +2094,36 @@ export type Database = {
           description?: string | null
           id?: string
           impact_metrics?: Json | null
+          industry?: string
+          is_verified?: boolean | null
+          title?: string
+        }
+        Relationships: []
+      }
+      ein_best_practices_v2: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          expected_gain: string | null
+          id: string
+          industry: string
+          is_verified: boolean | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          expected_gain?: string | null
+          id?: string
+          industry: string
+          is_verified?: boolean | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          expected_gain?: string | null
+          id?: string
           industry?: string
           is_verified?: boolean | null
           title?: string
@@ -2095,6 +2166,69 @@ export type Database = {
           period_end?: string
           period_start?: string
           sample_size?: number | null
+        }
+        Relationships: []
+      }
+      ein_industry_benchmarks_v2: {
+        Row: {
+          id: string
+          industry: string
+          measured_at: string | null
+          metric_name: string
+          metric_value: number
+          region: string | null
+          sample_size: number
+          size_category: string
+        }
+        Insert: {
+          id?: string
+          industry: string
+          measured_at?: string | null
+          metric_name: string
+          metric_value: number
+          region?: string | null
+          sample_size: number
+          size_category: string
+        }
+        Update: {
+          id?: string
+          industry?: string
+          measured_at?: string | null
+          metric_name?: string
+          metric_value?: number
+          region?: string | null
+          sample_size?: number
+          size_category?: string
+        }
+        Relationships: []
+      }
+      ein_sector_trends_v2: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          impact_level: string | null
+          industry: string
+          title: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact_level?: string | null
+          industry: string
+          title: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact_level?: string | null
+          industry?: string
+          title?: string
         }
         Relationships: []
       }
