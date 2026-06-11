@@ -116,7 +116,6 @@ const InboxContent = () => {
       queue: "Financeiro",
       agent: "IA Copilot",
     },
-    },
   ];
 
   const currentChat = chats.find(c => c.id === selectedChat);
