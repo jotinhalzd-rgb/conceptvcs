@@ -2,15 +2,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useIntegrationApps() {
+export function useHubAssets() {
   return useQuery({
-    queryKey: ["integration-apps"],
+    queryKey: ["hub-assets"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("integration_apps")
+        .from("hub_assets_marketplace")
         .select("*")
-        .eq("is_active", true)
-        .order("name", { ascending: true });
+        .order("asset_title", { ascending: true });
 
       if (error) throw error;
       return data;
@@ -18,17 +17,48 @@ export function useIntegrationApps() {
   });
 }
 
-export function useConnectedIntegrations() {
+export function useHubInstalls() {
   return useQuery({
-    queryKey: ["connected-integrations"],
+    queryKey: ["hub-installs"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("connected_integrations")
+        .from("hub_installs_marketplace")
         .select(`
           *,
-          app:integration_apps(*)
+          asset:hub_assets_marketplace(*)
         `)
-        .order("updated_at", { ascending: false });
+        .order("installed_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useHubPartners() {
+  return useQuery({
+    queryKey: ["hub-partners"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hub_partners_marketplace")
+        .select("*")
+        .eq("is_partner_public", true)
+        .order("partner_display_name", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useHubRevenue() {
+  return useQuery({
+    queryKey: ["hub-revenue"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hub_revenue_marketplace")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
@@ -65,3 +95,4 @@ export function useWebhookSubscriptions() {
     },
   });
 }
+
