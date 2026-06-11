@@ -69,8 +69,10 @@ export function AppLayout() {
     { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
     { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
     { icon: CreditCard, label: "Assinatura e Billing", href: "/settings/billing", group: "Configurações" },
+    { icon: Globe, label: "Marketplace", href: "/settings/marketplace", group: "Ecossistema" },
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
     { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
+
 
 
   ];

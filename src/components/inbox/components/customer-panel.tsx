@@ -10,8 +10,11 @@ import {
   PanelRightClose,
   Phone,
   PhoneMissed,
-  FileText
+  FileText,
+  ShoppingBag,
+  CreditCard
 } from 'lucide-react';
+
 
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -105,11 +108,13 @@ export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => 
               
               <div className="space-y-6 relative ml-4 border-l border-white/5 pl-6 py-2">
                   {[
+                      { icon: ShoppingBag, text: "Pedido #8429 realizado (Shopify)", time: "15:45", color: "bg-indigo-500/10 text-indigo-400" },
+                      { icon: CreditCard, text: "Pagamento R$ 450,00 (Stripe)", time: "15:46", color: "bg-emerald-500/10 text-emerald-400" },
                       { icon: Phone, text: "Chamada finalizada (2:05)", time: "14:15", color: "bg-emerald-500/10 text-emerald-400" },
                       { icon: MessageSquare, text: "Atendimento iniciado", time: "12:30", color: "bg-indigo-500/10 text-indigo-400" },
                       { icon: Target, text: "Lead qualificado por IA", time: "11:45", color: "bg-emerald-500/10 text-emerald-400" },
-                      { icon: CheckCircle2, text: "Boleto liquidado", time: "Ontem", color: "bg-emerald-500/10 text-emerald-400" },
                   ].map((item, i) => (
+
 
                       <div key={i} className="relative">
                           <div className={cn("absolute -left-[36px] top-0 w-8 h-8 rounded-xl flex items-center justify-center border-4 border-[#030712]", item.color)}>
