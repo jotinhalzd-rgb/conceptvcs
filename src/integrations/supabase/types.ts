@@ -50,6 +50,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_analytical_logs: {
+        Row: {
+          ai_response: string | null
+          created_at: string | null
+          data_points_referenced: Json | null
+          id: string
+          organization_id: string
+          query_text: string
+          satisfaction_score: number | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_response?: string | null
+          created_at?: string | null
+          data_points_referenced?: Json | null
+          id?: string
+          organization_id: string
+          query_text: string
+          satisfaction_score?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_response?: string | null
+          created_at?: string | null
+          data_points_referenced?: Json | null
+          id?: string
+          organization_id?: string
+          query_text?: string
+          satisfaction_score?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_analytical_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_insights: {
         Row: {
           action_label: string | null
@@ -262,6 +303,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "automation_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_health_scores: {
+        Row: {
+          calculated_at: string | null
+          category: string
+          id: string
+          metrics_breakdown: Json | null
+          organization_id: string
+          score: number
+          status: string
+        }
+        Insert: {
+          calculated_at?: string | null
+          category: string
+          id?: string
+          metrics_breakdown?: Json | null
+          organization_id: string
+          score: number
+          status: string
+        }
+        Update: {
+          calculated_at?: string | null
+          category?: string
+          id?: string
+          metrics_breakdown?: Json | null
+          organization_id?: string
+          score?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_health_scores_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -1096,6 +1175,56 @@ export type Database = {
             columns: ["stage_id"]
             isOneToOne: false
             referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      executive_insights: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          insight_type: string
+          is_resolved: boolean | null
+          metadata: Json | null
+          organization_id: string
+          priority: string | null
+          suggested_action: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          insight_type: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          organization_id: string
+          priority?: string | null
+          suggested_action?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          insight_type?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          organization_id?: string
+          priority?: string | null
+          suggested_action?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executive_insights_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
