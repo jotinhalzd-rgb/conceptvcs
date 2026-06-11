@@ -1,72 +1,66 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 7 (GROWTH & AUTOMATION HUB)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 8 (VOICE & PBX CLOUD)
 
-Este plano detalha a construção da máquina de relacionamento e automação do ONECONTACT OS, transformando disparos isolados em jornadas inteligentes de cliente.
-
----
-
-## 1. ARQUITETURA DE DADOS E ENTIDADES
-
-Expandiremos o schema para suportar automações complexas e rastreamento de ROI.
-
-### Extensão: `campaigns` (Campanhas)
-- **Campos:** `type` (promo, post-sales, retention, etc), `segmentation_rules` (JSON), `ab_test_config` (JSON), `budget`, `expected_roi`.
-- **Status:** `draft`, `scheduled`, `sending`, `completed`, `paused`, `canceled`.
-
-### Nova Entidade: `automation_workflows` (Jornadas)
-- **Campos:** `name`, `trigger_event` (ex: purchase_completed), `nodes` (JSON - estrutura visual), `is_active`.
-- **Nodos:** `trigger`, `delay`, `condition` (if/else), `action` (send_msg, create_deal, tag_contact).
-
-### Nova Entidade: `campaign_analytics` (Performance)
-- **Métricas:** `sent`, `delivered`, `read`, `replied`, `converted`, `revenue_generated`, `roi`.
+Este plano detalha a unificação da comunicação por voz ao ecossistema OneContact, transformando o sistema em uma central de atendimento 360º (Omnichannel Real).
 
 ---
 
-## 2. JORNADAS VISUAIS (WORKFLOW BUILDER)
+## 1. ARQUITETURA PBX CLOUD (ABSTRAÇÃO)
 
-Implementaremos uma interface inspirada em ferramentas de alto nível (ActiveCampaign/HubSpot).
+Implementaremos uma camada de abstração de voz para permitir a conexão com múltiplos provedores SIP/WebRTC sem dependência de um único fornecedor.
 
-- **Visual Interface:** Canvas infinito para arrastar e soltar elementos de lógica.
-- **Integração Nativa:** Automações que podem criar `Deals` no CRM, mudar `Lead Score` e enviar mensagens em qualquer canal da Fase 6.
-- **Workflow Engine:** Worker em segundo plano que escuta `omnichannel_events` e processa as condições de cada jornada ativa.
-
----
-
-## 3. IA DE CAMPANHAS (CAMPAIGN AI)
-
-A inteligência artificial atuará como estrategista de crescimento.
-
-- **Copy Generator:** Geração de variações de texto focadas em conversão (A/B testing nativo).
-- **Predictive Sending:** Sugestão do melhor canal e horário baseado no histórico de engajamento do cliente no Customer 360.
-- **Churn Recovery:** Identificação automática de clientes inativos e sugestão de campanhas de reativação personalizadas.
+### Novas Entidades de Dados
+- **`voice_extensions` (Ramais):** `number`, `agent_id` (FK), `status` (available, busy, offline, ringing), `voicemail_config`.
+- **`call_logs` (Chamadas):** `direction` (inbound/outbound), `from_number`, `to_number`, `duration`, `recording_url`, `transcription_text`, `ai_summary`, `deal_id` (FK CRM), `contact_id` (FK).
+- **`ivr_flows` (URA):** Estrutura JSON para árvores de decisão de voz.
 
 ---
 
-## 4. ESTRATÉGIA DE CUSTOS E ESCALA
+## 2. EXPERIÊNCIA INTEGRADA (VOICE + INBOX + CRM)
 
-- **Caching:** Cache agressivo de regras de segmentação para disparos em massa.
-- **Rate Limiting:** Controle inteligente por canal para evitar banimentos (especialmente WhatsApp).
-- **Processamento:** Uso intensivo de filas de mensageria (Supabase/PGMQ) para processar milhões de eventos sem travar a interface.
+A telefonia será um componente nativo da interface, não um popup externo.
+
+- **Softphone Nativo:** Widget flutuante ou integrado à sidebar para discagem, mudo, transferência e conferência.
+- **Vincular Chamada:** Ao receber uma ligação de um número conhecido, a Inbox abre automaticamente o **Customer 360** desse contato.
+- **Conversão Automática:** Botão "Gerar Negócio" disponível durante a chamada para alimentar o CRM instantaneamente.
+
+---
+
+## 3. INTELIGÊNCIA DE VOZ (AI COPILOT VOICE)
+
+A IA atuará após e durante as chamadas para aumentar a produtividade.
+
+- **Transcrição em Tempo Real:** Conexão preparada para Deepgram/Whisper para transformar áudio em texto.
+- **Motor de Insights:** Geração automática de resumo do motivo do contato e identificação de tarefas ("follow-up amanhã").
+- **URA Inteligente (NLP):** Preparação para roteamento por voz ("Diga em poucas palavras o que você precisa").
+
+---
+
+## 4. ESTRATÉGIA DE CUSTOS E ESCALABILIDADE
+
+- **Mídia:** Armazenamento de gravações em Supabase Storage com políticas de retenção configuráveis.
+- **Latência:** Uso de sinalização WebRTC para voz de alta fidelidade diretamente no navegador.
+- **Custos:** Aproximadamente $0.005/min para transcrição e armazenamento.
 
 ---
 
 ## 5. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
 
-**Passo 1: Schema & Automation Engine Core**  
-Criação das tabelas de workflows e logs de execução de jornadas.
+**Passo 1: Voice Schema & Migrations**  
+Criação das tabelas de ramais, chamadas e URA.
 
-**Passo 2: Workflow Builder UI**  
-Desenvolvimento da interface visual de construção de automações (Nodes & Canvas).
+**Passo 2: Painel de Telefonia (Softphone UI)**  
+Desenvolvimento da interface de discagem e controle de chamadas na Sidebar.
 
-**Passo 3: Módulo de Campanhas v2**  
-Refatoração da tela de campanhas com segmentação avançada e suporte a Teste A/B.
+**Passo 3: Integração com Filas Omnichannel**  
+Lógica para fazer chamadas caírem nas mesmas filas de WhatsApp/Email (Round Robin de Voz).
 
-**Passo 4: Dashboards de Growth**  
-Visualização de funil de conversão de campanhas e cálculo automático de ROI.
+**Passo 4: Monitoramento em Tempo Real (Wallboard)**  
+Dashboard para gestores visualizarem quem está em linha e tempo médio de espera.
 
-**Passo 5: Campaign AI Integration**  
-Integração do motor de geração de copy e sugestões estratégicas.
+**Passo 5: Módulo de Transcrição & IA**  
+Processamento automático de chamadas finalizadas para gerar resumos no Customer 360.
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para iniciar a construção da máquina de crescimento do ONECONTACT OS.
+Aguardando seu "sim" para iniciar a construção da central de voz definitiva do ONECONTACT OS.
