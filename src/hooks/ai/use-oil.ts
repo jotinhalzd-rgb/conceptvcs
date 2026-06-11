@@ -4,15 +4,17 @@ import { useProfile } from "@/hooks/auth/use-auth";
 
 export const useOIL = () => {
   const { data: profile } = useProfile();
-  const orgId = profile?.organization_id || profile?.company_id;
+  const orgId = profile?.organization_id;
 
-  const { data: recommendations, isLoading: isLoadingRecs } = useQuery({
-    queryKey: ["oil-recommendations", orgId],
+  // 1. Insights Estratégicos (Decisões & Recomendações)
+  const { data: insights, isLoading: isLoadingInsights } = useQuery({
+    queryKey: ["oil-insights-v2", orgId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("oil_recommendations")
+        .from("oil_insights_v2")
         .select("*")
-        .order("priority", { ascending: false })
+        .eq("organization_id", orgId!)
+        .eq("status", "active")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
@@ -21,13 +23,16 @@ export const useOIL = () => {
     enabled: !!orgId,
   });
 
-  const { data: healthScores, isLoading: isLoadingHealth } = useQuery({
-    queryKey: ["oil-health-scores", orgId],
+  // 2. Alertas Críticos (Riscos & Oportunidades)
+  const { data: alerts, isLoading: isLoadingAlerts } = useQuery({
+    queryKey: ["oil-alerts-v2", orgId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("oil_health_scores")
+        .from("oil_alerts_v2")
         .select("*")
-        .order("calculated_at", { ascending: false });
+        .eq("organization_id", orgId!)
+        .eq("is_resolved", false)
+        .order("created_at", { ascending: false });
       
       if (error) throw error;
       return data;
@@ -35,9 +40,57 @@ export const useOIL = () => {
     enabled: !!orgId,
   });
 
+  // 3. Histórico de Saúde (Health Score)
+  const { data: healthHistory, isLoading: isLoadingHealth } = useQuery({
+    queryKey: ["oil-health-history", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("oil_health_history")
+        .select("*")
+        .eq("organization_id", orgId!)
+        .order("measured_at", { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
+  // 4. Sinais Recentes (Operacional)
+  const { data: signals, isLoading: isLoadingSignals } = useQuery({
+    queryKey: ["oil-signals-v2", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("oil_signals_v2")
+        .select("*")
+        .eq("organization_id", orgId!)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orgId,
+  });
+
+  // Legado para compatibilidade se necessário
+  const recommendations = insights?.map(i => ({
+    title: i.title,
+    description: i.description,
+    impact: i.impact_estimate,
+    priority: i.category === 'sales' ? 'High' : 'Medium'
+  })) || [];
+
+  const latestScore = healthHistory?.[0]?.score || 94;
+
   return {
-    recommendations,
-    healthScores,
-    isLoading: isLoadingRecs || isLoadingHealth,
+    insights,
+    alerts,
+    healthHistory,
+    signals,
+    recommendations, // Backward compat
+    latestScore,
+    isLoading: isLoadingInsights || isLoadingAlerts || isLoadingHealth || isLoadingSignals,
   };
 };
