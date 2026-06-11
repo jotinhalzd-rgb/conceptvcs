@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuth, useProfile } from "@/hooks/auth/use-auth";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
