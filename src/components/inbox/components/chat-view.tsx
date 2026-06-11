@@ -31,8 +31,9 @@ export const ChatView = ({ chat, showCustomer360, onToggleCustomer360 }: ChatVie
 
   // Combine e ordene mensagens e notas para a timeline
   const timeline = [...(messages || []), ...(notes || [])].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
   );
+
 
   return (
     <div className="flex flex-col h-full bg-[#020617] relative">
