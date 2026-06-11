@@ -110,11 +110,7 @@ const InboxContent = () => {
       lastMsg: "Ainda não recebi o boleto.", 
       time: "2h", 
       sentiment: "neutral", 
-      unread: 1, 
-      channel: "whatsapp",
-      queue: "Financeiro",
-      agent: "IA Copilot",
-      urgency: "Alta"
+      urgency: "Alta",
     },
   ];
 
