@@ -7,8 +7,12 @@ import {
   Target,
   MessageSquare,
   Zap,
-  PanelRightClose
+  PanelRightClose,
+  Phone,
+  PhoneMissed,
+  FileText
 } from 'lucide-react';
+
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -65,7 +69,7 @@ export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => 
               </div>
           </div>
 
-          {/* AI Insights */}
+          {/* AI Insights & Voice Summary */}
           <div className="space-y-4">
               <div className="flex items-center justify-between">
                   <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Predictive Insights</h4>
@@ -80,16 +84,17 @@ export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => 
                           </p>
                       </div>
                   </div>
-                  <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-2xl">
+                  <div className="bg-amber-500/5 border border-amber-500/10 p-4 rounded-2xl">
                       <div className="flex items-start gap-3">
-                          <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                          <FileText className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                           <p className="text-[11px] text-slate-300 leading-relaxed">
-                              <span className="text-white font-bold">Atenção:</span> Sentimento negativo detectado na última interação.
+                              <span className="text-white font-bold">Resumo da última Call:</span> Cliente demonstrou interesse claro em precificação mas pediu follow-up amanhã.
                           </p>
                       </div>
                   </div>
               </div>
           </div>
+
 
           {/* Unified Timeline */}
           <div className="space-y-6 pb-10">
@@ -100,10 +105,12 @@ export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => 
               
               <div className="space-y-6 relative ml-4 border-l border-white/5 pl-6 py-2">
                   {[
+                      { icon: Phone, text: "Chamada finalizada (2:05)", time: "14:15", color: "bg-emerald-500/10 text-emerald-400" },
                       { icon: MessageSquare, text: "Atendimento iniciado", time: "12:30", color: "bg-indigo-500/10 text-indigo-400" },
                       { icon: Target, text: "Lead qualificado por IA", time: "11:45", color: "bg-emerald-500/10 text-emerald-400" },
                       { icon: CheckCircle2, text: "Boleto liquidado", time: "Ontem", color: "bg-emerald-500/10 text-emerald-400" },
                   ].map((item, i) => (
+
                       <div key={i} className="relative">
                           <div className={cn("absolute -left-[36px] top-0 w-8 h-8 rounded-xl flex items-center justify-center border-4 border-[#030712]", item.color)}>
                               <item.icon className="w-3.5 h-3.5" />

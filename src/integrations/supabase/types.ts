@@ -269,6 +269,85 @@ export type Database = {
           },
         ]
       }
+      call_logs: {
+        Row: {
+          agent_id: string | null
+          ai_sentiment: string | null
+          ai_summary: string | null
+          contact_id: string | null
+          cost: number | null
+          created_at: string | null
+          deal_id: string | null
+          direction: string
+          duration_seconds: number | null
+          from_number: string
+          id: string
+          organization_id: string
+          recording_url: string | null
+          status: string
+          to_number: string
+          transcription_text: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          contact_id?: string | null
+          cost?: number | null
+          created_at?: string | null
+          deal_id?: string | null
+          direction: string
+          duration_seconds?: number | null
+          from_number: string
+          id?: string
+          organization_id: string
+          recording_url?: string | null
+          status: string
+          to_number: string
+          transcription_text?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          contact_id?: string | null
+          cost?: number | null
+          created_at?: string | null
+          deal_id?: string | null
+          direction?: string
+          duration_seconds?: number | null
+          from_number?: string
+          id?: string
+          organization_id?: string
+          recording_url?: string | null
+          status?: string
+          to_number?: string
+          transcription_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_analytics: {
         Row: {
           campaign_id: string
@@ -1053,6 +1132,44 @@ export type Database = {
           },
         ]
       }
+      ivr_flows: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          nodes: Json
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          nodes?: Json
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          nodes?: Json
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ivr_flows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base: {
         Row: {
           category: string | null
@@ -1529,6 +1646,50 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      voice_extensions: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          extension_number: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          status: string | null
+          updated_at: string | null
+          voicemail_enabled: boolean | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          extension_number: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          status?: string | null
+          updated_at?: string | null
+          voicemail_enabled?: boolean | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          extension_number?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          status?: string | null
+          updated_at?: string | null
+          voicemail_enabled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_extensions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

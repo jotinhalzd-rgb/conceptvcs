@@ -31,7 +31,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { SoftphoneWidget } from "@/components/voice/softphone-widget";
+
 export function AppLayout() {
+
   const { user, loading: authLoading } = useAuth();
   const { data: profile } = useProfile();
   const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
@@ -123,7 +126,9 @@ export function AppLayout() {
   return (
     <GlobalErrorBoundary name="AppLayout">
       <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
+      <SoftphoneWidget />
       <TooltipProvider delayDuration={0}>
+
         {/* Sidebar */}
         <aside 
           className={cn(
