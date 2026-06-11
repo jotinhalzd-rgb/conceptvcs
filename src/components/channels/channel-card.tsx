@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   MessageSquare, 
-  Instagram, 
   Mail, 
   Globe, 
   Plus,
@@ -9,8 +8,10 @@ import {
   AlertCircle,
   CheckCircle2,
   MoreVertical,
-  Settings
+  Settings,
+  MessageCircle
 } from 'lucide-react';
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ export const ChannelCard = ({ channel, onRefresh }: ChannelCardProps) => {
   const getIcon = (provider: string) => {
     switch (provider) {
       case 'whatsapp': return <MessageSquare className="w-5 h-5 text-emerald-400" />;
-      case 'instagram': return <Instagram className="w-5 h-5 text-pink-400" />;
+      case 'instagram': return <MessageCircle className="w-5 h-5 text-pink-400" />;
       case 'email': return <Mail className="w-5 h-5 text-indigo-400" />;
       default: return <Globe className="w-5 h-5 text-slate-400" />;
     }
