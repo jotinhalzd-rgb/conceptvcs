@@ -73,7 +73,14 @@ function DashboardContent() {
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
 
-  const stats = [
+  const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
+
+  const stats = isCEOMaster ? [
+    { label: "Receita Global", value: "R$ 2.4M", trend: "+32.1%", icon: DollarSign, color: "text-amber-400", bg: "bg-amber-500/10" },
+    { label: "Empresas Ativas", value: "1,240", trend: "+12.5%", icon: Briefcase, color: "text-indigo-400", bg: "bg-indigo-500/10" },
+    { label: "Total Mensagens", value: "12.8M", trend: "+45.2%", icon: MessageSquare, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Consumo IA", value: "85%", trend: "-5.4%", icon: Zap, color: "text-purple-400", bg: "bg-purple-500/10" },
+  ] : [
     { label: "Receita Prevista", value: "R$ 142.8k", trend: "+24.5%", icon: DollarSign, color: "text-indigo-400", bg: "bg-indigo-500/10" },
     { label: "Qualidade IA (CSAT)", value: "98.2%", trend: "+2.2%", icon: Activity, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Oportunidades", value: "84", trend: "+12.1%", icon: Target, color: "text-amber-400", bg: "bg-amber-500/10" },
