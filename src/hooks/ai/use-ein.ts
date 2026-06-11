@@ -5,7 +5,7 @@ import { useProfile } from "@/hooks/auth/use-auth";
 export const useEIN = () => {
   const { data: profile } = useProfile();
   const orgId = profile?.organization_id || profile?.company_id;
-  const industry = profile?.industry || "Retail"; // Default for demo
+  const industry = (profile as any)?.industry || "Retail"; // Default for demo
 
   const { data: benchmarks, isLoading: isLoadingBenchmarks } = useQuery({
     queryKey: ["ein-benchmarks", industry],
