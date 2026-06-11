@@ -100,6 +100,47 @@ export type Database = {
           },
         ]
       }
+      ai_suggestions_log: {
+        Row: {
+          agent_id: string | null
+          applied_content: string | null
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          status: string | null
+          suggestion_type: string
+        }
+        Insert: {
+          agent_id?: string | null
+          applied_content?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          suggestion_type: string
+        }
+        Update: {
+          agent_id?: string | null
+          applied_content?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          suggestion_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_suggestions_log_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
