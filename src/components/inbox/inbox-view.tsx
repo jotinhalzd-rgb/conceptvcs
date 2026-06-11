@@ -196,44 +196,54 @@ export const InboxView = () => {
               </div>
             </div>
 
-            {/* AI Copilot Suggestion Card */}
+            {/* AI Copilot Suggestion Card - Refatorado para usar Service Layer */}
             <AnimatePresence>
-              {showCopilot && (
+              {showCopilot && (analysis || isAnalyzing) && (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mx-auto max-w-md w-full bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-[2rem] p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+                  className="mx-auto max-w-md w-full bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-[2rem] p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden mb-6"
                 >
                   <div className="absolute top-0 right-0 p-2">
                     <Button variant="ghost" size="icon" className="h-6 w-6 text-indigo-400/50 hover:text-indigo-400" onClick={() => setShowCopilot(false)}>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </div>
+                  
                   <div className="flex items-center gap-2.5 mb-4">
                     <div className="h-8 w-8 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                      <Sparkles className="w-4 h-4 text-white" />
+                      {isAnalyzing ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Sparkles className="w-4 h-4 text-white" />}
                     </div>
                     <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">IA Copilot Assist</h4>
-                      <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest opacity-70">Análise em Tempo Real</p>
+                      <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest opacity-70">
+                        {isAnalyzing ? "Analisando contexto..." : "Análise em Tempo Real"}
+                      </p>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3 bg-rose-500/10 p-3 rounded-2xl border border-rose-500/20">
-                      <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                      <p className="text-xs text-rose-200 font-medium">Detetado risco alto de churn. Cliente com LTV alto (R$ 4.500).</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sugestão de Resposta:</p>
-                      <div className="bg-white/5 border border-white/10 p-3 rounded-2xl text-xs text-slate-300 italic">
-                        "Roberto, entendo perfeitamente sua frustração. Como você é um cliente estratégico, gostaria de oferecer..."
+
+                  {analysis && (
+                    <div className="space-y-4">
+                      {analysis.intent === 'churn' && (
+                        <div className="flex items-start gap-3 bg-rose-500/10 p-3 rounded-2xl border border-rose-500/20">
+                          <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                          <p className="text-xs text-rose-200 font-medium">Detectado risco alto de churn. Cliente estratégico.</p>
+                        </div>
+                      )}
+                      
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sugestão de Resposta:</p>
+                        <div className="bg-white/5 border border-white/10 p-3 rounded-2xl text-xs text-slate-300 italic">
+                          "{analysis.suggestion}"
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-xl">Aplicar Texto</Button>
+                        <Button size="sm" variant="outline" className="flex-1 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400">Ver Scripts</Button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-xl">Aplicar Texto</Button>
-                      <Button size="sm" variant="outline" className="flex-1 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-400">Ver Scripts</Button>
-                    </div>
-                  </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
