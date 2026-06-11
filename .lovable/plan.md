@@ -1,84 +1,69 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 4 (CRM OPERACIONAL)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 5 (IA COPILOT OPERACIONAL)
 
-Este plano detalha a transformação do ONECONTACT OS em um ecossistema de vendas integrado à comunicação, onde cada conversa é uma oportunidade de receita.
-
----
-
-## 1. ARQUITETURA DE DADOS (DATABASE)
-
-Expandiremos o schema para suportar a gestão de oportunidades e metas.
-
-### Nova Entidade: `deals` (Negócios)
-- **Campos:** `title`, `value` (decimal), `probability` (0-100), `status` (open, won, lost), `expected_close_date`, `closed_at`, `origin_conversation_id` (FK).
-- **Relações:** Vinculado obrigatoriamente a um `contact_id`, `pipeline_id` e `stage_id`.
-
-### Extensão: `contacts` & `lead_scores`
-- **Lead Status:** Adição de flag `is_lead` e `lifecycle_stage` em `contacts`.
-- **Pontuação:** Criação da tabela `lead_scores` para motor de temperatura (Cold, Warm, Hot, Priority).
-
-### Gestão de Metas: `sales_goals`
-- **Campos:** `target_value`, `current_value`, `type` (individual, team, company), `period` (YYYY-MM).
+Este plano detalha a inteligência artificial como um assistente de produtividade em tempo real para toda a operação.
 
 ---
 
-## 2. EXPERIÊNCIA INTEGRADA (INBOX + CRM)
+## 1. ESTRATÉGIA DE IA E CONSUMO
 
-A filosofia é "Zero Context Switching". O CRM vive dentro do chat.
-
-### Interface no Chat (Inbox)
-- **Barra de Contexto CRM:** No topo ou lateral do chat, exibição do negócio ativo vinculado ao contato.
-- **Ações Rápidas:**
-  - Botão "Criar Oportunidade" (abre pequeno popover com valor e pipeline).
-  - Seletor de Etapa do Funil direto na conversa.
-  - Indicador visual de "Lead Score" ao lado do nome do cliente.
+Utilizaremos uma arquitetura Híbrida para otimizar custos e latência:
+- **Modelo Principal:** GPT-4o (via Lovable AI Gateway) para análise de contexto complexo e geração de resumos.
+- **Modelo de Latência:** GPT-4o-mini para sugestões de resposta em tempo real e detecção de intenção.
+- **Estratégia de Cache:** Redis/Supabase Cache para respostas a FAQs idênticas e documentos da Base de Conhecimento.
+- **Consumo Estimado:** ~0.02 USD por atendimento completo (análise de ~20 mensagens + 1 resumo final).
 
 ---
 
-## 3. MÓDULO CRM (KANBAN & FORECAST)
+## 2. ARQUITETURA TÉCNICA (DATA & ENGINE)
 
-Uma visão macro para gestão de fluxo.
+### Base de Conhecimento (RAG)
+- Utilização da tabela `knowledge_base` existente.
+- Implementação de Busca Vetorial (pgvector) no Supabase para recuperar documentos relevantes baseados no contexto da última mensagem.
 
-- **Visualização Kanban:** Colunas por `stages`, cartões com `value`, `contact_name` e `last_interaction_time`.
-- **Drag & Drop:** Movimentação entre etapas com atualização instantânea no banco e registro em `crm_audit`.
-- **Painel de Forecast:**
-  - Receita Prevista (Soma dos valores * probabilidade).
-  - Receita Realizada (Soma dos deals 'won').
-  - Gráfico de funil de conversão.
-
----
-
-## 4. MOTOR DE LEAD SCORING (LOGIC ENGINE)
-
-Algoritmo inicial para classificação automática:
-- **+20 pts:** Interação nas últimas 2h.
-- **+30 pts:** Palavras-chave de intenção ("preço", "comprar", "pix").
-- **-10 pts:** Tempo de resposta do agente acima do SLA.
-- **Categorização:**
-  - 0-30: Frio | 31-60: Morno | 61-90: Quente | 91+: Prioritário.
+### Engine de Processamento
+- **Copilot Stream:** Um canal de realtime que envia "pensamentos" da IA enquanto o cliente fala.
+- **Detecção Automática:**
+  - **Intenção:** Atualiza `ai_intent` na tabela `conversations`.
+  - **Sentimento/Risco:** Alimenta `ai_sentiment` e `ai_urgency_score`.
+  - **Oportunidade:** Sugere a criação de um `Deal` se detectar interesse comercial.
 
 ---
 
-## 5. CRONOGRAMA DE EXECUÇÃO
+## 3. INTERFACE IA COPILOT (UX/UI)
 
-**Passo 1: Schema & Migrations**  
-Criação das tabelas `deals`, `sales_goals` e índices de performance.
+A IA será um "copiloto silencioso" no painel direito ou em widgets flutuantes.
 
-**Passo 2: CRM Core UI**  
-Desenvolvimento da tela de Pipelines e o componente de Kanban.
+### Chat Side-Panel (IA Hub)
+- **Sugestões Ativas:** Cards de resposta com botão "Aplicar" (copia para o input).
+- **Contexto Rápido:** Resumo em 3 tópicos da conversa atual.
+- **Alertas de Gestão:** "SLA em 5 min", "Cliente VIP detectado", "Sentimento Negativo".
 
-**Passo 3: Integração Inbox Universal**  
-Implementação dos widgets de CRM dentro do terminal de chat e automação de criação de Lead.
-
-**Passo 4: Dashboards de Gestão**  
-Construção da visão de Metas e Previsão de Receita para CEO e Gerentes.
+### Base de Conhecimento Hub
+- Tela para upload de PDFs e criação de FAQs que treinam o modelo.
 
 ---
 
-## IMPACTO NAS ENTIDADES EXISTENTES
-- **Customer 360:** Ganha aba "Oportunidades" com histórico de negociações.
-- **Audit Logs:** Passa a registrar cada mudança de valor ou etapa de negócio para transparência total.
+## 4. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
+
+**Passo 1: Fundação de Vetores & RAG**  
+Configuração de `pgvector` no banco de dados e hook para busca na base de conhecimento.
+
+**Passo 2: Painel Copilot no Chat**  
+Construção do painel lateral de IA dentro da `InboxView` com sugestões de resposta dinâmicas.
+
+**Passo 3: Motor de Resumo & Audit**  
+Implementação da lógica que gera e salva o resumo ao trocar de `status` para `resolved`.
+
+**Passo 4: Dashboard de Insights para Gestores**  
+Widget de IA para gerentes com análise de performance da equipe e gargalos operacionais.
+
+---
+
+## ENTIDADES E MODELOS
+- `ai_suggestions_log`: Para medir o aprendizado (aceitas vs rejeitadas).
+- `knowledge_base`: Expansão para suporte a embeddings vetoriais.
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para iniciar a construção do CRM nativo integrado.
+Aguardando seu "sim" para transformar a IA no braço direito da sua equipe operacional.
