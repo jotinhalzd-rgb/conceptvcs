@@ -1,71 +1,72 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT INTELLIGENCE LAYER (OIL) - FASE 14
+# PLANO DE IMPLEMENTAÇÃO: ECOSSISTEMA EMPRESARIAL GLOBAL (ONECONTACT HUB) - FASE 15
 
-Este plano detalha a criação do **OIL**, o cérebro central do ONECONTACT OS, projetado para unificar dados de todos os módulos e gerar inteligência acionável em tempo real.
-
----
-
-## 1. ARQUITETURA TÉCNICA (OIL CORE)
-
-O OIL funcionará como uma camada de abstração sobre o banco de dados atual, utilizando um modelo de **Entity Graph** para conectar pontos de dados dispersos.
-
-### A. Memory Engine (Central de Contexto)
-*   **Vector Sync**: Sincronização automática de conversas, tickets e interações no CRM para uma base vetorial centralizada.
-*   **Temporal Memory**: Armazenamento de eventos históricos com carimbo de tempo para análise de tendências e detecção de padrões sazonais.
-
-### B. Decision Engine (Motor de Inferência)
-*   **Opportunity Detector**: Algoritmos para identificar leads quentes, cross-sell (ex: cliente do CRM sem campanha ativa) e reativação.
-*   **Risk Guard**: Monitoramento de SLAs críticos, sentimentos negativos em massa e quedas bruscas de conversão.
-
-### C. Digital Twin (Gêmeo Digital)
-*   Representação virtual da empresa baseada em:
-    *   **Receita Real-time** (Financeiro)
-    *   **Capacidade Operacional** (Atendentes logados vs. Demanda)
-    *   **Saúde do Cliente** (Customer Health Score 360)
+Este plano detalha a transformação do ONECONTACT OS em uma plataforma de rede empresarial (Ecosystem-as-a-Service), conectando empresas, parceiros e fornecedores em um ambiente seguro e colaborativo.
 
 ---
 
-## 2. COMPONENTES DE INTERFACE (COMMAND CENTER)
+## 1. ARQUITETURA DO ECOSSISTEMA (THE HUB)
 
-### A. OIL Command Center (Visão Exclusiva CEO)
-Uma nova interface de controle que substitui dashboards estáticos por "Inteligência Ativa":
-*   **Top 3 Risks**: Exibição imediata de gargalos ou riscos de churn detectados.
-*   **Top 3 Opportunities**: Recomendações diretas de ações para aumentar a receita.
-*   **Predictive Revenue**: Projeção de faturamento baseada no funil atual do CRM.
+O novo módulo **Business Hub** funcionará como a camada social e de rede da plataforma.
 
-### B. Entity Graph Explorer
-*   Visualização relacional de como um cliente se conecta a uma campanha, um atendente e um resultado financeiro.
+### A. Business Registry & Network Graph
+*   **Company Profiles**: Cada tenant (empresa) terá um perfil público (opcional) destacando especialidades, selos de reputação e serviços oferecidos.
+*   **Relationship Mapping**: Implementação de tipos de conexões: *Partner, Vendor, Franchisee, Subsidiary*.
+*   **Visual Network**: Grafo interativo mostrando como as empresas se conectam e geram valor mútuo.
 
----
-
-## 3. ESPECIFICAÇÕES DE DADOS (MIGRAÇÕES)
-
-Criação de novas tabelas estruturais para sustentar o OIL:
-*   `oil_events`: Log central de eventos significativos de todos os módulos.
-*   `oil_recommendations`: Recomendações geradas pelo motor de decisão com status de execução.
-*   `oil_entity_graph`: Tabela de mapeamento de relacionamentos transversais.
-*   `oil_health_scores`: Scores detalhados por departamento e entidade.
+### B. Marketplace de Ativos & Serviços (Business Exchange)
+*   **Asset Sharing**: Ambiente para as empresas compartilharem (ou venderem) templates de automação, prompts de agentes IA e playbooks de atendimento.
+*   **Service Procurement**: Área para contratação de parceiros verificados diretamente pela plataforma (Consultoria, Suporte, Marketing).
 
 ---
 
-## 4. CRONOGRAMA DE EXECUÇÃO
+## 2. INTELIGÊNCIA DE REDE (MATCHING & SCORE)
 
-**Passo 1: Data Pipeline & Events**
-Mapeamento de gatilhos em todos os módulos existentes para alimentar a tabela `oil_events`.
+### A. Business Matching Engine
+*   IA que analisa gargalos operacionais de uma empresa (detectados pelo OIL na Fase 14) e sugere parceiros no ecossistema que resolvem esses problemas.
+*   Exemplo: "Detectamos queda em conversão de anúncios. Conecte-se com a *Agência X* (Parceira Gold) para otimização."
 
-**Passo 2: Memory & Decision Engine**
-Implementação das funções de banco de dados (Edge Functions) que processam eventos e geram recomendações.
-
-**Passo 3: Command Center UI**
-Desenvolvimento da nova visão "Intelligence" dentro do Dashboard, com foco em previsões e alertas.
-
-**Passo 4: Digital Twin Integration**
-Conexão final do OIL com Financeiro, CRM e Inbox para fechar o ciclo de inteligência.
+### B. Business Score & Reputação
+*   Sistema de pontuação baseado em:
+    *   **Performance**: Eficiência operacional medida pelo sistema.
+    *   **Trust**: Tempo de plataforma e histórico de parcerias bem-sucedidas.
+    *   **Feedback**: Avaliações de outras empresas do ecossistema.
 
 ---
 
-## 5. RISCOS E MITIGAÇÃO
-*   **Risco**: Latência no processamento de grandes volumes de eventos.
-*   **Mitigação**: Processamento assíncrono via Edge Functions e filas PGMQ para não afetar a UX.
-*   **Custo**: Aumento no consumo de tokens de IA para análise de padrões (OIL consumirá modelos avançados para geração de recomendações).
+## 3. INFRAESTRUTURA E PRIVACIDADE (MULTI-TENANT 2.0)
 
-**AGUARDANDO APROVAÇÃO PARA INICIAR A CONSTRUÇÃO DO CÉREBRO DA PLATAFERMA.**
+*   **Privacy Wall**: Garantia técnica de que o compartilhamento é apenas de metadados e ativos autorizados. Dados de clientes (CRM) e conversas permanecem isolados e criptografados.
+*   **Auditoria de Conexão**: Log completo de todas as interações e trocas de informações entre empresas.
+
+---
+
+## 4. DASHBOARD CEO MASTER (GLOBAL ECOSYSTEM VIEW)
+
+Uma nova camada de controle para a gestão do ecossistema:
+*   **Ecosystem Health**: KPIs de crescimento da rede, volume de transações no marketplace e taxa de conexões.
+*   **Top Partners**: Ranking de empresas que mais agregam valor à rede.
+*   **Revenue Share**: Monitoramento de comissões e transações geradas pelo hub.
+
+---
+
+## 5. CRONOGRAMA DE IMPLEMENTAÇÃO
+
+**Passo 1: Database Migration (Ecossistema)**
+Criação das tabelas de `hub_connections`, `hub_marketplace_assets` e `company_reputation`.
+
+**Passo 2: Business Hub Interface**
+Desenvolvimento da UI de rede, perfis empresariais e marketplace.
+
+**Passo 3: Matching & Referral Engine**
+Implementação da lógica de indicação e comissionamento automatizado.
+
+**Passo 4: CEO Master Global View**
+Finalização com a visão estratégica de toda a rede OneContact.
+
+---
+
+## 6. RISCOS E MITIGAÇÃO
+*   **Risco**: Vazamento acidental de dados entre empresas competidoras.
+*   **Mitigação**: RLS (Row Level Security) ultra-rigoroso e camadas de aprovação explícitas para qualquer conexão de dados.
+
+**AGUARDANDO APROVAÇÃO PARA TRANSFORMAR O ONECONTACT NO MAIOR ECOSSISTEMA EMPRESARIAL DO MERCADO.**
