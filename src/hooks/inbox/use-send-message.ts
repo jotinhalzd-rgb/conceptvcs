@@ -15,10 +15,10 @@ export function useSendMessage() {
       body: string; 
       type?: 'public' | 'internal' 
     }) => {
-      if (type === 'internal') {
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData.user) throw new Error("Usuário não autenticado");
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("Usuário não autenticado");
 
+      if (type === 'internal') {
         const { data, error } = await supabase
           .from("internal_notes")
           .insert({
@@ -37,7 +37,8 @@ export function useSendMessage() {
           .insert({
             conversation_id: conversationId,
             body: body,
-            sender_type: 'agent',
+            type: 'text',
+            sender_profile_id: userData.user.id,
           })
           .select()
           .single();
