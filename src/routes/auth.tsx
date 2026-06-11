@@ -98,7 +98,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#020617] overflow-y-auto no-scrollbar">
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#020617] relative">
       {/* Background Decorative Elements for the whole page */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
@@ -106,7 +106,7 @@ function AuthPage() {
       </div>
 
       {/* LEFT COLUMN: Auth Form */}
-      <div className="relative z-10 w-full md:w-[500px] lg:w-[600px] min-h-screen flex flex-col px-6 py-12 md:px-12 lg:px-20 bg-[#020617]/50 backdrop-blur-sm border-r border-white/5">
+      <div className="relative z-10 w-full md:w-[500px] lg:w-[600px] min-h-screen flex flex-col px-6 py-12 md:px-12 lg:px-20 bg-[#020617]/50 backdrop-blur-sm border-r border-white/5 flex-shrink-0">
         <header className="flex flex-col mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-500 p-0.5 shadow-2xl shadow-indigo-500/20 mb-8">
             <div className="w-full h-full rounded-[14px] bg-[#020617] flex items-center justify-center">

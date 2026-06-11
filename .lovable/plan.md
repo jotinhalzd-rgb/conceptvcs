@@ -1,53 +1,34 @@
-text
-# OneContact OS - Fase 2: Centro de Controle Operacional (CCO)
+# DIAGNÓSTICO DO BUG - TELA DE LOGIN SEM ROLAGEM
 
-O objetivo é transformar o dashboard atual em um verdadeiro Centro de Comando adaptativo, onde cada perfil de usuário (CEO, Gestor, Gerente, Atendente) visualiza apenas o que é essencial para sua tomada de decisão e produtividade.
+Após a análise do arquivo `src/routes/auth.tsx`, identifiquei a causa raiz do bloqueio de rolagem.
 
-## 1. Arquitetura Adaptativa de Dashboard
-Implementaremos uma lógica de renderização baseada em perfis (Roles) para o `DashboardView`.
+**Causa Raiz:**
+No componente `AuthPage`, o container principal (linha 101) possui as classes `overflow-y-auto no-scrollbar`. 
+Embora `overflow-y-auto` devesse permitir a rolagem, a combinação com `min-height-screen` (100vh) em um container que usa `flex-col md:flex-row` sem uma definição clara de comportamento de rolagem no nível do `html/body` ou em seus filhos imediatos está travando a experiência em algumas resoluções. Além disso, a classe `no-scrollbar` esconde a barra, o que pode dar a impressão de travamento total quando o scroll do mouse não é detectado corretamente pelo navegador.
 
-### Perfis e Blocos de Comando:
+**Componente:** `AuthPage` em `src/routes/auth.tsx`
+**Propriedade CSS Responsável:** `overflow-y-auto no-scrollbar` no container principal e a falta de `overflow-y: auto` explícito no `html/body`.
 
-#### CEO Master (Visão Estratégica)
-*   **KPIs Críticos:** Receita da plataforma, Consumo total de IA, Crescimento mensal.
-*   **Alertas de Risco:** Empresas sem atividade, quedas bruscas de performance.
-*   **Oportunidades:** Empresas atingindo limites de plano, alto volume de leads.
-*   **Ações Recomendadas:** Sugestões baseadas em dados (Ex: "Empresa X precisa de upgrade").
+---
 
-#### Gestor de Empresa (Visão Operacional)
-*   **Status em Tempo Real:** Conversas abertas/aguardando, atendentes/gerentes online.
-*   **Métricas de Conversão:** Leads e Vendas do dia.
-*   **Painel "Necessita Atenção":** Clientes VIP aguardando, filas congestionadas, SLAs em risco.
+# PLANO DE EXECUÇÃO
 
-#### Gerente de Equipe (Visão Tática)
-*   **Performance de Equipe:** Ranking de atendentes, Tempo Médio de Resposta (TMR) e Atendimento (TMA).
-*   **Monitoramento em Tempo Real:** Visualização de carga de trabalho (quem está parado vs. sobrecarregado).
-*   **Qualidade:** Avaliações médias e conversões.
+### Passo 1: Ajuste de Estrutura Global
+Garantir que o navegador permita a rolagem no nível mais alto do documento.
 
-#### Atendente (Visão de Execução)
-*   **Foco Total:** "Minhas Conversas", "Minhas Tarefas", Metas individuais.
-*   **Produtividade:** Agenda do dia, avisos importantes e ranking pessoal.
+### Passo 2: Refatoração do AuthPage
+1. Alterar o container principal para remover `overflow-y-auto no-scrollbar`.
+2. Garantir que a coluna da esquerda (`LeftPanel`) e a da direita (`RightPanel`) permitam o crescimento natural do conteúdo.
+3. Utilizar `min-h-screen` em vez de `h-screen`.
 
-## 2. Customer 360 (Módulo de Inteligência)
-Evolução da visualização de clientes para um perfil omnichannel completo.
-*   **Timeline:** Histórico unificado de interações, compras, tickets e campanhas.
-*   **IA Insights:** Score de propensão à compra, risco de churn (cancelamento) e perfil comportamental.
-*   **Contexto:** Último atendente/gerente, canal de origem e tags de segmentação.
+### Passo 3: Implementação do Scroll Natural
+- Remover classes que escondem barras de rolagem.
+- Aplicar `overflow-y: auto` no container que realmente precisa rolar (o layout principal da rota auth).
 
-## 3. Arquitetura de Filas Enterprise
-Estrutura robusta para gestão de tráfego de mensagens.
-*   **Configurações:** SLA por fila, níveis de prioridade, supervisores dedicados.
-*   **Operação:** Suporte a transferência entre filas/atendentes e regras de escalonamento.
-*   **Visual:** Indicadores de volume e "calor" da fila (congestionamento).
+### Passo 4: Validação de Responsividade
+- Testar visualmente se o conteúdo abaixo da dobra (botão de Sair e Acessos Rápidos) está acessível via scroll em resoluções baixas (1366x768).
 
-## 4. Design System & UX (Estética Premium Dark)
-Refinamento visual seguindo referências como Linear e Stripe.
-*   **Cards de Comando:** Bordas sutis, tipografia clara, uso semântico de cores para alertas.
-*   **Micro-interações:** Feedback imediato em ações de comando.
-*   **Responsividade:** Interface adaptada para operação em diferentes tamanhos de tela sem perda de densidade de informação.
+---
 
-## Detalhes Técnicos
-*   **Componentes:** Criação de `CommandCenter` component para gerenciar os diferentes widgets por perfil.
-*   **Estado:** Utilização de hooks customizados para simular dados em tempo real (Real-time updates).
-*   **Tipagem:** Extensão das interfaces de `User`, `Customer` e `Queue` para suportar os novos campos de inteligência e operação.
-*   **Performance:** Memoization de componentes pesados e carregamento lazy de módulos do Customer 360.
+**PARANDO PARA APROVAÇÃO.**
+Aguardando seu "sim" para aplicar a correção estrutural definitiva.
