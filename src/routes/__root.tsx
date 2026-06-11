@@ -102,11 +102,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
 
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "OneContact OS" },
+      { property: "og:description", content: "Enterprise OS for High-Growth Companies" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "OneContact OS" },
+      { name: "twitter:description", content: "Enterprise OS for High-Growth Companies" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/626d066b-870c-4d2d-977a-730854eb5f08" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/626d066b-870c-4d2d-977a-730854eb5f08" },
     ],
     links: [
       {
