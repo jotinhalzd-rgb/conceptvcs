@@ -9,24 +9,30 @@ import {
   ShieldCheck,
   Rocket,
   BrainCircuit,
-  LayoutDashboard
+  LayoutDashboard,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HealthScoreWidget } from "./business-ai/health-score-widget";
 import { SmartFeed } from "./business-ai/smart-feed";
 import { OILCommandCenter } from "./oil-command-center";
+import { CEOAdvisorView } from "./ceo-advisor-view";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 export const CEODashboard = () => {
-  const [activeTab, setActiveTab] = useState("intelligence");
+  const [activeTab, setActiveTab] = useState("advisor");
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex items-center justify-between mb-8">
             <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl gap-1 h-auto">
+                <TabsTrigger value="advisor" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white font-black uppercase tracking-widest text-[10px] px-6 h-10 gap-2">
+                    <Sparkles className="w-3 h-3" />
+                    CEO Advisor
+                </TabsTrigger>
                 <TabsTrigger value="intelligence" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white font-black uppercase tracking-widest text-[10px] px-6 h-10 gap-2">
                     <BrainCircuit className="w-3 h-3" />
                     OIL Intelligence
@@ -44,6 +50,16 @@ export const CEODashboard = () => {
         </div>
 
         <AnimatePresence mode="wait">
+          <TabsContent value="advisor" className="m-0 focus-visible:outline-none">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <CEOAdvisorView />
+            </motion.div>
+          </TabsContent>
+
           <TabsContent value="intelligence" className="m-0 focus-visible:outline-none">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
