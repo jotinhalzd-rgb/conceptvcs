@@ -209,7 +209,7 @@ export function AppLayout() {
                     onClick={handleLogout}
                   >
                     <LogOut className="h-5 w-5" />
-                    {!collapsed && <span>Encerrar Sessão</span>}
+                    {!collapsed && <span>Sair / Encerrar Demo</span>}
                   </Button>
                 </TooltipTrigger>
                 {collapsed && <TooltipContent side="right" className="bg-rose-600 text-white">Sair</TooltipContent>}
