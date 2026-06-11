@@ -59,7 +59,7 @@ export function ConnectModal({ isOpen, onOpenChange }: ConnectModalProps) {
       const { data, error } = await supabase
         .from("channels")
         .insert({
-          organization_id: profile?.organization_id || undefined,
+          organization_id: profile?.organization_id!,
           name: values.name,
           provider: values.provider,
           identifier: values.identifier,
