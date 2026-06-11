@@ -1,50 +1,51 @@
-# Plano de Implementação: OneContact Hub (Marketplace & Ecossistema)
+# Plano de Implementação: Mobile Experience Platform
 
-O Hub transformará o OneContact OS de um software em uma **plataforma expansível**, criando um efeito de rede onde desenvolvedores, consultores e empresas trocam ativos digitais e serviços.
+O objetivo é transformar o OneContact OS em uma plataforma mobile-first robusta, permitindo a operação integral (Vendas, Atendimento, Gestão) através de uma experiência nativa e segura.
 
-## 1. Arquitetura do Ecossistema (Hub Schema)
+## 1. Estratégia Tecnológica (PWA & Mobile-First)
 
-A estrutura será dividida em Ativos (Apps/Templates) e Entidades (Parceiros/Serviços):
+Para garantir escala imediata e custo de manutenção eficiente, utilizaremos uma arquitetura **PWA (Progressive Web App)** de alto desempenho com:
+- **Service Workers**: Para modo offline e cache resiliente.
+- **Push API**: Para notificações em tempo real.
+- **Biometric API**: Integração nativa com Face ID/Touch ID.
+- **Geolocation API**: Para rastreamento de visitas e check-in.
 
-- `public.hub_marketplace_assets`: Tabela central de itens (Apps, Bots, AI Agents, Templates).
-    - `type`: 'app', 'bot', 'ai_agent', 'template', 'workflow'.
-    - `category`: 'crm', 'marketing', 'support', 'finance'.
-    - `pricing_model`: 'free', 'one_time', 'subscription'.
-- `public.hub_asset_installs`: Registro de quais empresas instalaram quais ativos.
-- `public.hub_partners`: Perfis de parceiros (Consultores, Agências, Devs).
-    - `certification_level`: 'partner', 'expert', 'specialist', 'elite'.
-- `public.hub_service_offers`: Catálogo de serviços profissionais (Implantação, Treinamento).
-- `public.hub_reviews`: Avaliações e ratings para ativos e parceiros.
-- `public.hub_revenue_share`: Log de transações para repasse de comissões.
+## 2. Arquitetura de Dados Mobile (Offline-Ready)
 
-## 2. Governança e Validação
+Implementaremos uma camada de persistência local para garantir produtividade sem internet:
+- `IndexedDB / localForage`: Sincronização de dados do CRM e Customer 360.
+- `Queue-Based Sync`: Ações realizadas offline (mover card, enviar mensagem) entram em uma fila e são disparadas assim que a conexão retorna.
+- `Conflict Resolution`: Lógica de "last-write-wins" baseada em `updated_at`.
 
-- **Asset State**: Todo item passará por estados: `draft` -> `pending_review` -> `certified` -> `published`.
-- **Sandboxing**: Apps instalados via Hub operarão via API com escopos limitados, respeitando o RLS do tenant.
+## 3. Experiência por Perfil (Context-Aware UI)
 
-## 3. Componentes Frontend (Hub UI)
+A interface se adaptará dinamicamente ao cargo do usuário:
+- **Executivo/CEO**: Foco no `Executive Feed` (EIN) e `Health Scores` (OIL).
+- **Vendedor**: Foco no Kanban Simplificado, `Check-in` geolocalizado e notificações de novos leads.
+- **Atendente**: Foco no `Inbox Mobile` otimizado para respostas rápidas e gestão de mídia.
 
-### A. Marketplace Central (`MarketplaceView`)
-- `AssetExplorer`: Grade de descoberta com filtros por categoria e popularidade.
-- `AssetDetailCard`: Página completa do item com screenshots, documentação e botão "Instalar".
+## 4. Componentes Mobile Core
 
-### B. Portal do Parceiro (`PartnerDashboard`)
-- Gestão de portfólio e ativos publicados.
-- Monitoramento de instalações e receita gerada (Revenue Share).
+### A. Mobile Shell (`MobileNavigation`)
+- Navegação por tabs inferiores persistentes.
+- Gestos de deslizar (swipe) para fechar chats ou mover negócios.
 
-### C. Gestão de Ativos Instalados
-- Central de controle para gerenciar APIs, webhooks e configurações de extensões instaladas.
+### B. Gestão de Campo (`FieldModule`)
+- `VisitsTracker`: Botão de Check-in com captura automática de coordenadas e data/hora.
+- `CameraModule`: Upload instantâneo de fotos de auditoria ou documentos.
 
-## 4. Estratégia de Monetização e Escalabilidade
+### C. Alertas e Push (`NotificationEngine`)
+- Central de notificações categorizada por Urgência (SLA, IA, Mensagem).
 
-- **Universal Installer**: Sistema de "um clique" que executa scripts de configuração (tabelas, webhooks, bots) ao instalar um ativo.
-- **Isolamento**: `company_id` em todos os registros de instalação e transação.
-- **Repasse Automático**: Preparação para integração com gateways de pagamento para divisão de receita (Stripe Connect / Paddle).
+## 5. Segurança e Isolamento
 
-## Fluxo do Hub
+- **Encryption at Rest**: Dados sensíveis no cache local serão criptografados via Web Crypto API.
+- **RLS Persistence**: O `company_id` é injetado em todas as requisições de sincronização, garantindo que o cache local nunca contenha dados de outros tenants.
+
+## Fluxo de Implementação
 
 ```text
-PUBLICAÇÃO (Dev/Parceiro) -> HOMOLOGAÇÃO (OneContact) -> MARKETPLACE (Descoberta) -> INSTALAÇÃO (Empresa) -> VALOR (Efeito de Rede)
+CACHE LOCAL (PWA) -> FILA DE SINCRONIZAÇÃO -> SUPABASE (Real-time) -> PUSH NOTIFICATION
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das tabelas de marketplace e a interface de exploração de aplicativos.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a construção da navegação adaptativa por perfil e o módulo de sincronização offline.
