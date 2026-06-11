@@ -37,7 +37,8 @@ export const CRMView = () => {
   const activeGoal = goals?.[0];
   const activeForecast = forecast?.[0];
 
-  const pipelineTitle = activePipeline?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
+  const pipelineTitle = (activePipeline as any)?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
+
 
 
   return (
