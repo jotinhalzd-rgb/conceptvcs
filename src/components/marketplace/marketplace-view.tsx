@@ -17,9 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
+
 
 export const MarketplaceView = () => {
+  const navigate = useNavigate();
   const { data: apps, isLoading: loadingApps } = useIntegrationApps();
+
   const { data: connected, isLoading: loadingConnected } = useConnectedIntegrations();
   const [activeCategory, setActiveTab] = useState('all');
 
@@ -67,10 +71,15 @@ export const MarketplaceView = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="h-10 text-slate-400 hover:text-white gap-2 border border-white/5 bg-white/5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest">
+            <Button 
+                variant="ghost" 
+                onClick={() => navigate({ to: "/settings/developer" })}
+                className="h-10 text-slate-400 hover:text-white gap-2 border border-white/5 bg-white/5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest"
+            >
                 Developer Center
                 <Terminal className="w-3.5 h-3.5" />
             </Button>
+
             <Button className="h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-6 gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
               <span>Sugerir Integração</span>
             </Button>
