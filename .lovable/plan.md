@@ -1,27 +1,31 @@
 text
-# PLANO DE REFATORAÇÃO E OTIMIZAÇÃO ESTRUTURAL - ONECONTACT OS
+# PLANO DE REPROJETO: INBOX OPERACIONAL PREMIUM (LINEAR/INTERCOM STYLE)
 
-Este plano visa consolidar a arquitetura da Fase 3, garantindo escalabilidade para milhões de mensagens e performance de resposta abaixo de 100ms.
+Transformação da Inbox em uma ferramenta de alta performance, eliminando desperdícios de espaço e focando na produtividade do operador.
 
-## ETAPA 1: OTIMIZAÇÃO DA CAMADA DE DADOS (DATABASE & CACHING)
-*   **Normalização de Performance:** Criar índices compostos nas tabelas `messages` (conversation_id, created_at) e `conversations` (status, queue_id).
-*   **Data Tiering:** Implementar lógica de arquivamento para mensagens com mais de 90 dias para tabelas de cold storage, mantendo a performance da Inbox ativa.
-*   **Caching Estratégico:** Configurar cache via React Query com políticas de stale-while-revalidate agressivas para metadados de Customer 360.
+## 1. Reestruturação do Grid & Viewport
+*   **Aplicação 100vh:** Ajustar o `AppLayout` para que a área de conteúdo principal possa ocupar 100% da altura disponível sem paddings excessivos.
+*   **CSS Grid Operacional:** Implementar o grid fixo: `[Sidebar 80px] | [Lista 360px] | [Chat 1fr] | [Customer 360 420px]`.
+*   **Scroll Isolado:** Garantir que apenas as colunas internas possuam scroll (`overflow-y-auto`), travando o scroll da página.
 
-## ETAPA 2: REFATORAÇÃO DO CORE DE INTELIGÊNCIA (IA ENGINE)
-*   **Abstração de LLM:** Criar um Service Layer unificado para chamadas de IA, permitindo alternar entre GPT-4o, Claude 3.5 e modelos locais sem alterar a UI.
-*   **Vetorização (RAG):** Implementar Supabase Vector (pgvector) no `knowledge_base` para buscas semânticas ultrarrápidas pelo Copilot.
-*   **Batch Processing:** Otimizar as Edge Functions de análise de sentimento para processamento em lote, reduzindo latência e custos de API.
+## 2. Refinamento das Colunas
+*   **Coluna 2 (Lista de Conversas):** Aumento da densidade de informação. Redução de paddings, tipografia otimizada e inclusão de mini-badges de Fila e Sentimento sem poluição visual.
+*   **Coluna 3 (Chat Principal - Core):** Expansão da largura para 55-65%. Interface de mensagens inspirada no Slack/Linear (foco no conteúdo, bolhas de chat discretas).
+*   **Coluna 4 (Customer 360):** Painel compacto com cabeçalho fixo, timeline vertical densa e insights de IA em blocos de alto contraste.
 
-## ETAPA 3: OTIMIZAÇÃO DE FRONTEND & UX (CLIENT-SIDE)
-*   **Virtualização de Listas:** Implementar `react-window` ou `tanstack-virtual` na lista de conversas da Inbox para suportar scroll infinito sem degradação de FPS.
-*   **Otimização de Asset Loading:** Migrar ícones Lucide para carregamento dinâmico e otimizar o bundle principal através de Code Splitting por rota.
-*   **Web Workers:** Mover cálculos pesados de scores (Customer/Agent) para Web Workers, liberando a Main Thread para interações de chat.
+## 3. Experiência de Usuário & Responsividade
+*   **Brekpoints Inteligentes:** 
+    *   < 1440px: Customer 360 torna-se um painel flutuante (Drawer) acionável por ícone.
+    *   < 1024px: Sidebar e Lista de Conversas entram em modo compacto/recolhido.
+*   **Estética "Enterprise SaaS":** 
+    *   Remoção de glows e sombras agressivas.
+    *   Uso de bordas sutis (`border-white/5`).
+    *   Background sólido `#020617` com variações mínimas para separação de áreas.
+    *   Tipografia Inter/Sans de alta legibilidade.
 
-## ETAPA 4: GOVERNANÇA E SEGURANÇA (SYSTEM HARDENING)
-*   **Auditoria Imutável:** Refinar os triggers de histórico para garantir que nenhuma edição de mensagem escape da trilha de auditoria.
-*   **Rate Limiting:** Implementar limites de taxa por Tenant/Agente para proteger a infraestrutura contra picos de tráfego.
-*   **Monitoring:** Adicionar logs estruturados e telemetria para monitorar o Tempo Médio de Resposta da IA (TMR-IA).
+## 4. Detalhes de Produtividade
+*   **Área de Input:** Fixada no rodapé do chat, com comandos rápidos visíveis e suporte a mídias sem expandir excessivamente a altura.
+*   **Cabeçalhos:** Fixos com metadados do contato e status de atendimento sempre visíveis.
 
-## ETAPA 5: ESCALABILIDADE OMNICHANNEL (ADAPTER PATTERN)
-*   **Unified Adapter Interface:** Refatorar os conectores de canais (WhatsApp, Email, etc) para um padrão de Adapter único, facilitando a adição de novos canais como TikTok ou LinkedIn em tempo recorde.
+---
+**Resultado Esperado:** Uma interface que desaparece para dar lugar ao trabalho, transmitindo a sensação de um sistema robusto, rápido e confiável para uso contínuo.
