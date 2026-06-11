@@ -321,9 +321,9 @@ export const InboxView = () => {
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Inteligência 360</h4>
               <div className="space-y-3">
                 {[
-                  { label: "Prob. Expansão", val: 85, color: "bg-emerald-500" },
-                  { label: "Engajamento", val: 92, color: "bg-indigo-500" },
-                  { label: "Risco de Churn", val: 12, color: "bg-rose-500" },
+                  { label: "Prob. Expansão", val: currentChat?.id === 2 ? 95 : 85, color: "bg-emerald-500" },
+                  { label: "Engajamento", val: currentChat?.id === 1 ? 92 : 70, color: "bg-indigo-500" },
+                  { label: "Risco de Churn", val: currentChat?.sentiment === 'negative' ? 65 : 12, color: "bg-rose-500" },
                 ].map(m => (
                   <div key={m.label} className="space-y-1.5">
                     <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
