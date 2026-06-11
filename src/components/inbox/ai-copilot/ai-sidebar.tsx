@@ -80,7 +80,25 @@ export const AISidebar = ({ chat, onApplyReply }: AISidebarProps) => {
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
+        {/* Agent Selector */}
+        <div className="space-y-2">
+          <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Especialista Ativo</label>
+          <Select value={selectedAgentId || ""} onValueChange={setSelectedAgentId}>
+            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-10 text-[10px] font-bold text-white uppercase tracking-wider">
+              <SelectValue placeholder="Selecionar Agente" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#0f172a] border-white/10">
+              {agents?.map(agent => (
+                <SelectItem key={agent.id} value={agent.id} className="text-[10px] font-bold uppercase">
+                  {agent.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Quick Tabs */}
+
         <div className="grid grid-cols-2 p-1 bg-white/[0.03] border border-white/5 rounded-xl">
           <Button 
             variant="ghost" 
