@@ -180,55 +180,206 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_logs: {
+        Row: {
+          action_type: string
+          contact_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          node_id: string
+          status: string | null
+          workflow_id: string
+        }
+        Insert: {
+          action_type: string
+          contact_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          node_id: string
+          status?: string | null
+          workflow_id: string
+        }
+        Update: {
+          action_type?: string
+          contact_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          node_id?: string
+          status?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_workflows: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          nodes: Json
+          organization_id: string
+          trigger_event: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          nodes?: Json
+          organization_id: string
+          trigger_event: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          nodes?: Json
+          organization_id?: string
+          trigger_event?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_analytics: {
+        Row: {
+          campaign_id: string
+          converted_count: number | null
+          delivered_count: number | null
+          id: string
+          last_updated_at: string | null
+          read_count: number | null
+          replied_count: number | null
+          revenue_generated: number | null
+          sent_count: number | null
+        }
+        Insert: {
+          campaign_id: string
+          converted_count?: number | null
+          delivered_count?: number | null
+          id?: string
+          last_updated_at?: string | null
+          read_count?: number | null
+          replied_count?: number | null
+          revenue_generated?: number | null
+          sent_count?: number | null
+        }
+        Update: {
+          campaign_id?: string
+          converted_count?: number | null
+          delivered_count?: number | null
+          id?: string
+          last_updated_at?: string | null
+          read_count?: number | null
+          replied_count?: number | null
+          revenue_generated?: number | null
+          sent_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_analytics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
+          ab_test_config: Json | null
+          budget: number | null
+          campaign_type: string | null
           channel: string
           company_id: string
           content_template: Json | null
           created_at: string | null
           created_by: string | null
           description: string | null
+          expected_roi: number | null
           id: string
           name: string
           objective: string | null
           priority: string | null
           scheduled_at: string | null
           segmentation_filters: Json | null
+          segmentation_rules: Json | null
           status: string
+          total_cost: number | null
           type: string
           updated_at: string | null
         }
         Insert: {
+          ab_test_config?: Json | null
+          budget?: number | null
+          campaign_type?: string | null
           channel: string
           company_id: string
           content_template?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          expected_roi?: number | null
           id?: string
           name: string
           objective?: string | null
           priority?: string | null
           scheduled_at?: string | null
           segmentation_filters?: Json | null
+          segmentation_rules?: Json | null
           status?: string
+          total_cost?: number | null
           type: string
           updated_at?: string | null
         }
         Update: {
+          ab_test_config?: Json | null
+          budget?: number | null
+          campaign_type?: string | null
           channel?: string
           company_id?: string
           content_template?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          expected_roi?: number | null
           id?: string
           name?: string
           objective?: string | null
           priority?: string | null
           scheduled_at?: string | null
           segmentation_filters?: Json | null
+          segmentation_rules?: Json | null
           status?: string
+          total_cost?: number | null
           type?: string
           updated_at?: string | null
         }
