@@ -1,40 +1,62 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export function useAuth() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
+    let mounted = true;
+
     // Check local storage for bypass session
-    const bypassSession = localStorage.getItem("onecontact_bypass_session");
-    if (bypassSession) {
-      setSession(JSON.parse(bypassSession));
-      setLoading(false);
-      return;
-    }
+    const checkBypass = () => {
+      try {
+        const bypassSession = localStorage.getItem("onecontact_bypass_session");
+        if (bypassSession) {
+          const parsed = JSON.parse(bypassSession);
+          if (mounted) {
+            setSession(parsed);
+            setLoading(false);
+          }
+          return true;
+        }
+      } catch (e) {
+        console.error("Error parsing bypass session", e);
+      }
+      return false;
+    };
+
+    if (checkBypass()) return;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
+      if (mounted) {
+        setSession(session);
+        setLoading(false);
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       console.log(`Auth event: ${event}`);
-      setSession(session);
-      setLoading(false);
+      if (mounted) {
+        setSession(session);
+        setLoading(false);
+      }
       
       if (event === 'SIGNED_OUT') {
-        setSession(null);
         localStorage.removeItem("onecontact_bypass_session");
+        queryClient.clear();
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [queryClient]);
 
   return { session, loading, user: session?.user };
 }

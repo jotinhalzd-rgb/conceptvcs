@@ -31,21 +31,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAICopilot } from "@/hooks/inbox/use-ai-copilot";
 
 export const InboxView = () => {
-  const [selectedChat, setSelectedChat] = useState(1);
+  const [selectedChat, setSelectedChat] = useState<number>(1);
   const [showCopilot, setShowCopilot] = useState(true);
   const [inputMessage, setInputMessage] = useState("");
   
-  // Exemplo de uso do Hook de Refatoração (Etapa 2)
-  const lastCustomerMessage = "Quero cancelar meu plano imediatamente."; 
-  const { analysis, isAnalyzing } = useAICopilot(lastCustomerMessage);
-
-
+  // Encontrar o chat selecionado para pegar a última mensagem real
   const chats = [
     { id: 1, name: "Roberto Almeida", lastMsg: "Quero cancelar meu plano.", time: "2 min", sentiment: "negative", risk: "high", unread: 2, channel: "whatsapp" },
     { id: 2, name: "TechFlow Solutions", lastMsg: "Como faço o upgrade?", time: "15 min", sentiment: "positive", intent: "sale", unread: 0, channel: "instagram" },
     { id: 3, name: "Mariana Costa", lastMsg: "Obrigada pela ajuda!", time: "1h", sentiment: "positive", unread: 0, channel: "messenger" },
     { id: 4, name: "Carlos Edu", lastMsg: "Ainda não recebi o boleto.", time: "2h", sentiment: "neutral", urgency: "medium", unread: 1, channel: "whatsapp" },
   ];
+
+  const currentChat = chats.find(c => c.id === selectedChat);
+  const { analysis, isAnalyzing } = useAICopilot(currentChat?.lastMsg || "");
 
   const queues = [
     { name: "Comercial", count: 12, color: "bg-emerald-500" },
@@ -156,13 +155,17 @@ export const InboxView = () => {
           <div className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 backdrop-blur-xl bg-[#020617]/50 sticky top-0 z-10">
             <div className="flex items-center gap-4">
               <Avatar className="h-10 w-10 border border-white/10">
-                <AvatarFallback className="bg-indigo-600 text-white font-bold">R</AvatarFallback>
+                <AvatarFallback className="bg-indigo-600 text-white font-bold">
+                  {currentChat?.name.charAt(0) || "R"}
+                </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-sm font-bold text-white leading-none">Roberto Almeida</h3>
+                <h3 className="text-sm font-bold text-white leading-none">
+                  {currentChat?.name || "Cliente"}
+                </h3>
                 <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Digitando via WhatsApp
+                  Digitando via {currentChat?.channel === 'whatsapp' ? 'WhatsApp' : currentChat?.channel || 'Chat'}
                 </p>
               </div>
             </div>
@@ -186,11 +189,13 @@ export const InboxView = () => {
             
             <div className="flex gap-4 max-w-[80%]">
               <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-slate-800 text-slate-400 text-xs font-bold">RA</AvatarFallback>
+                <AvatarFallback className="bg-slate-800 text-slate-400 text-xs font-bold">
+                  {currentChat?.name.split(' ').map(n => n[0]).join('') || "RA"}
+                </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
                 <div className="bg-white/[0.03] border border-white/[0.08] text-slate-200 p-4 rounded-3xl rounded-tl-none shadow-sm">
-                  Olá, estou muito insatisfeito com a demora no suporte. Quero cancelar meu plano imediatamente.
+                  {currentChat?.lastMsg || "Olá, como posso ajudar?"}
                 </div>
                 <span className="text-[10px] text-slate-600 font-bold ml-2">12:30</span>
               </div>
@@ -227,7 +232,7 @@ export const InboxView = () => {
                       {analysis.intent === 'churn' && (
                         <div className="flex items-start gap-3 bg-rose-500/10 p-3 rounded-2xl border border-rose-500/20">
                           <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                          <p className="text-xs text-rose-200 font-medium">Detectado risco alto de churn. Cliente estratégico.</p>
+                          <p className="text-xs text-rose-200 font-medium">Detectado risco de {analysis.intent === 'churn' ? 'churn' : 'cancelamento'}. Cliente estratégico.</p>
                         </div>
                       )}
                       
@@ -283,15 +288,19 @@ export const InboxView = () => {
               <div className="relative inline-block">
                 <Avatar className="h-24 w-24 mx-auto border-4 border-indigo-500/20 p-1">
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-3xl font-black">R</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-3xl font-black">
+                    {currentChat?.name.charAt(0) || "R"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
-                  Cliente VIP
+                  {currentChat?.id === 1 ? "Cliente VIP" : "Standard"}
                 </div>
               </div>
               <div>
-                <h2 className="text-lg font-black text-white tracking-tight">Roberto Almeida</h2>
-                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Diretor Executivo @ TechFlow</p>
+                <h2 className="text-lg font-black text-white tracking-tight">{currentChat?.name || "Cliente"}</h2>
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">
+                  {currentChat?.id === 1 ? "Diretor Executivo @ TechFlow" : "Contato Externo"}
+                </p>
               </div>
             </div>
 
@@ -312,9 +321,9 @@ export const InboxView = () => {
               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Inteligência 360</h4>
               <div className="space-y-3">
                 {[
-                  { label: "Prob. Expansão", val: 85, color: "bg-emerald-500" },
-                  { label: "Engajamento", val: 92, color: "bg-indigo-500" },
-                  { label: "Risco de Churn", val: 12, color: "bg-rose-500" },
+                  { label: "Prob. Expansão", val: currentChat?.id === 2 ? 95 : 85, color: "bg-emerald-500" },
+                  { label: "Engajamento", val: currentChat?.id === 1 ? 92 : 70, color: "bg-indigo-500" },
+                  { label: "Risco de Churn", val: currentChat?.sentiment === 'negative' ? 65 : 12, color: "bg-rose-500" },
                 ].map(m => (
                   <div key={m.label} className="space-y-1.5">
                     <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
