@@ -1,71 +1,60 @@
-# PLANO DE IMPLEMENTAÇÃO: ENTERPRISE INTELLIGENCE NETWORK (EIN) - FASE 16
+# Plano de Implementação: Customer 360 Enterprise
 
-Este plano detalha a criação da camada máxima de inteligência coletiva do ONECONTACT OS. O **EIN** transforma padrões operacionais anônimos em insights estratégicos para cada empresa da rede, criando o primeiro "Waze para Negócios".
+O objetivo é transformar a visualização atual em uma central de inteligência de dados do cliente, consolidando informações de CRM, Suporte, Financeiro e IA em uma única interface escalável.
 
----
+## 1. Arquitetura de Dados (Database Schema)
 
-## 1. ARQUITETURA DE INTELIGÊNCIA COLETIVA
+Serão criadas/ajustadas as seguintes tabelas para suportar o volume enterprise:
 
-O EIN funcionará processando os dados do **OIL (Fase 14)** em uma camada de agregação global.
+- `public.contacts`: Adição de colunas para `profile_picture_url`, `main_channel`, `status`, `lead_score`.
+- `public.customer_events_unified`: Tabela centralizadora de eventos para a Timeline.
+- `public.customer_tickets`: Gestão de tickets de suporte com SLA e NPS.
+- `public.billing_transactions`: Histórico financeiro consolidado.
+- `public.customer_insights_enterprise`: Cache de inteligência gerado por IA (resumos, churn, propensão).
 
-### A. Anonymization & Aggregation Layer
-*   **Data Scrubbing**: Processo automático que remove PII (Personal Identifiable Information) antes de qualquer análise.
-*   **Industry Clustering**: Agrupamento de dados por CNAE/Setor (Farmácias, Varejo, Serviços) para gerar benchmarks contextuais.
+## 2. Componentes Frontend (UI/UX)
 
-### B. Benchmarking Inteligente (Peer Analysis)
-*   **Relative Performance Index**: Comparação de KPIs (Time to First Response, CSAT, Conversão) contra a média e o "Top 10%" do setor.
-*   **Gap Analysis**: Identificação automática de onde a empresa está performando abaixo de seus pares.
+A interface será dividida em zonas de responsabilidade:
 
----
+### A. Perfil e Identificação (Header/Sidebar)
+- Componente `CustomerIdentity`: Exibição de Nome, Foto, Empresa e Tags.
+- Componente `AccountHealthScore`: Visualização gráfica do score e status.
 
-## 2. COMPONENTES DO SISTEMA (ADVISORY & EVOLUTION)
+### B. Timeline Unificada (Centro)
+- Componente `OmniTimeline`: Feed infinito com carregamento incremental (`useInfiniteQuery`).
+- Filtros por categoria: Conversas, Financeiro, CRM, Suporte e IA.
 
-### A. CEO Advisor (O Conselheiro Virtual)
-Uma interface de diálogo e alertas que fornece insights executivos baseados no ecossistema:
-*   *"Empresas do seu setor que adotaram o AI Studio reduziram o tempo de resposta em 65%. Deseja aplicar o template padrão de Suporte?"*
-*   *"Seu NPS de 72 está 12 pontos abaixo da média das clínicas odontológicas. O OIL detectou que a demora no agendamento é o principal fator."*
+### C. Painéis Laterais (Contexto)
+- `CRMContextPanel`: Negócios ativos e valor negociado.
+- `SupportSlaPanel`: Tickets ativos e métricas de atendimento.
+- `CommunicationLauncher`: Histórico por canal (WA, Email, etc).
 
-### B. Evolution Engine (Best Practices AI)
-*   **Playbook Discovery**: Detecção de processos que geram maior receita no ecossistema e transformação em recomendações de configuração (Templates de fluxos, scripts e prompts).
+### D. Camada de Inteligência (IA Insights)
+- `AIStrategistCard`: Resumo dinâmico, Churn risk e "Next Best Action".
+- Alertas preditivos (Oportunidades e Riscos).
 
----
+## 3. Fluxos de Dados e Performance
 
-## 3. INFRAESTRUTURA DE DADOS (MIGRAÇÕES)
+- **Lazy Loading**: A timeline carregará apenas os últimos 20 eventos por vez.
+- **Cache SWR**: Uso de React Query para garantir que a navegação entre clientes seja instantânea.
+- **Triggers de Agregação**: Eventos no CRM ou Inbox disparam automaticamente uma inserção na `customer_events_unified`.
 
-Criação das tabelas de inteligência agregada:
-*   `ein_industry_benchmarks`: Médias e quartis de performance por setor.
-*   `ein_best_practices`: Repositório de padrões operacionais de alta performance anonimizados.
-*   `ein_advisor_logs`: Histórico de insights estratégicos entregues ao CEO.
+## 4. Segurança (Multi-Tenancy)
 
----
+- Todas as queries incluirão `WHERE organization_id = current_org()`.
+- RLS rigoroso para impedir vazamento de dados entre empresas (Tenants).
 
-## 4. DASHBOARD CEO MASTER (GLOBAL NETWORK INTELLIGENCE)
+## Detalhes Técnicos
 
-Visão consolidada para o gestor do ecossistema:
-*   **Economic Pulse**: Crescimento agregado por setor dentro da plataforma.
-*   **Efficiency Map**: Quais segmentos estão performando melhor com as ferramentas de IA.
-*   **Network Risks**: Detecção de anomalias sistêmicas (ex: queda generalizada de faturamento em um setor específico).
+```text
+ESTRUTURA DE EVENTOS (JSONB):
+{
+  "type": "deal_closed",
+  "icon": "TrendingUp",
+  "color": "emerald",
+  "amount": 5000,
+  "agent_name": "Marcos"
+}
+```
 
----
-
-## 5. CRONOGRAMA DE EXECUÇÃO
-
-**Passo 1: Aggregation Engine**
-Implementação das rotinas de processamento de dados do OIL para gerar os primeiros Benchmarks anônimos.
-
-**Passo 2: CEO Advisor UI**
-Criação do componente de conselheiro estratégico dentro do Dashboard executivo.
-
-**Passo 3: Benchmarking Modules**
-Interface visual para comparação "Sua Empresa vs. Mercado".
-
-**Passo 4: Playbook Recommendation**
-Sistema que sugere a instalação de ativos do Marketplace (Fase 15) com base em gaps de performance.
-
----
-
-## 6. SEGURANÇA E COMPLIANCE
-*   **LGPD-by-Design**: Toda inteligência é estatística; nenhum dado individual de cliente ou transação sai do isolamento do tenant original.
-*   **Audit Trail**: Transparência total sobre quais dados foram anonimizados para compor a rede de inteligência.
-
-**AGUARDANDO APROVAÇÃO PARA TRANSFORMAR DADOS EM SABEDORIA COLETIVA.**
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a migração final do banco de dados e o desenvolvimento dos novos componentes de UI.

@@ -1053,10 +1053,14 @@ export type Database = {
           is_lead: boolean | null
           lead_score: number | null
           lifecycle_stage: string | null
+          main_channel: string | null
           metadata: Json | null
           name: string | null
           organization_id: string
           phone: string | null
+          profile_picture_url: string | null
+          status: string | null
+          tags: Json | null
           updated_at: string | null
         }
         Insert: {
@@ -1066,10 +1070,14 @@ export type Database = {
           is_lead?: boolean | null
           lead_score?: number | null
           lifecycle_stage?: string | null
+          main_channel?: string | null
           metadata?: Json | null
           name?: string | null
           organization_id: string
           phone?: string | null
+          profile_picture_url?: string | null
+          status?: string | null
+          tags?: Json | null
           updated_at?: string | null
         }
         Update: {
@@ -1079,10 +1087,14 @@ export type Database = {
           is_lead?: boolean | null
           lead_score?: number | null
           lifecycle_stage?: string | null
+          main_channel?: string | null
           metadata?: Json | null
           name?: string | null
           organization_id?: string
           phone?: string | null
+          profile_picture_url?: string | null
+          status?: string | null
+          tags?: Json | null
           updated_at?: string | null
         }
         Relationships: [
