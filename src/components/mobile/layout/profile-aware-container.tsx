@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "./mobile-navigation";
 import { useProfile } from "@/hooks/auth/use-auth";
@@ -8,11 +8,20 @@ import { CRMView } from "@/components/crm/crm-view";
 import { Dashboard } from "@/components/dashboard/dashboard-view";
 import { CEODashboard } from "@/components/dashboard/ceo/ceo-dashboard";
 import { BillingView } from "@/components/billing/billing-view";
+import { MarketplaceView } from "@/components/marketplace/marketplace-view";
+
 
 export const ProfileAwareContainer = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
   const { data: profile } = useProfile();
-  const [activeTab, setActiveTab] = useState('inbox'); // Default depende do perfil
+  const [activeTab, setActiveTab] = useState('inbox');
+
+  useEffect(() => {
+    if (profile?.role) {
+      if (profile.role.includes('ceo')) setActiveTab('dashboard');
+      else setActiveTab('inbox');
+    }
+  }, [profile?.role]);
 
   if (!isMobile) return <>{children}</>;
 
@@ -23,9 +32,12 @@ export const ProfileAwareContainer = ({ children }: { children: React.ReactNode 
       case 'crm': return <CRMView />;
       case 'dashboard': return profile?.role?.includes('ceo') ? <CEODashboard /> : <Dashboard />;
       case 'billing': return <BillingView />;
+      case 'business-ai': return <CEODashboard />; // IA Feed é parte da view executiva
+      case 'marketplace': return <MarketplaceView />;
       default: return <Dashboard />;
     }
   };
+
 
   return (
     <div className="flex flex-col h-screen bg-[#020617] overflow-hidden">
