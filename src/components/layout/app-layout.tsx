@@ -49,6 +49,8 @@ export function AppLayout() {
   const { data: profile } = useProfile();
   const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
   const navigate = useNavigate();
+  const location = window.location.pathname;
+  const isInbox = location.startsWith("/inbox");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -241,12 +243,22 @@ export function AppLayout() {
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto no-scrollbar relative p-8">
+          <main className={cn(
+            "flex-1 overflow-hidden relative",
+            !isInbox && "p-8 overflow-y-auto no-scrollbar"
+          )}>
             {/* Background Gradient Spotlights */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
-            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/5 blur-[120px] pointer-events-none rounded-full" />
+            {!isInbox && (
+              <>
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/5 blur-[120px] pointer-events-none rounded-full" />
+              </>
+            )}
             
-            <div className="relative z-10 max-w-7xl mx-auto">
+            <div className={cn(
+              "relative z-10 h-full",
+              !isInbox && "max-w-7xl mx-auto"
+            )}>
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />
               </GlobalErrorBoundary>
