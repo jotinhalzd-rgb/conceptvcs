@@ -69,7 +69,7 @@ export const CRMView = () => {
                       onClick={() => setSelectedPipelineId(p.id)}
                       className="hover:bg-white/5 focus:bg-white/5 cursor-pointer"
                     >
-                      {p.title || (p as any).name}
+                      {(p as any).title || (p as any).name}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
