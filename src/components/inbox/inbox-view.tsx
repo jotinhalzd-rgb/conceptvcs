@@ -111,6 +111,15 @@ const InboxContent = () => {
         </div>
       )}
 
+      {/* 3. Customer 360 (420px) */}
+      {showCustomer360 && selectedChat && (
+        <CustomerSidePanel 
+          chat={selectedChat} 
+          onClose={() => setShowCustomer360(false)} 
+        />
+      )}
+
+
       {/* 4. IA Copilot (380px) */}
       {showAICopilot && selectedChat && (
         <AISidebar 
