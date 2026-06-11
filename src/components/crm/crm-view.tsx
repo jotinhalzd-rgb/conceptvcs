@@ -203,7 +203,7 @@ export const CRMView = () => {
             </Button>
             <div className="w-px h-4 bg-white/5 mx-2" />
             <span className="text-[10px] font-bold text-slate-600 uppercase tabular-nums tracking-widest">
-              Visualizando {deals?.length || 0} negócios
+              Visualizando {filteredDealsCount} negócios
             </span>
           </div>
         </div>
