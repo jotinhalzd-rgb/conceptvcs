@@ -3020,6 +3020,182 @@ export type Database = {
           },
         ]
       }
+      mobile_field_visits: {
+        Row: {
+          checkin_at: string | null
+          checkout_at: string | null
+          contact_id: string
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          location_address: string | null
+          location_coords_json: Json | null
+          notes: string | null
+          organization_id: string
+          photos_urls: string[] | null
+          profile_id: string
+          visit_type: string | null
+        }
+        Insert: {
+          checkin_at?: string | null
+          checkout_at?: string | null
+          contact_id: string
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          location_address?: string | null
+          location_coords_json?: Json | null
+          notes?: string | null
+          organization_id: string
+          photos_urls?: string[] | null
+          profile_id: string
+          visit_type?: string | null
+        }
+        Update: {
+          checkin_at?: string | null
+          checkout_at?: string | null
+          contact_id?: string
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          location_address?: string | null
+          location_coords_json?: Json | null
+          notes?: string | null
+          organization_id?: string
+          photos_urls?: string[] | null
+          profile_id?: string
+          visit_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_field_visits_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_field_visits_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_field_visits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_field_visits_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_push_tokens: {
+        Row: {
+          device_id: string
+          device_platform: string | null
+          id: string
+          is_active: boolean | null
+          last_seen_at: string | null
+          organization_id: string
+          profile_id: string
+          push_token: string
+        }
+        Insert: {
+          device_id: string
+          device_platform?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen_at?: string | null
+          organization_id: string
+          profile_id: string
+          push_token: string
+        }
+        Update: {
+          device_id?: string
+          device_platform?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen_at?: string | null
+          organization_id?: string
+          profile_id?: string
+          push_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_push_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_push_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_sync_logs: {
+        Row: {
+          error_details: string | null
+          finished_at: string | null
+          id: string
+          organization_id: string
+          profile_id: string
+          records_processed: number | null
+          started_at: string | null
+          status: string | null
+          sync_type: string
+        }
+        Insert: {
+          error_details?: string | null
+          finished_at?: string | null
+          id?: string
+          organization_id: string
+          profile_id: string
+          records_processed?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_type: string
+        }
+        Update: {
+          error_details?: string | null
+          finished_at?: string | null
+          id?: string
+          organization_id?: string
+          profile_id?: string
+          records_processed?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_sync_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_sync_logs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oil_alerts_v2: {
         Row: {
           created_at: string | null
