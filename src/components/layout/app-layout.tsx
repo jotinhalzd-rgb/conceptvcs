@@ -217,23 +217,6 @@ export function AppLayout() {
                 {collapsed && <TooltipContent side="right">Expandir Menu</TooltipContent>}
               </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={cn(
-                      "w-full justify-start gap-3 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl font-semibold",
-                      collapsed && "justify-center"
-                    )}
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-5 w-5" />
-                    {!collapsed && <span>Sair / Encerrar Demo</span>}
-                  </Button>
-                </TooltipTrigger>
-                {collapsed && <TooltipContent side="right" className="bg-rose-600 text-white">Sair</TooltipContent>}
-              </Tooltip>
             </div>
           </div>
         </aside>
