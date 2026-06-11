@@ -11,8 +11,9 @@ import {
   User,
   ShieldCheck,
   TrendingUp,
-  Plus,
-  DollarSign
+  Plus, 
+  DollarSign,
+  ArrowRightLeft
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMessages, useInternalNotes } from "@/hooks/inbox/use-messages";
 import { useSendMessage } from "@/hooks/inbox/use-send-message";
+import { TransferModal } from "./transfer-modal";
 import { Badge } from "@/components/ui/badge";
 import { useEffect } from 'react';
 
@@ -42,6 +44,7 @@ export const ChatView = ({
 }: ChatViewProps) => {
   const [messageType, setMessageType] = useState<'public' | 'internal'>('public');
   const [inputMessage, setInputMessage] = useState("");
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const { data: messages } = useMessages(chat?.id);
   const { data: notes } = useInternalNotes(chat?.id);
   const sendMessageMutation = useSendMessage();
@@ -126,6 +129,14 @@ export const ChatView = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl"
+            onClick={() => setIsTransferModalOpen(true)}
+          >
+            <ArrowRightLeft className="w-4 h-4"/>
+          </Button>
           <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl">
             <Clock className="w-4 h-4"/>
           </Button>
@@ -249,8 +260,14 @@ export const ChatView = ({
                 <Send className="w-4 h-4 text-white"/>
               )}
             </Button>
-          </div>
-        </div>
+      </div>
+      
+      <TransferModal 
+        conversationId={chat.id} 
+        isOpen={isTransferModalOpen} 
+        onOpenChange={setIsTransferModalOpen} 
+      />
+    </div>
       </div>
     </div>
   );
