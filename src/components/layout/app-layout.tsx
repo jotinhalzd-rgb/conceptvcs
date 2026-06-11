@@ -37,13 +37,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { SoftphoneWidget } from "@/components/voice/softphone-widget";
 import { ProfileAwareContainer } from "@/components/mobile/layout/profile-aware-container";
+import { CommandCenter } from "./command-center";
 
 export function AppLayout() {
 
 
   const { user, loading: authLoading } = useAuth();
   const { data: profile } = useProfile();
-  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
+  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed, setQuickLaunchOpen } = useUIStore();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const navigate = useNavigate();
   const location = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -141,6 +142,7 @@ export function AppLayout() {
       <ProfileAwareContainer>
       <div className="flex h-screen bg-[#020817] text-slate-200 overflow-hidden font-sans">
 
+      <CommandCenter />
       <SoftphoneWidget />
       <TooltipProvider delayDuration={0}>
 
@@ -310,13 +312,17 @@ export function AppLayout() {
           {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub && (
             <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020817]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
-                <div className="relative max-w-md w-full group hidden md:block">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-indigo-400 transition-all duration-300" />
-                  <input 
-                    type="text" 
-                    placeholder="Pesquisar em toda a plataforma... (⌘ + K)" 
-                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-slate-600"
-                  />
+                <div 
+                  onClick={() => setQuickLaunchOpen(true)}
+                  className="relative max-w-md w-full group hidden md:block cursor-pointer"
+                >
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-hover:text-indigo-400 transition-all duration-300" />
+                  <div className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-500 hover:border-indigo-500/50 hover:bg-white/[0.05] transition-all flex justify-between items-center">
+                    <span>Pesquisar em toda a plataforma...</span>
+                    <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-slate-400 opacity-100">
+                      <span className="text-xs">⌘</span>K
+                    </kbd>
+                  </div>
                 </div>
               </div>
 
@@ -331,7 +337,10 @@ export function AppLayout() {
                   </Button>
                 </div>
                 <div className="h-8 w-px bg-white/[0.08] mx-1" />
-                <Button className="h-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Button 
+                  onClick={() => setQuickLaunchOpen(true)}
+                  className="h-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
                   <Rocket className="w-4 h-4" />
                   <span>Quick Launch</span>
                 </Button>

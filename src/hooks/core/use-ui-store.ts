@@ -6,6 +6,8 @@ interface UIState {
   setSidebarCollapsed: (collapsed: boolean) => void;
   activeTheme: 'dark' | 'light' | 'system';
   setActiveTheme: (theme: 'dark' | 'light' | 'system') => void;
+  quickLaunchOpen: boolean;
+  setQuickLaunchOpen: (open: boolean) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -15,6 +17,8 @@ export const useUIStore = create<UIState>()(
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
       activeTheme: 'dark',
       setActiveTheme: (theme) => set({ activeTheme: theme }),
+      quickLaunchOpen: false,
+      setQuickLaunchOpen: (open) => set({ quickLaunchOpen: open }),
     }),
     {
       name: 'onecontact-ui-storage',
