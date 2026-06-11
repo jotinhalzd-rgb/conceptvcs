@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 
 const LazyMarketplace = lazy(() => import("@/components/marketplace/marketplace-view").then(m => ({ default: m.MarketplaceView })));
 
-export const Route = createFileRoute("/settings/marketplace" as any)({
+export const Route = createFileRoute("/settings/marketplace")({
   component: MarketplacePage,
 });
 

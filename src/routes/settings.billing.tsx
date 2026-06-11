@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 
 const LazyBilling = lazy(() => import("@/components/billing/billing-view").then(m => ({ default: m.BillingView })));
 
-export const Route = createFileRoute("/settings/billing" as any)({
+export const Route = createFileRoute("/settings/billing")({
   component: BillingPage,
 });
 
