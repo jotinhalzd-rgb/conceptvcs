@@ -18,6 +18,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Users, User, ArrowRightLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TransferModalProps {
   conversationId: string;
@@ -143,9 +144,4 @@ export function TransferModal({ conversationId, isOpen, onOpenChange }: Transfer
       </DialogContent>
     </Dialog>
   );
-}
-
-// Para usar o cn no componente
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
 }
