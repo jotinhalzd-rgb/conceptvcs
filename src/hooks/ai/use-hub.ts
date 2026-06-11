@@ -31,7 +31,7 @@ export const useHub = () => {
           *,
           target_org:hub_profiles!hub_connections_target_org_id_fkey(*)
         `)
-        .eq("source_org_id", orgId);
+        .eq("source_org_id", orgId!);
       
       if (error) throw error;
       return data;
