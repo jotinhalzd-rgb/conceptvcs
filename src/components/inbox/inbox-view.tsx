@@ -110,15 +110,15 @@ const InboxContent = () => {
       lastMsg: "Ainda não recebi o boleto.", 
       time: "2h", 
       sentiment: "neutral", 
-      urgency: "Alta",
       unread: 1, 
       channel: "whatsapp",
       queue: "Financeiro",
       agent: "IA Copilot",
+      urgency: "Alta"
     },
   ];
 
-  const currentChat = chats.find(c => c.id === selectedChat);
+  const currentChat = chats.find(c => c.id === selectedChat) || chats[0];
   const { analysis, isAnalyzing } = useAICopilot(currentChat?.lastMsg || "");
 
   return (
