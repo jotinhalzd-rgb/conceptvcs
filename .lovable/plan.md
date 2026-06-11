@@ -1,74 +1,75 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 10 (BILLING, SUBSCRIPTIONS & WHITE LABEL)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 11 (MARKETPLACE & ECOSYSTEM)
 
-Este plano detalha a transformação do ONECONTACT OS em uma plataforma SaaS comercialmente viável, escalável e multi-marca.
+Este plano detalha a abertura da plataforma para integrações externas, transformando o ONECONTACT OS em um hub central de dados e operações empresariais.
 
 ---
 
-## 1. ARQUITETURA FINANCEIRA E SUBSCRIPTIONS
+## 1. ARQUITETURA DE INTEGRAÇÕES (DATA HUB)
 
-Implementaremos uma camada de gestão de planos e assinaturas que controla o acesso a recursos baseado no nível de contrato.
+Implementaremos uma camada de abstração que permite ao sistema processar eventos de qualquer fonte externa (Shopify, ERPs, etc.) de forma padronizada.
 
 ### Novas Entidades de Dados
-- **`subscription_plans`**: `name`, `price`, `interval` (monthly/yearly), `features` (JSON com limites: max_users, max_messages, max_channels, ai_enabled).
-- **`subscriptions`**: `company_id` (FK), `plan_id` (FK), `status` (trial, active, past_due, canceled), `current_period_end`, `trial_ends_at`.
-- **`invoices`**: `subscription_id`, `amount`, `status` (paid, pending, failed), `pdf_url`, `billing_reason`.
-- **`usage_logs`**: Rastreamento de consumo em tempo real para controle de limites (mensagens enviadas, minutos de voz).
+- **`integration_apps`**: Catálogo de aplicativos disponíveis (Nome, Categoria, Logo, Descrição).
+- **`connected_integrations`**: Registro de conexões por empresa (Status, Credenciais Criptografadas, Configurações).
+- **`integration_events`**: Barramento de eventos central (ex: `order_created`, `payment_paid`) que alimenta o Customer 360 e o CRM.
+- **`api_keys`**: Gestão de tokens de acesso para a API pública do OneContact.
+- **`webhook_subscriptions`**: Configurações de webhooks de saída (notificar sistemas externos sobre eventos no OneContact).
 
 ---
 
-## 2. WHITE LABEL E MULTI-TENANCY CORE
+## 2. MARKETPLACE & CENTRAL DE INTEGRAÇÕES (UI)
 
-O sistema será preparado para assumir a identidade visual de parceiros ou grandes empresas.
+Uma nova área de alto nível para descoberta e gestão de conectores.
 
-### Extensão: `companies` / `tenant_configs`
-- **Branding:** `logo_url`, `primary_color`, `custom_domain`, `company_name`.
-- **Login:** Customização da tela de autenticação baseada no host da requisição.
-
----
-
-## 3. ÁREA DO PARCEIRO E COMISSÕES
-
-Módulo para revendedores e consultores gerenciarem sua carteira.
-
-- **Partner Hub:** Dashboard para parceiros visualizarem suas empresas cadastradas e faturamento total.
-- **`commissions_log`**: Registro de valores devidos a parceiros baseado em cada pagamento aprovado (recorrência).
+- **Marketplace Grid:** Visual estilo HubSpot/Shopify App Store, dividido por categorias (ERP, E-commerce, Marketing).
+- **Configuração de Conector:** Tela passo-a-passo para cada integração (ex: Colar API Key da Omie ou Token do Shopify).
+- **Dashboard de Saúde:** Monitoramento de logs de sincronização e volume de dados por conector.
 
 ---
 
-## 4. EXECUTIVE FINANCIAL DASHBOARD (CEO MASTER)
+## 3. DEVELOPER CENTER (PLATAFORMA ABERTA)
 
-Visibilidade total da saúde financeira da plataforma.
+Área dedicada para TI e desenvolvedores terceiros.
 
-- **Metrics:** MRR (Monthly Recurring Revenue), ARR, Churn Rate, LTV (Lifetime Value).
-- **Billing Health Score:** Identificação de inadimplência e empresas prontas para upgrade baseado em uso (Upsell Signals).
+- **API Management:** Geração e revogação de chaves de API com controle de scopes.
+- **Webhook Center:** Painel para cadastrar URLs de destino e testar payloads de saída.
+- **Logs do Desenvolvedor:** Histórico detalhado de requisições à API para depuração.
+
+---
+
+## 4. MOTOR DE SINCRONIZAÇÃO (INTEGRATION ENGINE)
+
+- **Event Bus:** Toda entrada externa gera um evento no barramento, que é processado e distribuído para:
+  - **Timeline do Customer 360:** "Pedido #123 realizado na Shopify".
+  - **CRM:** Criação ou atualização automática de `Deals`.
+  - **Business AI:** Recálculo de previsão de receita e health scores.
 
 ---
 
 ## 5. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
 
-**Passo 1: Billing Schema & Security**  
-Criação das tabelas de planos, faturas e auditoria financeira.
+**Passo 1: Marketplace & Ecosystem Schema**  
+Criação das tabelas de aplicativos, conexões, chaves de API e barramento de eventos.
 
-**Passo 2: Subscription Management UI**  
-Desenvolvimento da tela de "Assinatura e Planos" dentro das configurações da empresa.
+**Passo 2: Marketplace UI**  
+Desenvolvimento da galeria de aplicativos e filtros por categoria.
 
-**Passo 3: Módulo White Label Engine**  
-Implementação do hook `useTheme` e `useTenant` que injeta cores e logos baseados na empresa logada.
+**Passo 3: Engine de Conectores**  
+Implementação da lógica base para receber, validar e transformar dados externos (Adapter Pattern).
 
-**Passo 4: Integração Gateway (Abstração)**  
-Criação do `PaymentService` preparado para Stripe/Asaas, tratando webhooks de pagamento.
+**Passo 4: Developer Center UI**  
+Construção da área de gestão de API Keys e Webhooks.
 
-**Passo 5: Partner & Commission Hub**  
-Interface para parceiros e automação de cálculo de comissões.
+**Passo 5: Integração com Customer 360 & CRM**  
+Garantir que eventos externos alimentem proativamente a timeline do cliente e o funil de vendas.
 
 ---
 
-## RISCOS E CUSTOS ESTIMADOS
-- **Custo Gateway:** ~3% a 5% por transação.
-- **Infraestrutura:** Aumento marginal de processamento para workers de cobrança.
-- **Risco:** Bloqueios indevidos por erro de processamento de webhook (mitigado com logs extensivos).
+**ESTRATÉGIA DE SEGURANÇA**
+- **Criptografia:** Credenciais de terceiros armazenadas com criptografia em repouso.
+- **Rate Limiting:** Proteção da API pública contra abusos.
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para transformar o ONECONTACT OS em uma potência comercial automatizada.
+Aguardando seu "sim" para transformar o ONECONTACT OS em um ecossistema aberto e conectado.

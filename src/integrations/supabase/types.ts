@@ -182,6 +182,50 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          scopes: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          scopes?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          scopes?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -717,6 +761,60 @@ export type Database = {
           },
         ]
       }
+      connected_integrations: {
+        Row: {
+          app_id: string
+          config: Json | null
+          created_at: string | null
+          credentials: Json | null
+          error_log: string | null
+          id: string
+          last_sync_at: string | null
+          organization_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          app_id: string
+          config?: Json | null
+          created_at?: string | null
+          credentials?: Json | null
+          error_log?: string | null
+          id?: string
+          last_sync_at?: string | null
+          organization_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          app_id?: string
+          config?: Json | null
+          created_at?: string | null
+          credentials?: Json | null
+          error_log?: string | null
+          id?: string
+          last_sync_at?: string | null
+          organization_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connected_integrations_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "integration_apps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connected_integrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           created_at: string | null
@@ -1237,6 +1335,97 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "executive_insights_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_apps: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          metadata: Json | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          metadata?: Json | null
+          name: string
+          slug: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          metadata?: Json | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      integration_events: {
+        Row: {
+          contact_id: string | null
+          created_at: string | null
+          event_type: string
+          id: string
+          integration_id: string | null
+          organization_id: string
+          payload: Json
+          processed_at: string | null
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          integration_id?: string | null
+          organization_id: string
+          payload: Json
+          processed_at?: string | null
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          integration_id?: string | null
+          organization_id?: string
+          payload?: Json
+          processed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_events_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "connected_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_events_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2059,6 +2248,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "voice_extensions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_subscriptions: {
+        Row: {
+          created_at: string | null
+          events: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          secret: string
+          target_url: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          events?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          secret: string
+          target_url: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          events?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          secret?: string
+          target_url?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_subscriptions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
