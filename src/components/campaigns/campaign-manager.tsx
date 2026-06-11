@@ -186,6 +186,7 @@ export const CampaignManager = () => {
           </table>
         </div>
       </div>
+      </div>
     </div>
   );
 };
