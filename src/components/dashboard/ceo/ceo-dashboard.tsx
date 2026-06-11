@@ -50,6 +50,16 @@ export const CEODashboard = () => {
         </div>
 
         <AnimatePresence mode="wait">
+          <TabsContent value="advisor" className="m-0 focus-visible:outline-none">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <CEOAdvisorView />
+            </motion.div>
+          </TabsContent>
+
           <TabsContent value="intelligence" className="m-0 focus-visible:outline-none">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
