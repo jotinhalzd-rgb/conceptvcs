@@ -69,7 +69,7 @@ export const SmartFeed = () => {
                   </h4>
                   <span className="text-[9px] font-bold text-slate-600 flex items-center gap-1.5 tabular-nums">
                     <Clock className="w-3 h-3" />
-                    {new Date(insight.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(insight.created_at || 0).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed mb-4">
