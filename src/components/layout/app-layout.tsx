@@ -52,6 +52,7 @@ export function AppLayout() {
   const isCustomers = location.startsWith("/customers");
   const isQueues = location.startsWith("/queues");
   const isCRM = location.startsWith("/crm");
+  const isHub = location.startsWith("/dashboard/hub");
 
 
   const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
@@ -73,7 +74,7 @@ export function AppLayout() {
     { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
     { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
     { icon: CreditCard, label: "Assinatura e Billing", href: "/settings/billing", group: "Configurações" },
-    { icon: Globe, label: "Marketplace", href: "/settings/marketplace", group: "Ecossistema" },
+    { icon: Globe, label: "Business Hub", href: "/dashboard/hub", group: "Ecossistema" },
     { icon: Sparkles, label: "AI Studio 3.0", href: "/dashboard/ai-studio", group: "Inteligência" },
 
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
@@ -306,7 +307,7 @@ export function AppLayout() {
         {/* Topbar & Content */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#020617]">
           {/* Header */}
-          {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && (
+          {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub && (
             <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
                 <div className="relative max-w-md w-full group hidden md:block">
@@ -341,10 +342,10 @@ export function AppLayout() {
           {/* Main Content Area */}
           <main className={cn(
             "flex-1 overflow-hidden relative",
-            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && "p-8 overflow-y-auto no-scrollbar"
+            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "p-8 overflow-y-auto no-scrollbar"
           )}>
             {/* Background Gradient Spotlights */}
-            {(!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && (
+            {(!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && (
 
               <>
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
@@ -354,7 +355,7 @@ export function AppLayout() {
             
             <div className={cn(
               "relative z-10 h-full",
-              (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && "max-w-7xl mx-auto"
+              (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "max-w-7xl mx-auto"
             )}>
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />

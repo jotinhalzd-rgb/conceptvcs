@@ -1557,6 +1557,163 @@ export type Database = {
           },
         ]
       }
+      hub_connections: {
+        Row: {
+          commission_rate: number | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          relationship_type: string
+          source_org_id: string
+          status: string | null
+          target_org_id: string
+          updated_at: string
+        }
+        Insert: {
+          commission_rate?: number | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          relationship_type: string
+          source_org_id: string
+          status?: string | null
+          target_org_id: string
+          updated_at?: string
+        }
+        Update: {
+          commission_rate?: number | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          relationship_type?: string
+          source_org_id?: string
+          status?: string | null
+          target_org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_connections_source_org_id_fkey"
+            columns: ["source_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hub_connections_target_org_id_fkey"
+            columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hub_marketplace_assets: {
+        Row: {
+          asset_type: string
+          content: Json
+          created_at: string
+          description: string | null
+          download_count: number | null
+          id: string
+          is_public: boolean | null
+          name: string
+          organization_id: string
+          price: number | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          asset_type: string
+          content: Json
+          created_at?: string
+          description?: string | null
+          download_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          organization_id: string
+          price?: number | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          asset_type?: string
+          content?: Json
+          created_at?: string
+          description?: string | null
+          download_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          organization_id?: string
+          price?: number | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_marketplace_assets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hub_profiles: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          industry: string | null
+          is_public: boolean | null
+          metadata: Json | null
+          reputation_score: number | null
+          specialties: string[] | null
+          updated_at: string
+          verified_badge: boolean | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id: string
+          industry?: string | null
+          is_public?: boolean | null
+          metadata?: Json | null
+          reputation_score?: number | null
+          specialties?: string[] | null
+          updated_at?: string
+          verified_badge?: boolean | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          industry?: string | null
+          is_public?: boolean | null
+          metadata?: Json | null
+          reputation_score?: number | null
+          specialties?: string[] | null
+          updated_at?: string
+          verified_badge?: boolean | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_apps: {
         Row: {
           category: string

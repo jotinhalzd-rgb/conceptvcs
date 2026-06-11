@@ -21,6 +21,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
 import { Route as SettingsDeveloperRouteImport } from './routes/settings.developer'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
+import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 
@@ -84,6 +85,11 @@ const SettingsBillingRoute = SettingsBillingRouteImport.update({
   path: '/settings/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardHubRoute = DashboardHubRouteImport.update({
+  id: '/hub',
+  path: '/hub',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAiStudioRoute = DashboardAiStudioRouteImport.update({
   id: '/ai-studio',
   path: '/ai-studio',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/queues': typeof QueuesRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/queues': typeof QueuesRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/queues': typeof QueuesRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/admin/channels'
     | '/dashboard/ai-studio'
+    | '/dashboard/hub'
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/admin/channels'
     | '/dashboard/ai-studio'
+    | '/dashboard/hub'
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/admin/channels'
     | '/dashboard/ai-studio'
+    | '/dashboard/hub'
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
@@ -294,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsBillingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/hub': {
+      id: '/dashboard/hub'
+      path: '/hub'
+      fullPath: '/dashboard/hub'
+      preLoaderRoute: typeof DashboardHubRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/ai-studio': {
       id: '/dashboard/ai-studio'
       path: '/ai-studio'
@@ -313,11 +332,13 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteChildren {
   DashboardAiStudioRoute: typeof DashboardAiStudioRoute
+  DashboardHubRoute: typeof DashboardHubRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAiStudioRoute: DashboardAiStudioRoute,
+  DashboardHubRoute: DashboardHubRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
