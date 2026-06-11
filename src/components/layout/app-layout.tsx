@@ -34,7 +34,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
   { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
   { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
-  { icon: Search, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
+  { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
   { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
   { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
   { icon: Rocket, label: "Gamificação", href: "/gamification", group: "Operação" },
