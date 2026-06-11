@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_knowledge_base: {
+        Row: {
+          agent_id: string
+          knowledge_id: string
+        }
+        Insert: {
+          agent_id: string
+          knowledge_id: string
+        }
+        Update: {
+          agent_id?: string
+          knowledge_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_knowledge_base_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_knowledge_base_knowledge_id_fkey"
+            columns: ["knowledge_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_performance: {
         Row: {
           agent_id: string
@@ -49,6 +79,155 @@ export type Database = {
           total_chats?: number | null
         }
         Relationships: []
+      }
+      ai_agent_actions: {
+        Row: {
+          action_type: string
+          agent_id: string
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          input_params: Json | null
+          output_result: Json | null
+          performed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_id: string
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          input_params?: Json | null
+          output_result?: Json | null
+          performed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          input_params?: Json | null
+          output_result?: Json | null
+          performed_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_actions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_actions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_memory: {
+        Row: {
+          agent_id: string
+          contact_id: string
+          created_at: string | null
+          id: string
+          last_accessed_at: string | null
+          memory_key: string
+          memory_value: Json
+        }
+        Insert: {
+          agent_id: string
+          contact_id: string
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          memory_key: string
+          memory_value: Json
+        }
+        Update: {
+          agent_id?: string
+          contact_id?: string
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          memory_key?: string
+          memory_value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_memory_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_memory_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agents: {
+        Row: {
+          autonomy_level: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          organization_id: string
+          role_type: string
+          system_prompt: string | null
+          tone_of_voice: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          autonomy_level?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          organization_id: string
+          role_type: string
+          system_prompt?: string | null
+          tone_of_voice?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          autonomy_level?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          organization_id?: string
+          role_type?: string
+          system_prompt?: string | null
+          tone_of_voice?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_analytical_logs: {
         Row: {

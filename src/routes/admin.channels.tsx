@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 
 const LazyChannels = lazy(() => import("@/components/channels/channels-view").then(m => ({ default: m.ChannelsView })));
 
-export const Route = createFileRoute("/admin/channels" as any)({
+export const Route = createFileRoute("/admin/channels")({
   component: ChannelsPage,
 });
 

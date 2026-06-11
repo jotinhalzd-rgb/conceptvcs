@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 
 const LazyDeveloperCenter = lazy(() => import("@/components/marketplace/developer-center").then(m => ({ default: m.DeveloperCenter })));
 
-export const Route = createFileRoute("/settings/developer" as any)({
+export const Route = createFileRoute("/settings/developer")({
   component: DeveloperCenterPage,
 });
 

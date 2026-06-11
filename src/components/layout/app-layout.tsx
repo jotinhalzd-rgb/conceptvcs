@@ -22,8 +22,10 @@ import {
   Briefcase,
   Ticket,
   Rocket,
-  CreditCard
+  CreditCard,
+  Sparkles
 } from "lucide-react";
+
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -72,6 +74,8 @@ export function AppLayout() {
     { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
     { icon: CreditCard, label: "Assinatura e Billing", href: "/settings/billing", group: "Configurações" },
     { icon: Globe, label: "Marketplace", href: "/settings/marketplace", group: "Ecossistema" },
+    { icon: Sparkles, label: "AI Studio 3.0", href: "/dashboard/ai-studio", group: "Inteligência" },
+
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
     { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
 

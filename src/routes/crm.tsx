@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 
 const LazyCRM = lazy(() => import("@/components/crm/crm-view").then(m => ({ default: m.CRMView })));
 
-export const Route = createFileRoute("/crm" as any)({
+export const Route = createFileRoute('/crm')({
   component: CRMPage,
 });
 

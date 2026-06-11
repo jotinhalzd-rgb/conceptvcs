@@ -8,46 +8,42 @@ export interface CopilotInsight {
 }
 
 export const CopilotEngine = {
-  async getInsights(conversationId: string, lastMessage: string): Promise<CopilotInsight[]> {
-    // Simulação de motor de IA enquanto o Gateway real é configurado
-    // Em produção, isso chamaria uma Edge Function que usa OpenAI/Anthropic
-    
+  async getInsights(conversationId: string, lastMessage: string, agentId?: string | null): Promise<CopilotInsight[]> {
     const insights: CopilotInsight[] = [];
 
-    // 1. Detecção de Intenção / Sugestão de Resposta
+    // Se houver um agente selecionado, buscamos o prompt do sistema dele
+    let agentPrompt = "";
+    if (agentId) {
+      const { data: agent } = await supabase
+        .from('ai_agents')
+        .select('system_prompt, role_type')
+        .eq('id', agentId)
+        .single();
+      
+      if (agent) {
+        agentPrompt = agent.system_prompt || "";
+        console.log(`Usando contexto do agente: ${agent.role_type}`);
+      }
+    }
+
+    // Simulação de motor de IA baseado no agente
     if (lastMessage.toLowerCase().includes("preço") || lastMessage.toLowerCase().includes("quanto")) {
       insights.push({
         type: 'reply',
-        content: "Olá! Nossos planos corporativos começam em R$ 499/mês. Gostaria de uma demonstração personalizada das funcionalidades premium?",
+        content: agentId ? `[Agente Especialista] Analisando sua solicitação baseada em nossa política de preços atual...` : "Olá! Nossos planos corporativos começam em R$ 499/mês.",
         confidence: 0.95
       });
-      insights.push({
-        type: 'opportunity',
-        content: "Potencial Lead Qualificado: O cliente demonstrou interesse em precificação.",
-        confidence: 0.8
-      });
     }
 
-    if (lastMessage.toLowerCase().includes("cancelar") || lastMessage.toLowerCase().includes("sair")) {
+    // Ações variam por agente
+    if (agentId) {
       insights.push({
-        type: 'risk',
-        content: "ALERTA DE CHURN: O cliente mencionou cancelamento. Recomenda-se oferecer upgrade gratuito por 30 dias para retenção.",
-        confidence: 0.98
-      });
-      insights.push({
-        type: 'reply',
-        content: "Sinto muito que esteja pensando em nos deixar. Antes de prosseguirmos, eu adoraria entender o que houve e como posso tornar sua experiência melhor.",
-        confidence: 0.9
+        type: 'action',
+        content: `Ação sugerida pelo Especialista Digital: Criar tarefa de acompanhamento`,
+        confidence: 1.0,
+        metadata: { action: 'create_task' }
       });
     }
-
-    // 2. Ação recomendada baseada no contexto
-    insights.push({
-      type: 'action',
-      content: "Atualizar Status: Mover para 'Aguardando Operador'",
-      confidence: 1.0,
-      metadata: { action: 'status_change', target: 'active' }
-    });
 
     return insights;
   },
