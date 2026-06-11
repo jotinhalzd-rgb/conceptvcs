@@ -170,7 +170,9 @@ export function AppLayout() {
                     className="flex-1 min-w-0"
                   >
                     <p className="text-sm font-bold text-white truncate leading-none mb-1">{profile?.full_name || "CEO DEMO"}</p>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">CEO / Founder</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">
+                      {profile?.role === 'ceo_master' ? 'CEO MASTER' : (profile?.role === 'admin' ? 'GESTOR MASTER' : (profile?.role === 'manager' ? 'GERENTE' : 'ATENDENTE'))}
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
