@@ -13,8 +13,9 @@ import {
   X,
   Maximize2,
   Minimize2,
-  Dialpad
+  Grid3X3
 } from 'lucide-react';
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
