@@ -78,18 +78,27 @@ export function Dashboard() {
       className="space-y-8"
     >
       {/* Welcome Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">Executivo Dashboard</h1>
-          <p className="text-slate-400 font-medium">Bem-vindo de volta, {profile?.full_name || "Líder"}. Aqui está o resumo da sua operação hoje.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl flex items-center gap-2">
-            <Clock className="w-4 h-4 text-indigo-400" />
-            <span className="text-sm font-bold text-slate-300">Atualizado agora</span>
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-1">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Sistema Operacional Ativo</span>
           </div>
-          <Button className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/20 font-bold px-6">
-            Exportar Relatório
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Executivo <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Dashboard</span>
+          </h1>
+          <p className="text-slate-400 font-medium max-w-xl">
+            Olá, {profile?.full_name || "Líder"}. Sua operação está rodando com <span className="text-emerald-400 font-bold">98% de eficiência</span> hoje.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-2xl flex items-center gap-2.5 backdrop-blur-md shadow-sm">
+            <Clock className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-slate-300">Tempo Real</span>
+          </div>
+          <Button className="h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-xl shadow-indigo-600/20 font-bold px-8 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Exportar BI
           </Button>
         </div>
       </header>
