@@ -342,10 +342,10 @@ export function AppLayout() {
           {/* Main Content Area */}
           <main className={cn(
             "flex-1 overflow-hidden relative",
-            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && "p-8 overflow-y-auto no-scrollbar"
+            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "p-8 overflow-y-auto no-scrollbar"
           )}>
             {/* Background Gradient Spotlights */}
-            {(!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && (
+            {(!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && (
 
               <>
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
