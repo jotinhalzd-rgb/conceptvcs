@@ -343,6 +343,44 @@ export type Database = {
           },
         ]
       }
+      conversation_audit: {
+        Row: {
+          action_type: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          new_state: Json | null
+          performed_by: string | null
+          previous_state: Json | null
+        }
+        Insert: {
+          action_type: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          new_state?: Json | null
+          performed_by?: string | null
+          previous_state?: Json | null
+        }
+        Update: {
+          action_type?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          new_state?: Json | null
+          performed_by?: string | null
+          previous_state?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_audit_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_tags: {
         Row: {
           conversation_id: string
@@ -375,58 +413,79 @@ export type Database = {
       }
       conversations: {
         Row: {
+          agent_id: string | null
           ai_intent: string | null
           ai_sentiment: string | null
           ai_summary: string | null
           ai_urgency_score: number | null
           channel_id: string
           churn_risk_probability: number | null
+          closed_at: string | null
           contact_id: string
           conversion_probability: number | null
           created_at: string | null
+          first_response_at: string | null
           id: string
           last_message_at: string | null
+          last_message_preview: string | null
           organization_id: string
           priority: string | null
           queue_id: string | null
+          sla_status: string | null
           status: string | null
+          temperature: string | null
           updated_at: string | null
+          waiting_since: string | null
         }
         Insert: {
+          agent_id?: string | null
           ai_intent?: string | null
           ai_sentiment?: string | null
           ai_summary?: string | null
           ai_urgency_score?: number | null
           channel_id: string
           churn_risk_probability?: number | null
+          closed_at?: string | null
           contact_id: string
           conversion_probability?: number | null
           created_at?: string | null
+          first_response_at?: string | null
           id?: string
           last_message_at?: string | null
+          last_message_preview?: string | null
           organization_id: string
           priority?: string | null
           queue_id?: string | null
+          sla_status?: string | null
           status?: string | null
+          temperature?: string | null
           updated_at?: string | null
+          waiting_since?: string | null
         }
         Update: {
+          agent_id?: string | null
           ai_intent?: string | null
           ai_sentiment?: string | null
           ai_summary?: string | null
           ai_urgency_score?: number | null
           channel_id?: string
           churn_risk_probability?: number | null
+          closed_at?: string | null
           contact_id?: string
           conversion_probability?: number | null
           created_at?: string | null
+          first_response_at?: string | null
           id?: string
           last_message_at?: string | null
+          last_message_preview?: string | null
           organization_id?: string
           priority?: string | null
           queue_id?: string | null
+          sla_status?: string | null
           status?: string | null
+          temperature?: string | null
           updated_at?: string | null
+          waiting_since?: string | null
         }
         Relationships: [
           {
@@ -544,6 +603,38 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_notes: {
+        Row: {
+          author_id: string
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_notes_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -829,6 +920,54 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      routing_rules: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          keyword: string
+          priority_bonus: number | null
+          target_queue_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          keyword: string
+          priority_bonus?: number | null
+          target_queue_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          keyword?: string
+          priority_bonus?: number | null
+          target_queue_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routing_rules_target_queue_id_fkey"
+            columns: ["target_queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       satisfaction_surveys: {
         Row: {
