@@ -19,7 +19,8 @@ import {
   Smile,
   Zap,
   ShieldCheck,
-  Target
+  Target,
+  Loader2
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,10 +28,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAICopilot } from "@/hooks/inbox/use-ai-copilot";
 
 export const InboxView = () => {
   const [selectedChat, setSelectedChat] = useState(1);
   const [showCopilot, setShowCopilot] = useState(true);
+  const [inputMessage, setInputMessage] = useState("");
+  
+  // Exemplo de uso do Hook de Refatoração (Etapa 2)
+  const lastCustomerMessage = "Quero cancelar meu plano imediatamente."; 
+  const { analysis, isAnalyzing } = useAICopilot(lastCustomerMessage);
+
 
   const chats = [
     { id: 1, name: "Roberto Almeida", lastMsg: "Quero cancelar meu plano.", time: "2 min", sentiment: "negative", risk: "high", unread: 2, channel: "whatsapp" },
