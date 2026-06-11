@@ -1,4 +1,5 @@
-import { Link, Outlet } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { 
   LayoutDashboard, 
   Inbox, 
@@ -40,12 +41,20 @@ const navItems = [
 ];
 
 export function AppLayout() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { data: profile } = useProfile();
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/auth" });
+    }
+  }, [user, loading, navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    navigate({ to: "/auth" });
   };
 
   const groups = [...new Set(navItems.map(item => item.group))];
