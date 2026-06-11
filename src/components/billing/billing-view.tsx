@@ -12,11 +12,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { useCurrentSubscription } from "@/hooks/billing/use-billing";
+import { useCurrentSubscription, useUsageMeters } from "@/hooks/billing/use-billing";
 import { cn } from "@/lib/utils";
 
 export const BillingView = () => {
   const { data: currentSub, isLoading } = useCurrentSubscription();
+  const { data: usageMeters } = useUsageMeters();
+
 
   return (
     <GlobalErrorBoundary name="Billing">
