@@ -1292,6 +1292,42 @@ export type Database = {
           },
         ]
       }
+      device_sessions: {
+        Row: {
+          biometrics_enabled: boolean | null
+          created_at: string | null
+          device_model: string | null
+          device_name: string | null
+          id: string
+          is_trusted: boolean | null
+          last_active_at: string | null
+          os_version: string | null
+          user_id: string
+        }
+        Insert: {
+          biometrics_enabled?: boolean | null
+          created_at?: string | null
+          device_model?: string | null
+          device_name?: string | null
+          id?: string
+          is_trusted?: boolean | null
+          last_active_at?: string | null
+          os_version?: string | null
+          user_id: string
+        }
+        Update: {
+          biometrics_enabled?: boolean | null
+          created_at?: string | null
+          device_model?: string | null
+          device_name?: string | null
+          id?: string
+          is_trusted?: boolean | null
+          last_active_at?: string | null
+          os_version?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       executive_insights: {
         Row: {
           created_at: string | null
@@ -1843,6 +1879,39 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string | null
+          device_token: string
+          device_type: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_token: string
+          device_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_token?: string
+          device_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       queues: {
         Row: {
           color: string | null
@@ -2210,6 +2279,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_notification_preferences: {
+        Row: {
+          business_ai_insights: boolean | null
+          crm_deals: boolean | null
+          id: string
+          inbox_messages: boolean | null
+          marketing_campaigns: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sla_alerts: boolean | null
+          system_alerts: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_ai_insights?: boolean | null
+          crm_deals?: boolean | null
+          id?: string
+          inbox_messages?: boolean | null
+          marketing_campaigns?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sla_alerts?: boolean | null
+          system_alerts?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_ai_insights?: boolean | null
+          crm_deals?: boolean | null
+          id?: string
+          inbox_messages?: boolean | null
+          marketing_campaigns?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sla_alerts?: boolean | null
+          system_alerts?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       voice_extensions: {
         Row: {
