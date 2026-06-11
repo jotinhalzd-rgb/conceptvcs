@@ -11,14 +11,17 @@ import {
   User,
   ShieldCheck,
   TrendingUp,
-  Plus,
-  DollarSign
+  Plus, 
+  DollarSign,
+  ArrowRightLeft
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMessages, useInternalNotes } from "@/hooks/inbox/use-messages";
+import { useSendMessage } from "@/hooks/inbox/use-send-message";
+import { TransferModal } from "./transfer-modal";
 import { Badge } from "@/components/ui/badge";
 import { useEffect } from 'react';
 
@@ -41,8 +44,31 @@ export const ChatView = ({
 }: ChatViewProps) => {
   const [messageType, setMessageType] = useState<'public' | 'internal'>('public');
   const [inputMessage, setInputMessage] = useState("");
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const { data: messages } = useMessages(chat?.id);
   const { data: notes } = useInternalNotes(chat?.id);
+  const sendMessageMutation = useSendMessage();
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim() || sendMessageMutation.isPending) return;
+
+    sendMessageMutation.mutate({
+      conversationId: chat.id,
+      body: inputMessage,
+      type: messageType
+    }, {
+      onSuccess: () => {
+        setInputMessage("");
+      }
+    });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   useEffect(() => {
     if (appliedReply) {
@@ -103,6 +129,14 @@ export const ChatView = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl"
+            onClick={() => setIsTransferModalOpen(true)}
+          >
+            <ArrowRightLeft className="w-4 h-4"/>
+          </Button>
           <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl">
             <Clock className="w-4 h-4"/>
           </Button>
@@ -202,6 +236,8 @@ export const ChatView = ({
             placeholder={messageType === 'internal' ? "Escreva uma nota interna (cliente não visualiza)..." : "Pressione Alt + S para sugestões da IA..."}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            disabled={sendMessageMutation.isPending}
           />
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
@@ -210,14 +246,28 @@ export const ChatView = ({
             <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
               <Smile className="w-4 h-4" />
             </Button>
-            <Button className={cn(
-              "h-10 w-10 rounded-xl p-0 transition-all shadow-lg active:scale-95",
-              messageType === 'internal' ? "bg-amber-600 hover:bg-amber-500 shadow-amber-600/20" : "bg-[#8B5CF6] hover:bg-[#A78BFA] shadow-[#8B5CF6]/20"
-            )}>
-              <Send className="w-4 h-4 text-white"/>
+            <Button 
+              onClick={handleSendMessage}
+              disabled={sendMessageMutation.isPending || !inputMessage.trim()}
+              className={cn(
+                "h-10 w-10 rounded-xl p-0 transition-all shadow-lg active:scale-95",
+                messageType === 'internal' ? "bg-amber-600 hover:bg-amber-500 shadow-amber-600/20" : "bg-[#8B5CF6] hover:bg-[#A78BFA] shadow-[#8B5CF6]/20"
+              )}
+            >
+              {sendMessageMutation.isPending ? (
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Send className="w-4 h-4 text-white"/>
+              )}
             </Button>
-          </div>
-        </div>
+      </div>
+      
+      <TransferModal 
+        conversationId={chat.id} 
+        isOpen={isTransferModalOpen} 
+        onOpenChange={setIsTransferModalOpen} 
+      />
+    </div>
       </div>
     </div>
   );

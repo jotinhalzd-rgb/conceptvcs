@@ -29,10 +29,16 @@ export const InboxView = () => {
 
 const InboxContent = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showCustomer360, setShowCustomer360] = useState(false);
   const [showAICopilot, setShowAICopilot] = useState(true);
   const [appliedReply, setAppliedReply] = useState<string | null>(null);
   const { data: conversations, isLoading } = useConversations();
+
+  const filteredConversations = conversations?.filter(c => 
+    (c.contacts as any)?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.last_message_preview?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   
   // Detecção de tamanho de tela para responsividade
@@ -90,25 +96,33 @@ const InboxContent = () => {
 
       {/* 1. Lista de Conversas (360px) */}
       <div className="flex flex-col h-full border-r border-[#1E293B] bg-[#0F172A]/20">
-        <div className="p-4 h-16 border-b border-[#1E293B] flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-                <h1 className="text-xs font-black text-[#E2E8F0] uppercase tracking-[0.2em]">Universal Inbox</h1>
-                <Badge className="bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20 text-[9px] px-1.5 py-0">
-                  {conversations?.length || 0}
-                </Badge>
+        <div className="p-4 border-b border-[#1E293B] flex flex-col gap-3 shrink-0">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <h1 className="text-xs font-black text-[#E2E8F0] uppercase tracking-[0.2em]">Universal Inbox</h1>
+                    <Badge className="bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20 text-[9px] px-1.5 py-0">
+                      {filteredConversations?.length || 0}
+                    </Badge>
+                </div>
+                <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-[#94A3B8] hover:text-white transition-colors">
+                        <Filter className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
-            <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-[#94A3B8] hover:text-white transition-colors">
-                    <Filter className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-[#94A3B8] hover:text-white transition-colors">
-                    <Search className="w-4 h-4" />
-                </Button>
+            <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94A3B8] group-focus-within:text-[#8B5CF6] transition-colors" />
+                <input 
+                  placeholder="Pesquisar conversas..." 
+                  className="w-full bg-[#0F172A] border border-[#1E293B] rounded-xl py-2 pl-9 pr-3 text-xs text-[#E2E8F0] focus:outline-none focus:border-[#8B5CF6]/30 transition-all placeholder:text-slate-600"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
             </div>
         </div>
         
         <ChatList 
-          conversations={conversations || []} 
+          conversations={filteredConversations || []} 
           selectedId={selectedChatId} 
           onSelect={setSelectedChatId} 
         />
