@@ -69,14 +69,16 @@ export function useProfile() {
     queryFn: async () => {
       if (!user) return null;
       
-      // If bypass user, return mock profile
-      if (user.id === "bypass-ceo-id") {
+      // If bypass user, return mock profile with appropriate role
+      if (user.id.startsWith("bypass-")) {
+        const role = user.id.replace("bypass-", "").replace("-id", "");
         return {
-          id: "bypass-ceo-id",
-          full_name: "CEO Demo (Bypass)",
-          role: "ceo",
-          organizations: {
-            name: "ONECONTACT DEMO COMPANY"
+          id: user.id,
+          full_name: user.user_metadata?.full_name || "Demo User",
+          role: role,
+          company_id: "00000000-0000-0000-0000-000000000000",
+          companies: {
+            name: "ONECONTACT DEMO CORP"
           }
         };
       }
