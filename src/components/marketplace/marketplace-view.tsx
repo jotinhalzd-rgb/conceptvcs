@@ -56,7 +56,7 @@ export const MarketplaceView = () => {
                 <Box className="w-4 h-4 text-emerald-400" />
                 <div>
                   <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Conectados</p>
-                  <p className="text-sm font-black text-white leading-none">{connected?.length || 0}</p>
+                  <p className="text-sm font-black text-white leading-none">{installs?.length || 0}</p>
                 </div>
               </div>
               <div className="bg-white/[0.02] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3 transition-all hover:bg-white/[0.04]">
@@ -100,7 +100,7 @@ export const MarketplaceView = () => {
                             activeCategory === cat ? "bg-indigo-600 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"
                         )}
                     >
-                        {cat === 'all' ? 'Todos' : cat}
+                        {cat === 'all' ? 'Todos' : cat.toUpperCase()}
                     </Button>
                 ))}
             </div>
@@ -115,7 +115,7 @@ export const MarketplaceView = () => {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-slate-600">
-              Mostrando {filteredApps?.length || 0} de {apps?.length || 0} aplicativos
+              Mostrando {filteredAssets?.length || 0} de {assets?.length || 0} aplicativos
             </span>
           </div>
         </div>
@@ -128,11 +128,11 @@ export const MarketplaceView = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-              {filteredApps?.map((app) => (
+              {filteredAssets?.map((asset: any) => (
                 <AppCard 
-                  key={app.id} 
-                  app={app} 
-                  isConnected={connected?.some(c => c.app_id === app.id) || false} 
+                  key={asset.id} 
+                  app={asset} 
+                  isConnected={installs?.some((c: any) => c.asset_id === asset.id) || false} 
                   onConnect={(id) => console.log("Connect to", id)}
                 />
               ))}
