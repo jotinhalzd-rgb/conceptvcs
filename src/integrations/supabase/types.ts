@@ -1866,6 +1866,185 @@ export type Database = {
           },
         ]
       }
+      oil_entity_graph: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          relationship_type: string
+          source_id: string
+          source_type: string
+          strength: number | null
+          target_id: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          relationship_type: string
+          source_id: string
+          source_type: string
+          strength?: number | null
+          target_id: string
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          relationship_type?: string
+          source_id?: string
+          source_type?: string
+          strength?: number | null
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_entity_graph_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oil_events: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          event_type: string
+          id: string
+          importance_score: number | null
+          module: string
+          organization_id: string
+          payload: Json | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          event_type: string
+          id?: string
+          importance_score?: number | null
+          module: string
+          organization_id: string
+          payload?: Json | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          event_type?: string
+          id?: string
+          importance_score?: number | null
+          module?: string
+          organization_id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oil_health_scores: {
+        Row: {
+          calculated_at: string
+          category: string
+          id: string
+          metrics_breakdown: Json | null
+          organization_id: string
+          score: number
+          trend: string | null
+        }
+        Insert: {
+          calculated_at?: string
+          category: string
+          id?: string
+          metrics_breakdown?: Json | null
+          organization_id: string
+          score: number
+          trend?: string | null
+        }
+        Update: {
+          calculated_at?: string
+          category?: string
+          id?: string
+          metrics_breakdown?: Json | null
+          organization_id?: string
+          score?: number
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_health_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oil_recommendations: {
+        Row: {
+          action_url: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          impact_estimate: Json | null
+          metadata: Json | null
+          organization_id: string
+          priority: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          action_url?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          impact_estimate?: Json | null
+          metadata?: Json | null
+          organization_id: string
+          priority?: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          impact_estimate?: Json | null
+          metadata?: Json | null
+          organization_id?: string
+          priority?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_recommendations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       omnichannel_events: {
         Row: {
           created_at: string | null
