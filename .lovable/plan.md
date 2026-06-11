@@ -1,68 +1,72 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 6 (OMNICHANNEL REAL)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 7 (GROWTH & AUTOMATION HUB)
 
-Este plano detalha a arquitetura para transformar o sistema em uma central de comunicação escalável, capaz de processar milhões de mensagens de diversos canais de forma unificada.
-
----
-
-## 1. ARQUITETURA DE CANAIS (ABSTRAÇÃO)
-
-Para evitar dependência de fornecedores únicos (vendor lock-in), implementaremos uma **Omni-Gateway Layer**.
-
-- **Provider Adapter Pattern:** O sistema falará com uma interface genérica. Plugins específicos (Meta, 360Dialog, Evolution API, etc.) traduzirão as mensagens para o formato OneContact.
-- **Identidade Única (Unified Contact):** Busca automática por CPF/Email/Telefone em todos os canais para vincular ao mesmo `contact_id`.
-- **Canal Padrão:** Toda conversa terá um `channel_type` (whatsapp, instagram, email, telegram, webchat) e um `provider_id`.
+Este plano detalha a construção da máquina de relacionamento e automação do ONECONTACT OS, transformando disparos isolados em jornadas inteligentes de cliente.
 
 ---
 
-## 2. ESTRATÉGIA DE SINCRONIZAÇÃO E ESCALABILIDADE
+## 1. ARQUITETURA DE DADOS E ENTIDADES
 
-- **Webhooks de Alta Performance:** Utilização de Edge Functions (Deno) para receber webhooks externos. Elas apenas validam e jogam a mensagem em uma fila de processamento (Supabase/PGMQ) para garantir resposta < 200ms aos provedores.
-- **Worker de Distribuição:** Um worker processará a fila, aplicará as `routing_rules` (Motor de Distribuição) e notificará o front-end via Realtime.
-- **Sincronização de E-mail:** Implementação via IMAP/SMTP com workers de polling (ou SendGrid/Resend Inbound) para transformar e-mails em threads de conversa na Inbox.
+Expandiremos o schema para suportar automações complexas e rastreamento de ROI.
+
+### Extensão: `campaigns` (Campanhas)
+- **Campos:** `type` (promo, post-sales, retention, etc), `segmentation_rules` (JSON), `ab_test_config` (JSON), `budget`, `expected_roi`.
+- **Status:** `draft`, `scheduled`, `sending`, `completed`, `paused`, `canceled`.
+
+### Nova Entidade: `automation_workflows` (Jornadas)
+- **Campos:** `name`, `trigger_event` (ex: purchase_completed), `nodes` (JSON - estrutura visual), `is_active`.
+- **Nodos:** `trigger`, `delay`, `condition` (if/else), `action` (send_msg, create_deal, tag_contact).
+
+### Nova Entidade: `campaign_analytics` (Performance)
+- **Métricas:** `sent`, `delivered`, `read`, `replied`, `converted`, `revenue_generated`, `roi`.
 
 ---
 
-## 3. MOTOR DE DISTRIBUIÇÃO E TRANSBORDO (ENGINE)
+## 2. JORNADAS VISUAIS (WORKFLOW BUILDER)
 
-- **Distribuição Inteligente:** Regras baseadas em carga de trabalho (quem tem menos chats ativos), horário de funcionamento e palavras-chave.
-- **Lógica de Transbordo:** 
-  - Se `waiting_since` > 5 min -> Reatribuir para Fila de Contingência.
-  - Se `queue_capacity` atingida -> Notificar gestor via IA e sugerir transbordo entre departamentos.
+Implementaremos uma interface inspirada em ferramentas de alto nível (ActiveCampaign/HubSpot).
+
+- **Visual Interface:** Canvas infinito para arrastar e soltar elementos de lógica.
+- **Integração Nativa:** Automações que podem criar `Deals` no CRM, mudar `Lead Score` e enviar mensagens em qualquer canal da Fase 6.
+- **Workflow Engine:** Worker em segundo plano que escuta `omnichannel_events` e processa as condições de cada jornada ativa.
 
 ---
 
-## 4. CUSTOS ESTIMADOS (INFRAESTRUTURA)
+## 3. IA DE CAMPANHAS (CAMPAIGN AI)
 
-- **Mensageria (Provedores):** De acordo com a tabela da Meta/Provedor (~$0.01 por conversa 24h).
-- **Processamento:** Baixo impacto inicial em Edge Functions.
-- **Escalabilidade de Banco:** Supabase suporta milhões de registros; utilizaremos particionamento de tabela para `messages` se o volume ultrapassar 10M/mês.
+A inteligência artificial atuará como estrategista de crescimento.
+
+- **Copy Generator:** Geração de variações de texto focadas em conversão (A/B testing nativo).
+- **Predictive Sending:** Sugestão do melhor canal e horário baseado no histórico de engajamento do cliente no Customer 360.
+- **Churn Recovery:** Identificação automática de clientes inativos e sugestão de campanhas de reativação personalizadas.
+
+---
+
+## 4. ESTRATÉGIA DE CUSTOS E ESCALA
+
+- **Caching:** Cache agressivo de regras de segmentação para disparos em massa.
+- **Rate Limiting:** Controle inteligente por canal para evitar banimentos (especialmente WhatsApp).
+- **Processamento:** Uso intensivo de filas de mensageria (Supabase/PGMQ) para processar milhões de eventos sem travar a interface.
 
 ---
 
 ## 5. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
 
-**Passo 1: Omni-Gateway Setup**  
-Criação da estrutura de tabelas `channel_configs` e `external_identifiers` para mapear IDs de diferentes redes ao mesmo cliente.
+**Passo 1: Schema & Automation Engine Core**  
+Criação das tabelas de workflows e logs de execução de jornadas.
 
-**Passo 2: Central de Canais UI**  
-Desenvolvimento da tela de gestão onde o gestor conecta e monitora o status (Online/Offline) de cada canal.
+**Passo 2: Workflow Builder UI**  
+Desenvolvimento da interface visual de construção de automações (Nodes & Canvas).
 
-**Passo 3: Módulo de E-mail Corporativo**  
-Integração de recebimento e envio de e-mails diretamente pela timeline da Inbox.
+**Passo 3: Módulo de Campanhas v2**  
+Refatoração da tela de campanhas com segmentação avançada e suporte a Teste A/B.
 
-**Passo 4: Webchat White Label**  
-Criação do script injetável para sites que abre o canal de chat direto do OneContact.
+**Passo 4: Dashboards de Growth**  
+Visualização de funil de conversão de campanhas e cálculo automático de ROI.
 
-**Passo 5: Motor de Transbordo & Dashboard Realtime**  
-Implementação dos triggers de escala e visualização macro de saúde das integrações.
-
----
-
-## ESTRUTURA DE ENTIDADES (MODELO)
-- `channel_accounts`: Credenciais e configurações (Meta Token, API Keys).
-- `customer_identities`: Mapa de `(provider_name, external_id) -> contact_id`.
+**Passo 5: Campaign AI Integration**  
+Integração do motor de geração de copy e sugestões estratégicas.
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para iniciar a construção da fundação omnichannel definitiva para os próximos 5 anos.
+Aguardando seu "sim" para iniciar a construção da máquina de crescimento do ONECONTACT OS.
