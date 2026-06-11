@@ -1507,6 +1507,122 @@ export type Database = {
         }
         Relationships: []
       }
+      ein_advisor_logs: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          impact_estimate: number | null
+          insight_type: string
+          metadata: Json | null
+          organization_id: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          impact_estimate?: number | null
+          insight_type: string
+          metadata?: Json | null
+          organization_id: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          impact_estimate?: number | null
+          insight_type?: string
+          metadata?: Json | null
+          organization_id?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ein_advisor_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ein_best_practices: {
+        Row: {
+          config_payload: Json
+          created_at: string
+          description: string | null
+          id: string
+          impact_metrics: Json | null
+          industry: string
+          is_verified: boolean | null
+          title: string
+        }
+        Insert: {
+          config_payload: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          impact_metrics?: Json | null
+          industry: string
+          is_verified?: boolean | null
+          title: string
+        }
+        Update: {
+          config_payload?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          impact_metrics?: Json | null
+          industry?: string
+          is_verified?: boolean | null
+          title?: string
+        }
+        Relationships: []
+      }
+      ein_industry_benchmarks: {
+        Row: {
+          avg_value: number
+          created_at: string
+          id: string
+          industry: string
+          metric_name: string
+          p10_value: number | null
+          p90_value: number | null
+          period_end: string
+          period_start: string
+          sample_size: number | null
+        }
+        Insert: {
+          avg_value: number
+          created_at?: string
+          id?: string
+          industry: string
+          metric_name: string
+          p10_value?: number | null
+          p90_value?: number | null
+          period_end: string
+          period_start: string
+          sample_size?: number | null
+        }
+        Update: {
+          avg_value?: number
+          created_at?: string
+          id?: string
+          industry?: string
+          metric_name?: string
+          p10_value?: number | null
+          p90_value?: number | null
+          period_end?: string
+          period_start?: string
+          sample_size?: number | null
+        }
+        Relationships: []
+      }
       executive_insights: {
         Row: {
           created_at: string | null
