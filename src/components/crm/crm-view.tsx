@@ -52,6 +52,12 @@ export const CRMView = () => {
   const activeForecast = forecast?.[0];
 
   const pipelineTitle = (activePipeline as any)?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredDealsCount = deals?.filter(d => 
+    d.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (d.contacts as any)?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  ).length || 0;
 
   return (
     <GlobalErrorBoundary name="CRM">
@@ -185,6 +191,8 @@ export const CRMView = () => {
               <input 
                 placeholder="Pesquisar negócios..." 
                 className="bg-transparent border-none text-[11px] font-medium text-slate-300 placeholder:text-slate-600 focus:outline-none pl-9 w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
