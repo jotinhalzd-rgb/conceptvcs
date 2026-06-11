@@ -9,18 +9,20 @@ import {
   ShieldCheck,
   Rocket,
   BrainCircuit,
-  LayoutDashboard
+  LayoutDashboard,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HealthScoreWidget } from "./business-ai/health-score-widget";
 import { SmartFeed } from "./business-ai/smart-feed";
 import { OILCommandCenter } from "./oil-command-center";
+import { CEOAdvisorView } from "./ceo-advisor-view";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 export const CEODashboard = () => {
-  const [activeTab, setActiveTab] = useState("intelligence");
+  const [activeTab, setActiveTab] = useState("advisor");
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
