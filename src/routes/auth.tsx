@@ -50,36 +50,36 @@ function AuthPage() {
     }
   };
 
-  const handleDemoAccess = async () => {
+  const handleDemoAccess = async (role: 'ceo_master' | 'admin' | 'manager' | 'agent') => {
     if (loading) return;
     
-    console.log("CEO Demo Bypass clicked");
+    const roleLabels = {
+      ceo_master: '👑 CEO MASTER',
+      admin: '🏢 EMPRESA (GESTOR)',
+      manager: '👨‍💼 GERENTE',
+      agent: '🎧 ATENDENTE'
+    };
+
     setLoading(true);
     
     try {
-      // Mock session data for bypass
       const mockSession = {
         user: {
-          id: "bypass-ceo-id",
-          email: "demo@onecontact.ai",
+          id: `bypass-${role}-id`,
+          email: `${role}@onecontact.ai`,
           user_metadata: {
-            full_name: "CEO Demo",
-            role: "ceo"
+            full_name: roleLabels[role].split(' ').slice(1).join(' '),
+            role: role
           }
         },
-        access_token: "bypass-token",
+        access_token: `bypass-token-${role}`,
         expires_at: Math.floor(Date.now() / 1000) + 3600
       };
 
       localStorage.setItem("onecontact_bypass_session", JSON.stringify(mockSession));
-      
-      console.log("Bypass login successful, redirecting to dashboard");
-      toast.success("Acesso DEMO CEO ativado (Bypass)!");
-      
-      // Immediate reload to trigger useAuth hook with bypass data
+      toast.success(`${roleLabels[role]} ativado (Demo)!`);
       window.location.href = "/dashboard";
     } catch (error: any) {
-      console.error("Bypass error:", error);
       toast.error(`Falha no bypass: ${error.message}`);
       setLoading(false);
     }
