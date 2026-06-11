@@ -21,8 +21,10 @@ import {
   ShieldCheck,
   Briefcase,
   Ticket,
-  Rocket
+  Rocket,
+  CreditCard
 } from "lucide-react";
+
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -66,8 +68,10 @@ export function AppLayout() {
     { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
     { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
     { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
+    { icon: CreditCard, label: "Assinatura e Billing", href: "/settings/billing", group: "Configurações" },
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
     { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
+
 
   ];
 

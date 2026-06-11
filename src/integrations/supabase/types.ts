@@ -638,35 +638,50 @@ export type Database = {
         Row: {
           ai_config: Json | null
           created_at: string | null
+          custom_domain: string | null
           global_kpis: Json | null
           id: string
           limits: Json | null
+          logo_url: string | null
           name: string
           plan_type: string | null
+          primary_color: string | null
           status: string
+          support_email: string | null
           updated_at: string | null
+          white_label_enabled: boolean | null
         }
         Insert: {
           ai_config?: Json | null
           created_at?: string | null
+          custom_domain?: string | null
           global_kpis?: Json | null
           id?: string
           limits?: Json | null
+          logo_url?: string | null
           name: string
           plan_type?: string | null
+          primary_color?: string | null
           status?: string
+          support_email?: string | null
           updated_at?: string | null
+          white_label_enabled?: boolean | null
         }
         Update: {
           ai_config?: Json | null
           created_at?: string | null
+          custom_domain?: string | null
           global_kpis?: Json | null
           id?: string
           limits?: Json | null
+          logo_url?: string | null
           name?: string
           plan_type?: string | null
+          primary_color?: string | null
           status?: string
+          support_email?: string | null
           updated_at?: string | null
+          white_label_enabled?: boolean | null
         }
         Relationships: []
       }
@@ -1261,6 +1276,57 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number
+          billing_reason: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          paid_at: string | null
+          pdf_url: string | null
+          status: string
+          subscription_id: string
+        }
+        Insert: {
+          amount: number
+          billing_reason?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          paid_at?: string | null
+          pdf_url?: string | null
+          status: string
+          subscription_id: string
+        }
+        Update: {
+          amount?: number
+          billing_reason?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          paid_at?: string | null
+          pdf_url?: string | null
+          status?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ivr_flows: {
         Row: {
           created_at: string | null
@@ -1449,6 +1515,58 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      partner_commissions: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string | null
+          id: string
+          invoice_id: string | null
+          partner_id: string
+          status: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          partner_id: string
+          status?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          partner_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_commissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pipelines: {
         Row: {
@@ -1755,6 +1873,99 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          billing_interval: string | null
+          created_at: string | null
+          currency: string | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number
+        }
+        Insert: {
+          billing_interval?: string | null
+          created_at?: string | null
+          currency?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price: number
+        }
+        Update: {
+          billing_interval?: string | null
+          created_at?: string | null
+          currency?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          company_id: string
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          external_subscription_id: string | null
+          id: string
+          metadata: Json | null
+          plan_id: string
+          status: string
+          trial_ends_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          company_id: string
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          metadata?: Json | null
+          plan_id: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          company_id?: string
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          metadata?: Json | null
+          plan_id?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           color: string | null
@@ -1775,6 +1986,41 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      usage_logs: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          quantity: number | null
+          resource_type: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          quantity?: number | null
+          resource_type: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          quantity?: number | null
+          resource_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       voice_extensions: {
         Row: {
