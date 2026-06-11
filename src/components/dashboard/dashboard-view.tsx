@@ -64,10 +64,10 @@ export function Dashboard() {
   if (!user) return <Navigate to="/auth" />;
 
   const stats = [
-    { label: "Clientes Ativos", value: "1,284", trend: "+12.5%", icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-    { label: "Leads Qualificados", value: "456", trend: "+18.2%", icon: Target, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Receita (Simulada)", value: "R$ 45.2k", trend: "+5.4%", icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { label: "NPS Médio", value: "9.2", trend: "+2.1%", icon: Activity, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Receita Prevista", value: "R$ 142.8k", trend: "+24.5%", icon: DollarSign, color: "text-indigo-400", bg: "bg-indigo-500/10" },
+    { label: "Qualidade IA (CSAT)", value: "98.2%", trend: "+2.2%", icon: Activity, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Oportunidades", value: "84", trend: "+12.1%", icon: Target, color: "text-amber-400", bg: "bg-amber-500/10" },
+    { label: "Economia IA", value: "420h", trend: "+15.4%", icon: Zap, color: "text-purple-400", bg: "bg-purple-500/10" },
   ];
 
   return (
