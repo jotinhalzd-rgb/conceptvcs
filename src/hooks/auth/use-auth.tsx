@@ -85,7 +85,7 @@ export function useProfile() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("*, organizations(*)")
+        .select("*, companies(*)")
         .eq("id", user.id)
         .single();
       
