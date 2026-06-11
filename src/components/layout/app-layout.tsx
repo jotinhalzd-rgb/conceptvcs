@@ -88,7 +88,7 @@ export function AppLayout() {
                 )}
                 <div className="space-y-1">
                   {navItems.filter(item => item.group === group).map((item) => (
-                    <Tooltip key={item.href} Object={collapsed ? undefined : { disabled: true }}>
+                    <Tooltip key={item.href}>
                       <TooltipTrigger asChild>
                         <Link
                           to={item.href}
