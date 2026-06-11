@@ -20,19 +20,37 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMessages, useInternalNotes } from "@/hooks/inbox/use-messages";
 import { Badge } from "@/components/ui/badge";
+import { useEffect } from 'react';
 
 interface ChatViewProps {
   chat: any;
   showCustomer360: boolean;
   onToggleCustomer360: () => void;
+  appliedReply?: string | null;
+  onReplyApplied?: () => void;
 }
 
 
-export const ChatView = ({ chat, showCustomer360, onToggleCustomer360 }: ChatViewProps) => {
+
+export const ChatView = ({ 
+  chat, 
+  showCustomer360, 
+  onToggleCustomer360,
+  appliedReply,
+  onReplyApplied
+}: ChatViewProps) => {
   const [messageType, setMessageType] = useState<'public' | 'internal'>('public');
   const [inputMessage, setInputMessage] = useState("");
   const { data: messages } = useMessages(chat?.id);
   const { data: notes } = useInternalNotes(chat?.id);
+
+  useEffect(() => {
+    if (appliedReply) {
+      setInputMessage(appliedReply);
+      onReplyApplied?.();
+    }
+  }, [appliedReply, onReplyApplied]);
+
 
   // Combine e ordene mensagens e notas para a timeline
   const timeline = [...(messages || []), ...(notes || [])].sort(
