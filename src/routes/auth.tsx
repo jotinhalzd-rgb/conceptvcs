@@ -41,7 +41,7 @@ function AuthPage() {
         toast.success("Cadastro realizado! Verifique seu e-mail.");
       } else {
         toast.success("Bem-vindo de volta!");
-        navigate({ to: "/dashboard" });
+        // Navigation is handled by the useEffect watching the session
       }
     } catch (error: any) {
       toast.error(error.message);
