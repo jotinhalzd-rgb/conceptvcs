@@ -37,13 +37,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 import { SoftphoneWidget } from "@/components/voice/softphone-widget";
 import { ProfileAwareContainer } from "@/components/mobile/layout/profile-aware-container";
+import { CommandCenter } from "./command-center";
 
 export function AppLayout() {
 
 
   const { user, loading: authLoading } = useAuth();
   const { data: profile } = useProfile();
-  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
+  const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed, setQuickLaunchOpen } = useUIStore();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const navigate = useNavigate();
   const location = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -141,6 +142,7 @@ export function AppLayout() {
       <ProfileAwareContainer>
       <div className="flex h-screen bg-[#020817] text-slate-200 overflow-hidden font-sans">
 
+      <CommandCenter />
       <SoftphoneWidget />
       <TooltipProvider delayDuration={0}>
 
@@ -331,7 +333,10 @@ export function AppLayout() {
                   </Button>
                 </div>
                 <div className="h-8 w-px bg-white/[0.08] mx-1" />
-                <Button className="h-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Button 
+                  onClick={() => setQuickLaunchOpen(true)}
+                  className="h-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
                   <Rocket className="w-4 h-4" />
                   <span>Quick Launch</span>
                 </Button>
