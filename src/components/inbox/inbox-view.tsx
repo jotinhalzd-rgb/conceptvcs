@@ -11,6 +11,8 @@ import { useConversations } from "@/hooks/inbox/use-conversations";
 import { ChatList } from "./components/chat-list";
 import { ChatView } from "./components/chat-view";
 import { CustomerSidePanel } from "./components/customer-panel";
+import { AISidebar } from "./ai-copilot/ai-sidebar";
+
 
 export const InboxView = () => {
   return (
@@ -22,8 +24,11 @@ export const InboxView = () => {
 
 const InboxContent = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [showCustomer360, setShowCustomer360] = useState(true);
+  const [showCustomer360, setShowCustomer360] = useState(false);
+  const [showAICopilot, setShowAICopilot] = useState(true);
+  const [appliedReply, setAppliedReply] = useState<string | null>(null);
   const { data: conversations, isLoading } = useConversations();
+
   
   // Detecção de tamanho de tela para responsividade
   useEffect(() => {
@@ -53,8 +58,11 @@ const InboxContent = () => {
   return (
     <div className={cn(
         "h-full w-full grid bg-[#020617] overflow-hidden transition-all duration-500",
-        showCustomer360 ? "grid-cols-[360px_1fr_420px]" : "grid-cols-[360px_1fr]"
+        showCustomer360 && showAICopilot ? "grid-cols-[360px_1fr_420px_380px]" :
+        showCustomer360 ? "grid-cols-[360px_1fr_420px]" :
+        showAICopilot ? "grid-cols-[360px_1fr_380px]" : "grid-cols-[360px_1fr]"
     )}>
+
       {/* 1. Lista de Conversas (360px) */}
       <div className="flex flex-col h-full border-r border-white/5 bg-[#030712]/40">
         <div className="p-4 h-16 border-b border-white/5 flex items-center justify-between shrink-0">
@@ -86,9 +94,15 @@ const InboxContent = () => {
         <ChatView 
           chat={selectedChat} 
           showCustomer360={showCustomer360} 
-          onToggleCustomer360={() => setShowCustomer360(!showCustomer360)} 
+          onToggleCustomer360={() => {
+            setShowCustomer360(!showCustomer360);
+            if (!showCustomer360) setShowAICopilot(false);
+          }} 
+          appliedReply={appliedReply}
+          onReplyApplied={() => setAppliedReply(null)}
         />
       ) : (
+
         <div className="flex-1 flex flex-col items-center justify-center bg-[#020617] text-slate-500 space-y-4">
           <div className="w-16 h-16 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center">
             <Search className="w-8 h-8 opacity-20" />
@@ -104,7 +118,17 @@ const InboxContent = () => {
           onClose={() => setShowCustomer360(false)} 
         />
       )}
+
+
+      {/* 4. IA Copilot (380px) */}
+      {showAICopilot && selectedChat && (
+        <AISidebar 
+          chat={selectedChat} 
+          onApplyReply={(content) => setAppliedReply(content)} 
+        />
+      )}
     </div>
   );
 };
+
 
