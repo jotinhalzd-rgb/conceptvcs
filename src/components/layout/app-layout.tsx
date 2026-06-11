@@ -32,18 +32,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
-const navItems = [
-  { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
-  { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
-  { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
-  { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
-  { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
-  { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
-  { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
-  { icon: Rocket, label: "Gamificação", href: "/gamification", group: "Operação" },
-  { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
-  { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
-];
+  const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
+
+  const navItems = [
+    { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
+    ...(isCEOMaster ? [
+      { icon: Briefcase, label: "Gestão de Empresas", href: "/admin/companies", group: "Governança" },
+      { icon: ShieldCheck, label: "Auditoria Global", href: "/admin/audit", group: "Governança" },
+    ] : []),
+    { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
+    { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
+    { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
+    { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
+    { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
+    { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
+    { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
+    { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
+  ];
 
 export function AppLayout() {
   const { user, loading } = useAuth();
