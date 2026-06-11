@@ -1320,6 +1320,252 @@ export type Database = {
           },
         ]
       }
+      crm_automation_rules: {
+        Row: {
+          action_config: Json | null
+          action_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          pipeline_id: string | null
+          stage_id: string | null
+          trigger_type: string
+        }
+        Insert: {
+          action_config?: Json | null
+          action_type: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          pipeline_id?: string | null
+          stage_id?: string | null
+          trigger_type: string
+        }
+        Update: {
+          action_config?: Json | null
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          pipeline_id?: string | null
+          stage_id?: string | null
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_automation_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_automation_rules_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_automation_rules_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_forecast: {
+        Row: {
+          actual_revenue: number | null
+          confidence_score: number | null
+          id: string
+          organization_id: string
+          period: string
+          pipeline_id: string | null
+          predicted_revenue: number | null
+          probable_revenue: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_revenue?: number | null
+          confidence_score?: number | null
+          id?: string
+          organization_id: string
+          period: string
+          pipeline_id?: string | null
+          predicted_revenue?: number | null
+          probable_revenue?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_revenue?: number | null
+          confidence_score?: number | null
+          id?: string
+          organization_id?: string
+          period?: string
+          pipeline_id?: string | null
+          predicted_revenue?: number | null
+          probable_revenue?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_forecast_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_forecast_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_goals: {
+        Row: {
+          created_at: string | null
+          current_value: number | null
+          end_date: string
+          id: string
+          organization_id: string
+          period: string
+          start_date: string
+          target_type: string
+          target_value: number
+          team_id: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_value?: number | null
+          end_date: string
+          id?: string
+          organization_id: string
+          period: string
+          start_date: string
+          target_type: string
+          target_value: number
+          team_id?: string | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_value?: number | null
+          end_date?: string
+          id?: string
+          organization_id?: string
+          period?: string
+          start_date?: string
+          target_type?: string
+          target_value?: number
+          team_id?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_goals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_tasks: {
+        Row: {
+          assigned_to: string | null
+          contact_id: string | null
+          created_at: string | null
+          deal_id: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          organization_id: string
+          priority: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id: string
+          priority?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id?: string
+          priority?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_events: {
         Row: {
           campaign_id: string | null

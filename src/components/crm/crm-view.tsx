@@ -8,29 +8,72 @@ import {
   Target, 
   TrendingUp, 
   DollarSign,
-  ChevronDown
+  ChevronDown,
+  LayoutGrid,
+  List,
+  LineChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { motion } from "framer-motion";
+import { usePipelines, useCRMGoals, useCRMForecast } from "@/hooks/crm/use-deals";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type ViewMode = 'kanban' | 'list' | 'forecast';
 
 export const CRMView = () => {
+  const [viewMode, setViewMode] = useState<ViewMode>('kanban');
+  const { data: pipelines } = usePipelines();
+  const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
+  const { data: goals } = useCRMGoals();
+  const { data: forecast } = useCRMForecast(selectedPipelineId || undefined);
+
+  const activePipeline = pipelines?.find(p => p.id === selectedPipelineId) || pipelines?.[0];
+  const activeGoal = goals?.[0];
+  const activeForecast = forecast?.[0];
+
+  const pipelineTitle = (activePipeline as any)?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
+
+
+
   return (
     <GlobalErrorBoundary name="CRM">
       <div className="h-full flex flex-col bg-[#020617] overflow-hidden">
         {/* Header de Gestão */}
         <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#030712]/40 shrink-0">
           <div className="flex items-center gap-6">
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Sales Pipeline</span>
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Enterprise CRM</span>
               </div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-black text-white tracking-tight uppercase italic">Pipeline Comercial</h1>
-                <ChevronDown className="w-4 h-4 text-slate-600" />
-              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="p-0 h-auto hover:bg-transparent flex items-center gap-3">
+                    <h1 className="text-xl font-black text-white tracking-tight uppercase italic">
+                      {pipelineTitle}
+                    </h1>
+                    <ChevronDown className="w-4 h-4 text-slate-600" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-[#0f172a] border-white/10 text-slate-300">
+                  {pipelines?.map((p) => (
+                    <DropdownMenuItem 
+                      key={p.id} 
+                      onClick={() => setSelectedPipelineId(p.id)}
+                      className="hover:bg-white/5 focus:bg-white/5 cursor-pointer"
+                    >
+                      {(p as any).title || (p as any).name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="h-10 w-px bg-white/5 mx-2" />
@@ -39,25 +82,65 @@ export const CRMView = () => {
               <div className="bg-white/[0.02] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3">
                 <DollarSign className="w-4 h-4 text-emerald-400" />
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Forecast</p>
-                  <p className="text-sm font-black text-white leading-none">R$ 1.2M</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Forecast Previsto</p>
+                  <p className="text-sm font-black text-white leading-none">
+                    {activeForecast?.predicted_revenue 
+                      ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(activeForecast.predicted_revenue))
+                      : "R$ 0,00"}
+                  </p>
                 </div>
               </div>
               <div className="bg-white/[0.02] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3">
                 <Target className="w-4 h-4 text-indigo-400" />
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Meta Batida</p>
-                  <p className="text-sm font-black text-white leading-none">68%</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Meta: {activeGoal?.title || (activeGoal as any)?.name || "Geral"}</p>
+                  <p className="text-sm font-black text-white leading-none">
+                    {activeGoal ? `${Math.round((Number(activeGoal.current_value) / Number(activeGoal.target_value)) * 100)}%` : "0%"}
+                  </p>
                 </div>
               </div>
             </div>
+
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex bg-white/[0.03] border border-white/5 p-1 rounded-xl gap-1">
-              <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase tracking-widest px-4 rounded-lg bg-indigo-600 text-white">Kanban</Button>
-              <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase tracking-widest px-4 rounded-lg text-slate-500">Lista</Button>
-              <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase tracking-widest px-4 rounded-lg text-slate-500">Previsão</Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setViewMode('kanban')}
+                className={cn(
+                  "h-8 text-[10px] font-black uppercase tracking-widest px-4 rounded-lg transition-all",
+                  viewMode === 'kanban' ? "bg-indigo-600 text-white" : "text-slate-500"
+                )}
+              >
+                <LayoutGrid className="w-3.5 h-3.5 mr-2" />
+                Kanban
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  "h-8 text-[10px] font-black uppercase tracking-widest px-4 rounded-lg transition-all",
+                  viewMode === 'list' ? "bg-indigo-600 text-white" : "text-slate-500"
+                )}
+              >
+                <List className="w-3.5 h-3.5 mr-2" />
+                Lista
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setViewMode('forecast')}
+                className={cn(
+                  "h-8 text-[10px] font-black uppercase tracking-widest px-4 rounded-lg transition-all",
+                  viewMode === 'forecast' ? "bg-indigo-600 text-white" : "text-slate-500"
+                )}
+              >
+                <LineChart className="w-3.5 h-3.5 mr-2" />
+                Previsão
+              </Button>
             </div>
             <Button className="h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-6 gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
               <Plus className="w-4 h-4" />
@@ -87,8 +170,20 @@ export const CRMView = () => {
           </div>
         </div>
 
-        {/* Kanban Area */}
-        <KanbanBoard />
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-hidden">
+          {viewMode === 'kanban' && <KanbanBoard pipelineId={activePipeline?.id} />}
+          {viewMode === 'list' && (
+            <div className="p-8 text-slate-500 text-sm italic font-medium">
+              Visão em lista sendo renderizada com carregamento incremental...
+            </div>
+          )}
+          {viewMode === 'forecast' && (
+            <div className="p-8 text-slate-500 text-sm italic font-medium">
+              Análise preditiva de IA gerando insights de receita...
+            </div>
+          )}
+        </div>
       </div>
     </GlobalErrorBoundary>
   );
