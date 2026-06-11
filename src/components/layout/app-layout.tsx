@@ -52,6 +52,7 @@ export function AppLayout() {
   const isCustomers = location.startsWith("/customers");
   const isQueues = location.startsWith("/queues");
   const isCRM = location.startsWith("/crm");
+  const isHub = location.startsWith("/dashboard/hub");
 
 
   const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
