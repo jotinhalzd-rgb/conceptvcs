@@ -81,7 +81,8 @@ export function AppLayout() {
   const groups = [...new Set(navItems.map(item => item.group))];
 
   return (
-    <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
+    <GlobalErrorBoundary name="AppLayout">
+      <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
       <TooltipProvider delayDuration={0}>
         {/* Sidebar */}
         <aside 
