@@ -59,6 +59,14 @@ const performanceData = [
 ];
 
 export function Dashboard() {
+  return (
+    <GlobalErrorBoundary name="Dashboard">
+      <DashboardContent />
+    </GlobalErrorBoundary>
+  );
+}
+
+function DashboardContent() {
   const { user, loading } = useAuth();
   const { data: profile } = useProfile();
 
