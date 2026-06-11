@@ -59,7 +59,7 @@ export function Customer360({ contactId }: { contactId?: string }) {
     phone: "+55 (11) 99887-7665",
     email: "eduardo.rocha@email.com",
     lead_score: 92,
-    lifecycle_stage: "Lead Qualificado (IA)"
+    lifecycle_stage: "Lead Qualificado (IA)" as string | null
   };
 
   const displayInsights = insights || {
@@ -80,7 +80,7 @@ export function Customer360({ contactId }: { contactId?: string }) {
           <CardContent className="px-6 pb-6 -mt-10 relative">
             <div className="w-20 h-20 rounded-2xl bg-[#020617] p-1 mb-4">
               <div className="w-full h-full rounded-xl bg-indigo-500 flex items-center justify-center text-white text-3xl font-black">
-                {displayContact.name?.substring(0, 2).toUpperCase()}
+                {(displayContact.name || "UN").substring(0, 2).toUpperCase()}
               </div>
             </div>
             <h3 className="text-xl font-black text-white">{displayContact.name}</h3>
