@@ -307,6 +307,9 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
+          is_lead: boolean | null
+          lead_score: number | null
+          lifecycle_stage: string | null
           metadata: Json | null
           name: string | null
           organization_id: string
@@ -317,6 +320,9 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          is_lead?: boolean | null
+          lead_score?: number | null
+          lifecycle_stage?: string | null
           metadata?: Json | null
           name?: string | null
           organization_id: string
@@ -327,6 +333,9 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          is_lead?: boolean | null
+          lead_score?: number | null
+          lifecycle_stage?: string | null
           metadata?: Json | null
           name?: string | null
           organization_id?: string
@@ -518,6 +527,44 @@ export type Database = {
           },
         ]
       }
+      crm_audit: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          deal_id: string
+          id: string
+          new_state: Json | null
+          performed_by: string | null
+          previous_state: Json | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          deal_id: string
+          id?: string
+          new_state?: Json | null
+          performed_by?: string | null
+          previous_state?: Json | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          deal_id?: string
+          id?: string
+          new_state?: Json | null
+          performed_by?: string | null
+          previous_state?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_audit_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_events: {
         Row: {
           campaign_id: string | null
@@ -603,6 +650,96 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          closed_at: string | null
+          contact_id: string
+          created_at: string | null
+          expected_close_date: string | null
+          id: string
+          organization_id: string
+          origin_conversation_id: string | null
+          pipeline_id: string
+          probability: number | null
+          responsible_id: string | null
+          stage_id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          closed_at?: string | null
+          contact_id: string
+          created_at?: string | null
+          expected_close_date?: string | null
+          id?: string
+          organization_id: string
+          origin_conversation_id?: string | null
+          pipeline_id: string
+          probability?: number | null
+          responsible_id?: string | null
+          stage_id: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          closed_at?: string | null
+          contact_id?: string
+          created_at?: string | null
+          expected_close_date?: string | null
+          id?: string
+          organization_id?: string
+          origin_conversation_id?: string | null
+          pipeline_id?: string
+          probability?: number | null
+          responsible_id?: string | null
+          stage_id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_origin_conversation_id_fkey"
+            columns: ["origin_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
             referencedColumns: ["id"]
           },
         ]
@@ -965,6 +1102,50 @@ export type Database = {
             columns: ["target_queue_id"]
             isOneToOne: false
             referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_goals: {
+        Row: {
+          created_at: string | null
+          current_value: number | null
+          id: string
+          organization_id: string
+          period: string
+          responsible_id: string | null
+          target_value: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          organization_id: string
+          period: string
+          responsible_id?: string | null
+          target_value: number
+          type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          organization_id?: string
+          period?: string
+          responsible_id?: string | null
+          target_value?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_goals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
