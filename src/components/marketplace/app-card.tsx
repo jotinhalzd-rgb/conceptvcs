@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
+import { ExternalLink, CheckCircle2, Star, Sparkles, Box, LayoutTemplate, Workflow } from "lucide-react";
 
 interface AppCardProps {
   app: any;
@@ -11,6 +11,12 @@ interface AppCardProps {
 }
 
 export const AppCard = ({ app, isConnected, onConnect }: AppCardProps) => {
+  const isTemplate = app.asset_type_code === 'template';
+  const isAgent = app.asset_type_code === 'ai_agent';
+  const isWorkflow = app.asset_type_code === 'workflow';
+
+  const TypeIcon = isTemplate ? LayoutTemplate : isAgent ? Sparkles : isWorkflow ? Workflow : Box;
+
   return (
     <div className="bg-[#030712] border border-white/5 rounded-2xl p-6 hover:border-indigo-500/20 transition-all group relative overflow-hidden flex flex-col h-full shadow-lg shadow-black/20">
       {/* Background Glow */}
@@ -18,36 +24,46 @@ export const AppCard = ({ app, isConnected, onConnect }: AppCardProps) => {
       
       <div className="flex items-start justify-between mb-6 relative z-10">
         <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center overflow-hidden p-2">
-          {app.logo_url ? (
-            <img src={app.logo_url} alt={app.name} className="w-full h-full object-contain filter brightness-110" />
+          {app.asset_icon_url ? (
+            <img src={app.asset_icon_url} alt={app.asset_title} className="w-full h-full object-contain filter brightness-110" />
           ) : (
-            <div className="w-full h-full bg-slate-800 rounded-xl" />
+            <TypeIcon className="w-6 h-6 text-slate-700" />
           )}
         </div>
-        {isConnected ? (
-          <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] font-black px-2 py-0.5 uppercase flex items-center gap-1.5">
-            <CheckCircle2 className="w-2.5 h-2.5" />
-            Conectado
-          </Badge>
-        ) : (
-          <Badge className="bg-white/5 text-slate-500 border-none text-[8px] font-black px-2 py-0.5 uppercase">
-            Disponível
-          </Badge>
-        )}
+        <div className="flex flex-col items-end gap-2">
+          {isConnected ? (
+            <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] font-black px-2 py-0.5 uppercase flex items-center gap-1.5">
+              <CheckCircle2 className="w-2.5 h-2.5" />
+              Instalado
+            </Badge>
+          ) : (
+            <Badge className="bg-white/5 text-slate-500 border-none text-[8px] font-black px-2 py-0.5 uppercase">
+              {app.asset_pricing_model === 'free' ? 'Gratuito' : 'Premium'}
+            </Badge>
+          )}
+          <div className="flex items-center gap-1">
+             <Star className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
+             <span className="text-[9px] font-black text-slate-500">4.9</span>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 mb-6 relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <TypeIcon className="w-3 h-3 text-indigo-500" />
+          <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">{app.asset_type_code}</span>
+        </div>
         <h3 className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight mb-2">
-          {app.name}
+          {app.asset_title}
         </h3>
         <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-3">
-          {app.description}
+          {app.asset_description}
         </p>
       </div>
 
       <div className="pt-6 border-t border-white/5 flex items-center justify-between relative z-10 mt-auto">
         <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-          Categoria: {app.category}
+          {app.asset_category_code}
         </span>
         <Button 
           variant="ghost" 
@@ -60,7 +76,7 @@ export const AppCard = ({ app, isConnected, onConnect }: AppCardProps) => {
               : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/10"
           )}
         >
-          {isConnected ? "Gerenciar" : "Conectar"}
+          {isConnected ? "Gerenciar" : "Instalar"}
           <ExternalLink className="w-3 h-3 ml-2" />
         </Button>
       </div>
