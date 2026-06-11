@@ -12,6 +12,7 @@ export interface Campaign {
   scheduled_at?: string;
   segmentation_filters?: any;
   content_template?: any;
+  company_id: string;
 }
 
 export const CampaignService = {
@@ -26,9 +27,14 @@ export const CampaignService = {
   },
 
   async create(campaign: Omit<Campaign, 'id'>) {
+    const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from('campaigns')
-      .insert([{ ...campaign, created_by: (await supabase.auth.getUser()).data.user?.id }])
+      .insert([{ 
+        ...campaign, 
+        created_by: user?.id,
+        company_id: campaign.company_id || '00000000-0000-0000-0000-000000000000' // Placeholder para multi-empresa
+      }])
       .select()
       .single();
     
