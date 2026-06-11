@@ -137,7 +137,7 @@ export function Customer360View() {
                       </div>
                       <div className={cn(
                         "w-2 h-2 rounded-full",
-                        contact.lead_score >= 80 ? "bg-emerald-500" : (contact.lead_score >= 40 ? "bg-amber-500" : "bg-slate-700")
+                        contact.lead_score && contact.lead_score >= 80 ? "bg-emerald-500" : (contact.lead_score && contact.lead_score >= 40 ? "bg-amber-500" : "bg-slate-700")
                       )} />
                     </div>
                   </div>
