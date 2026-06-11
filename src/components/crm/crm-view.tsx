@@ -56,7 +56,7 @@ export const CRMView = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-0 h-auto hover:bg-transparent flex items-center gap-3">
                     <h1 className="text-xl font-black text-white tracking-tight uppercase italic">
-                      {activePipeline?.title || "Selecione o Pipeline"}
+                      {pipelineTitle}
                     </h1>
                     <ChevronDown className="w-4 h-4 text-slate-600" />
                   </Button>
@@ -68,7 +68,7 @@ export const CRMView = () => {
                       onClick={() => setSelectedPipelineId(p.id)}
                       className="hover:bg-white/5 focus:bg-white/5 cursor-pointer"
                     >
-                      {p.title}
+                      {p.title || (p as any).name}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -92,13 +92,14 @@ export const CRMView = () => {
               <div className="bg-white/[0.02] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3">
                 <Target className="w-4 h-4 text-indigo-400" />
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Meta: {activeGoal?.title || "Geral"}</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Meta: {activeGoal?.title || (activeGoal as any)?.name || "Geral"}</p>
                   <p className="text-sm font-black text-white leading-none">
                     {activeGoal ? `${Math.round((Number(activeGoal.current_value) / Number(activeGoal.target_value)) * 100)}%` : "0%"}
                   </p>
                 </div>
               </div>
             </div>
+
           </div>
 
           <div className="flex items-center gap-3">
