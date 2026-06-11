@@ -208,27 +208,32 @@ export function AppLayout() {
         {/* Topbar & Content */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#020617]">
           {/* Header */}
-          <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#020617]/50 backdrop-blur-xl sticky top-0 z-20">
+          <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-20">
             <div className="flex items-center gap-6 flex-1">
               <div className="relative max-w-md w-full group hidden md:block">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-indigo-400 transition-all duration-300" />
                 <input 
                   type="text" 
-                  placeholder="Pesquisar em toda a plataforma... (Command + K)" 
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                  placeholder="Pesquisar em toda a plataforma... (⌘ + K)" 
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-slate-600"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.05] relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-indigo-500 rounded-full border-2 border-[#020617]" />
-              </Button>
-              <div className="h-6 w-px bg-white/10 mx-2" />
-              <Button className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 py-2 font-bold shadow-lg shadow-indigo-600/20 gap-2">
+            <div className="flex items-center gap-5">
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.05] relative h-11 w-11 transition-all">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-[#020617] ring-1 ring-indigo-500/50" />
+                </Button>
+                <Button variant="ghost" size="icon" className="rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.05] h-11 w-11 transition-all">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </div>
+              <div className="h-8 w-px bg-white/[0.08] mx-1" />
+              <Button className="h-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]">
                 <Rocket className="w-4 h-4" />
-                <span>Quick Action</span>
+                <span>Quick Launch</span>
               </Button>
             </div>
           </header>
