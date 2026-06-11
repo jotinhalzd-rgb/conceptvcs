@@ -54,7 +54,7 @@ export const AISidebar = ({ chat, onApplyReply }: AISidebarProps) => {
   const handleAnalyze = async () => {
     setIsLoading(true);
     try {
-      const results = await CopilotEngine.getInsights(chat.id, chat.last_message_preview);
+      const results = await CopilotEngine.getInsights(chat.id, chat.last_message_preview, selectedAgentId);
       setInsights(results);
     } catch (err) {
       console.error(err);
