@@ -14,8 +14,9 @@ import {
   Zap,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle 
 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CampaignService, Campaign } from "@/services/campaigns/campaign-service";
