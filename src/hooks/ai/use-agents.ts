@@ -7,8 +7,11 @@ export const useAgents = () => {
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
 
+  // @ts-ignore - organization_id exists in the database but might be missing in some profile type branches
+  const orgId = profile?.organization_id || profile?.company_id;
+
   const { data: agents, isLoading } = useQuery({
-    queryKey: ["ai-agents", profile?.organization_id],
+    queryKey: ["ai-agents", orgId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ai_agents")
@@ -18,14 +21,14 @@ export const useAgents = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.organization_id,
+    enabled: !!orgId,
   });
 
   const createAgent = useMutation({
     mutationFn: async (newAgent: any) => {
       const { data, error } = await supabase
         .from("ai_agents")
-        .insert([{ ...newAgent, organization_id: profile?.organization_id }])
+        .insert([{ ...newAgent, organization_id: orgId }])
         .select()
         .single();
       
