@@ -99,13 +99,15 @@ function DashboardContent() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
             <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Célula de Inteligência Executiva</span>
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">
+              {isCEOMaster ? "Célula de Governança Global" : "Célula de Inteligência Executiva"}
+            </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
             OneContact <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Enterprise OS</span>
           </h1>
           <p className="text-slate-400 font-medium max-w-xl">
-            Olá, {profile?.full_name || "Líder"}. A IA identificou <span className="text-indigo-400 font-bold">12 novas oportunidades</span> e <span className="text-rose-400 font-bold">2 riscos de churn</span> hoje.
+            Olá, {profile?.full_name || "Líder"}. {isCEOMaster ? "A plataforma processou 1.2M eventos nas últimas 24h sem falhas críticas detectadas." : "A IA identificou 12 novas oportunidades e 2 riscos de churn hoje."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
