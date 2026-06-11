@@ -1,38 +1,27 @@
 text
-# ONECONTACT OS - FASE 3: SISTEMA OPERACIONAL DE INTELIGÊNCIA COMERCIAL
+# PLANO DE REFATORAÇÃO E OTIMIZAÇÃO ESTRUTURAL - ONECONTACT OS
 
-Implementação da camada de inteligência e governança sobre a comunicação, transformando conversas em dados estratégicos e ações proativas.
+Este plano visa consolidar a arquitetura da Fase 3, garantindo escalabilidade para milhões de mensagens e performance de resposta abaixo de 100ms.
 
-## 1. Arquitetura de Inteligência (IA Copilot & Supervisor)
-*   **IA Copilot (Real-time):** Hook de análise semântica que processa a mensagem atual e sugere:
-    *   Próxima Melhor Ação (NBA).
-    *   Detecção de intenção (Compra, Reclamação, Churn).
-    *   Alertas de palavras críticas.
-*   **IA Supervisor:** Dashboard de monitoramento de saúde operacional com alertas de:
-    *   SLA em risco (visualização por gradiente de cor).
-    *   Congestionamento de filas.
-    *   Anomalias de produtividade.
+## ETAPA 1: OTIMIZAÇÃO DA CAMADA DE DADOS (DATABASE & CACHING)
+*   **Normalização de Performance:** Criar índices compostos nas tabelas `messages` (conversation_id, created_at) e `conversations` (status, queue_id).
+*   **Data Tiering:** Implementar lógica de arquivamento para mensagens com mais de 90 dias para tabelas de cold storage, mantendo a performance da Inbox ativa.
+*   **Caching Estratégico:** Configurar cache via React Query com políticas de stale-while-revalidate agressivas para metadados de Customer 360.
 
-## 2. Customer & Agent Scoring (Gamificação e Ranking)
-*   **Customer Score Engine:** Algoritmo dinâmico que classifica clientes (Bronze -> VIP) baseado em LTV, Engajamento e Sentimento.
-*   **Agent Performance OS:** Ranking gamificado com métricas de Conversão, TMA e CSAT, exibindo Badges de conquista por produtividade.
-*   **Knowledge Hub:** Base de conhecimento vetorial (RAG) integrada para que a IA gere respostas fundamentadas em manuais e FAQ da empresa.
+## ETAPA 2: REFATORAÇÃO DO CORE DE INTELIGÊNCIA (IA ENGINE)
+*   **Abstração de LLM:** Criar um Service Layer unificado para chamadas de IA, permitindo alternar entre GPT-4o, Claude 3.5 e modelos locais sem alterar a UI.
+*   **Vetorização (RAG):** Implementar Supabase Vector (pgvector) no `knowledge_base` para buscas semânticas ultrarrápidas pelo Copilot.
+*   **Batch Processing:** Otimizar as Edge Functions de análise de sentimento para processamento em lote, reduzindo latência e custos de API.
 
-## 3. Experiência de Usuário: Timeline Omnichannel
-*   **Unified Timeline:** Componente de visualização cronológica que agrupa interações de múltiplos canais (WhatsApp, Email, CRM Events) em um único fio de história.
-*   **Executive Insights (CEO View):** Painel de resposta rápida a perguntas de negócio ("Qual canal gera mais lucro?") com visualização de ROI por canal/agente.
+## ETAPA 3: OTIMIZAÇÃO DE FRONTEND & UX (CLIENT-SIDE)
+*   **Virtualização de Listas:** Implementar `react-window` ou `tanstack-virtual` na lista de conversas da Inbox para suportar scroll infinito sem degradação de FPS.
+*   **Otimização de Asset Loading:** Migrar ícones Lucide para carregamento dinâmico e otimizar o bundle principal através de Code Splitting por rota.
+*   **Web Workers:** Mover cálculos pesados de scores (Customer/Agent) para Web Workers, liberando a Main Thread para interações de chat.
 
-## 4. Estrutura Técnica de Dados (Supabase)
-*   **Novas Tabelas:**
-    *   `knowledge_base`: Documentos e FAQ para treinamento da IA.
-    *   `omnichannel_events`: Log central de eventos externos (compras, tickets, visitas).
-    *   `gamification_badges`: Registro de conquistas dos operadores.
-    *   `business_intelligence`: Agregadores diários para performance executiva.
+## ETAPA 4: GOVERNANÇA E SEGURANÇA (SYSTEM HARDENING)
+*   **Auditoria Imutável:** Refinar os triggers de histórico para garantir que nenhuma edição de mensagem escape da trilha de auditoria.
+*   **Rate Limiting:** Implementar limites de taxa por Tenant/Agente para proteger a infraestrutura contra picos de tráfego.
+*   **Monitoring:** Adicionar logs estruturados e telemetria para monitorar o Tempo Médio de Resposta da IA (TMR-IA).
 
-## 5. Implementação da Inbox Universal 2.0 (Interface)
-*   Integração dos widgets de IA na Coluna 3 (Chat).
-*   Visualização da Timeline e Customer Score na Coluna 4 (Customer 360).
-*   Painéis de controle de filas dinâmicas na Coluna 1.
-
----
-**Diferencial Estratégico:** O sistema deixará de ser um receptor de mensagens para se tornar um preditor de receitas e mitigador de riscos em tempo real.
+## ETAPA 5: ESCALABILIDADE OMNICHANNEL (ADAPTER PATTERN)
+*   **Unified Adapter Interface:** Refatorar os conectores de canais (WhatsApp, Email, etc) para um padrão de Adapter único, facilitando a adição de novos canais como TikTok ou LinkedIn em tempo recorde.
