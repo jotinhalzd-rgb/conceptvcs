@@ -23,7 +23,7 @@ export const MobileCRM = () => {
           <div>
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Pipeline</h2>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
-              {pipelines?.[0]?.title || "Vendas Principal"}
+              {(pipelines?.[0] as any)?.title || "Vendas Principal"}
             </p>
           </div>
           <button className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20 active:scale-95 transition-all">
