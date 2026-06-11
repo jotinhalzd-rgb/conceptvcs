@@ -78,6 +78,8 @@ export function useProfile() {
           full_name: user.user_metadata?.full_name || "Demo User",
           role: role,
           company_id: "00000000-0000-0000-0000-000000000000",
+          organization_id: "00000000-0000-0000-0000-000000000000",
+
           companies: {
             name: "ONECONTACT DEMO CORP"
           }
