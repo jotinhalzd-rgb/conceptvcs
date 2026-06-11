@@ -288,15 +288,19 @@ export const InboxView = () => {
               <div className="relative inline-block">
                 <Avatar className="h-24 w-24 mx-auto border-4 border-indigo-500/20 p-1">
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-3xl font-black">R</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-3xl font-black">
+                    {currentChat?.name.charAt(0) || "R"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
-                  Cliente VIP
+                  {currentChat?.id === 1 ? "Cliente VIP" : "Standard"}
                 </div>
               </div>
               <div>
-                <h2 className="text-lg font-black text-white tracking-tight">Roberto Almeida</h2>
-                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Diretor Executivo @ TechFlow</p>
+                <h2 className="text-lg font-black text-white tracking-tight">{currentChat?.name || "Cliente"}</h2>
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">
+                  {currentChat?.id === 1 ? "Diretor Executivo @ TechFlow" : "Contato Externo"}
+                </p>
               </div>
             </div>
 
