@@ -1454,6 +1454,7 @@ export type Database = {
           credentials: Json | null
           error_log: string | null
           id: string
+          identifier: string | null
           is_active: boolean | null
           last_sync_at: string | null
           name: string
@@ -1468,6 +1469,7 @@ export type Database = {
           credentials?: Json | null
           error_log?: string | null
           id?: string
+          identifier?: string | null
           is_active?: boolean | null
           last_sync_at?: string | null
           name: string
@@ -1482,6 +1484,7 @@ export type Database = {
           credentials?: Json | null
           error_log?: string | null
           id?: string
+          identifier?: string | null
           is_active?: boolean | null
           last_sync_at?: string | null
           name?: string
@@ -3894,11 +3897,14 @@ export type Database = {
           body: string | null
           conversation_id: string
           created_at: string | null
+          delivery_status: string | null
+          error_message: string | null
           id: string
           is_edited: boolean | null
           metadata: Json | null
           organization_id: string
           original_content: string | null
+          provider_message_id: string | null
           read_at: string | null
           sender_profile_id: string | null
           type: string | null
@@ -3907,11 +3913,14 @@ export type Database = {
           body?: string | null
           conversation_id: string
           created_at?: string | null
+          delivery_status?: string | null
+          error_message?: string | null
           id?: string
           is_edited?: boolean | null
           metadata?: Json | null
           organization_id: string
           original_content?: string | null
+          provider_message_id?: string | null
           read_at?: string | null
           sender_profile_id?: string | null
           type?: string | null
@@ -3920,11 +3929,14 @@ export type Database = {
           body?: string | null
           conversation_id?: string
           created_at?: string | null
+          delivery_status?: string | null
+          error_message?: string | null
           id?: string
           is_edited?: boolean | null
           metadata?: Json | null
           organization_id?: string
           original_content?: string | null
+          provider_message_id?: string | null
           read_at?: string | null
           sender_profile_id?: string | null
           type?: string | null
@@ -5262,6 +5274,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_org_by_channel_identifier: {
+        Args: { p_identifier: string }
+        Returns: string
+      }
       get_user_company: { Args: never; Returns: string }
       get_user_role: { Args: never; Returns: string }
     }
