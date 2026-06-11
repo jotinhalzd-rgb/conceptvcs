@@ -1,4 +1,5 @@
-import { useAuth } from "@/hooks/auth/use-auth";
+import { useAuth, useProfile } from "@/hooks/auth/use-auth";
+import { cn } from "@/lib/utils";
 import { Navigate } from "@tanstack/react-router";
 import { 
   Users, 
@@ -54,6 +55,7 @@ const performanceData = [
 
 export function Dashboard() {
   const { user, loading } = useAuth();
+  const { data: profile } = useProfile();
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth" />;
@@ -71,7 +73,7 @@ export function Dashboard() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight mb-1">Executivo Dashboard</h1>
-          <p className="text-slate-400 font-medium">Bem-vindo de volta, CEO. Aqui está o resumo da sua operação hoje.</p>
+          <p className="text-slate-400 font-medium">Bem-vindo de volta, {profile?.full_name || "Líder"}. Aqui está o resumo da sua operação hoje.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="px-4 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl flex items-center gap-2">
@@ -236,6 +238,3 @@ export function Dashboard() {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
-}
