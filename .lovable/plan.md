@@ -1,60 +1,54 @@
-# Plano de Implementação: Customer 360 Enterprise
+# Plano de Implementação: CRM Enterprise
 
-O objetivo é transformar a visualização atual em uma central de inteligência de dados do cliente, consolidando informações de CRM, Suporte, Financeiro e IA em uma única interface escalável.
+O objetivo é transformar o CRM em uma engine de vendas e relacionamento de alta escala, nativamente integrada ao ecossistema de inteligência (OIL/EIN) e atendimento (Inbox).
 
 ## 1. Arquitetura de Dados (Database Schema)
 
-Serão criadas/ajustadas as seguintes tabelas para suportar o volume enterprise:
+A fundação será expandida para suportar pipelines ilimitados, automações e previsibilidade:
 
-- `public.contacts`: Adição de colunas para `profile_picture_url`, `main_channel`, `status`, `lead_score`.
-- `public.customer_events_unified`: Tabela centralizadora de eventos para a Timeline.
-- `public.customer_tickets`: Gestão de tickets de suporte com SLA e NPS.
-- `public.billing_transactions`: Histórico financeiro consolidado.
-- `public.customer_insights_enterprise`: Cache de inteligência gerado por IA (resumos, churn, propensão).
+- `public.pipelines`: Estrutura de funis (Vendas, Pós-venda, etc).
+- `public.pipeline_stages`: Etapas customizáveis com ordenação e regras.
+- `public.deals`: Tabela de negócios com `company_id`, `probability`, `expected_close_date` e `tags`.
+- `public.crm_tasks`: Tarefas vinculadas a negócios ou clientes.
+- `public.crm_automation_rules`: Definição de gatilhos (triggers) por etapa.
+- `public.crm_goals`: Metas por organização, time ou usuário.
+- `public.crm_forecast`: Tabela de cache para projeções de receita geradas por IA.
 
 ## 2. Componentes Frontend (UI/UX)
 
-A interface será dividida em zonas de responsabilidade:
+### A. Visão Kanban & Lista
+- `CRMView`: Tela principal com alternador de pipelines e visões (Kanban/Lista).
+- `KanbanBoard`: Implementação de Drag & Drop performático com `dnd-kit`.
+- `DealCard`: Resumo visual com indicadores de temperatura (IA Score) e atrasos.
 
-### A. Perfil e Identificação (Header/Sidebar)
-- Componente `CustomerIdentity`: Exibição de Nome, Foto, Empresa e Tags.
-- Componente `AccountHealthScore`: Visualização gráfica do score e status.
+### B. Gestão e Metas
+- `GoalTracker`: Widgets de progresso de metas em tempo real.
+- `PipelineEditor`: Interface visual para criar e ordenar etapas.
 
-### B. Timeline Unificada (Centro)
-- Componente `OmniTimeline`: Feed infinito com carregamento incremental (`useInfiniteQuery`).
-- Filtros por categoria: Conversas, Financeiro, CRM, Suporte e IA.
+### C. Inteligência & Forecast
+- `ForecastPanel`: Gráficos de receita prevista vs. realizada.
+- `DealAIAdvisor`: Painel lateral no detalhe do negócio com "Próxima Melhor Ação".
 
-### C. Painéis Laterais (Contexto)
-- `CRMContextPanel`: Negócios ativos e valor negociado.
-- `SupportSlaPanel`: Tickets ativos e métricas de atendimento.
-- `CommunicationLauncher`: Histórico por canal (WA, Email, etc).
+## 3. Fluxos de Automação
 
-### D. Camada de Inteligência (IA Insights)
-- `AIStrategistCard`: Resumo dinâmico, Churn risk e "Next Best Action".
-- Alertas preditivos (Oportunidades e Riscos).
+O sistema utilizará **Postgres Triggers** e **Edge Functions** para:
+- Mover um negócio para "Ganhos" -> Gerar evento no Customer 360 -> Notificar Gerente.
+- Negócio parado por > 5 dias -> IA gera alerta de risco e sugere follow-up.
 
-## 3. Fluxos de Dados e Performance
+## 4. Escalabilidade e Segurança
 
-- **Lazy Loading**: A timeline carregará apenas os últimos 20 eventos por vez.
-- **Cache SWR**: Uso de React Query para garantir que a navegação entre clientes seja instantânea.
-- **Triggers de Agregação**: Eventos no CRM ou Inbox disparam automaticamente uma inserção na `customer_events_unified`.
-
-## 4. Segurança (Multi-Tenancy)
-
-- Todas as queries incluirão `WHERE organization_id = current_org()`.
-- RLS rigoroso para impedir vazamento de dados entre empresas (Tenants).
+- **Performance**: Indexação composta por `(organization_id, pipeline_id, stage_id)`.
+- **Isolamento**: RLS garantindo que usuários de uma empresa nunca vejam pipelines de outra.
+- **Cache**: Queries otimizadas com filtros pré-processados no banco.
 
 ## Detalhes Técnicos
 
 ```text
-ESTRUTURA DE EVENTOS (JSONB):
-{
-  "type": "deal_closed",
-  "icon": "TrendingUp",
-  "color": "emerald",
-  "amount": 5000,
-  "agent_name": "Marcos"
-}
+TABELA DE METAS:
+- target_value (numeric)
+- current_value (numeric)
+- target_type (revenue, conversion, activity)
+- period (monthly, quarterly)
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a migração final do banco de dados e o desenvolvimento dos novos componentes de UI.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das novas tabelas de CRM e o desenvolvimento do Kanban Enterprise com suporte a múltiplos pipelines.
