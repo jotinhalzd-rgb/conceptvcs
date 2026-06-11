@@ -19,11 +19,9 @@ import {
   ListTodo,
   Users2
 } from "lucide-react";
-import { useAuth } from "@/hooks/auth/use-auth";
 
 export function useQuickLaunch() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +65,6 @@ export function useQuickLaunch() {
           supabase
             .from("conversations")
             .select("id, status, contacts(name)")
-            .or(`status.ilike.%${query}%`) // Simplificado, idealmente buscaria no histórico
             .limit(3),
 
           // Buscar Deals (Oportunidades)
@@ -85,10 +82,10 @@ export function useQuickLaunch() {
         if (contactsRes.data?.length) {
           formattedResults.push({
             category: "CLIENTES",
-            items: contactsRes.data.map(c => ({
+            items: contactsRes.data.map((c: any) => ({
               id: `contact-${c.id}`,
-              title: c.name,
-              subtitle: c.email,
+              title: c.name || "Sem nome",
+              subtitle: c.email || "Sem e-mail",
               icon: Users,
               action: () => {
                 navigate({ to: `/customers/${c.id}` });
@@ -117,13 +114,13 @@ export function useQuickLaunch() {
         if (dealsRes.data?.length) {
           formattedResults.push({
             category: "CRM",
-            items: dealsRes.data.map(d => ({
+            items: dealsRes.data.map((d: any) => ({
               id: `deal-${d.id}`,
-              title: d.title,
+              title: d.title || "Sem título",
               subtitle: d.value ? `R$ ${d.value.toLocaleString()}` : "Sem valor",
               icon: Briefcase,
               action: () => {
-                navigate({ to: `/crm` }); // Redirecionar para CRM por enquanto
+                navigate({ to: `/crm` });
                 trackAction({ id: `deal-${d.id}`, title: d.title, icon: "Briefcase", type: "deal" });
               }
             }))
