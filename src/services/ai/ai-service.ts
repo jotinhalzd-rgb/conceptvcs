@@ -65,13 +65,23 @@ export class AIService {
    * Busca na base de conhecimento (Knowledge Hub) usando busca semântica (vetorial).
    */
   static async searchKnowledgeBase(query: string) {
-    // Futura integração com pgvector
-    const { data, error } = await supabase
-      .from('knowledge_base')
-      .select('*')
-      .limit(3);
+    try {
+      if (!query) return [];
       
-    if (error) throw error;
-    return data;
+      const { data, error } = await supabase
+        .from('knowledge_base')
+        .select('*')
+        .limit(3);
+        
+      if (error) {
+        console.error("Knowledge Base Query Error:", error);
+        throw new Error("Não foi possível consultar a base de conhecimento.");
+      }
+      
+      return data || [];
+    } catch (error) {
+      console.error("Knowledge Base Service Error:", error);
+      throw error;
+    }
   }
 }
