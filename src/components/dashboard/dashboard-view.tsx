@@ -1,5 +1,6 @@
 import { useAuth, useProfile } from "@/hooks/auth/use-auth";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { Navigate } from "@tanstack/react-router";
 import { 
   Users, 
@@ -68,7 +69,12 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
+    >
       {/* Welcome Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -234,7 +240,7 @@ export function Dashboard() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
 
