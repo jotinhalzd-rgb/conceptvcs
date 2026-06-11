@@ -29,8 +29,18 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAICopilot } from "@/hooks/inbox/use-ai-copilot";
+import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 
 export const InboxView = () => {
+  return (
+    <GlobalErrorBoundary name="Inbox">
+      <InboxContent />
+    </GlobalErrorBoundary>
+  );
+};
+
+const InboxContent = () => {
+
   const [selectedChat, setSelectedChat] = useState<number>(1);
   const [showCopilot, setShowCopilot] = useState(true);
   const [inputMessage, setInputMessage] = useState("");
