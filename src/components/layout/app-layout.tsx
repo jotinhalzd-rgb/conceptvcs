@@ -139,7 +139,7 @@ export function AppLayout() {
   return (
     <GlobalErrorBoundary name="AppLayout">
       <ProfileAwareContainer>
-      <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
+      <div className="flex h-screen bg-[#020817] text-slate-200 overflow-hidden font-sans">
 
       <SoftphoneWidget />
       <TooltipProvider delayDuration={0}>
@@ -305,10 +305,10 @@ export function AppLayout() {
         </aside>
 
         {/* Topbar & Content */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#020617]">
+        <div className="flex-1 flex flex-col min-w-0 bg-[#020817]">
           {/* Header */}
           {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub && (
-            <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-20">
+            <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020817]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
                 <div className="relative max-w-md w-full group hidden md:block">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-indigo-400 transition-all duration-300" />

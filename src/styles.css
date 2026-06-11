@@ -98,7 +98,7 @@
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
+  --background: oklch(0.12 0.03 264); /* Aproximadamente #020817 */
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
   --card-foreground: oklch(0.984 0.003 247.858);
@@ -144,7 +144,7 @@
   }
 
   body {
-    background-color: var(--color-background);
+    background-color: #020817;
     color: var(--color-foreground);
     overflow-x: hidden;
     overflow-y: auto;

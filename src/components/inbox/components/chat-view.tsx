@@ -59,17 +59,17 @@ export const ChatView = ({
 
 
   return (
-    <div className="flex flex-col h-full bg-[#020617] relative">
-      <div className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-[#020617]/50 backdrop-blur-xl z-10">
+    <div className="flex flex-col h-full bg-[#020817] relative">
+      <div className="h-16 border-b border-[#1E293B] flex items-center justify-between px-6 shrink-0 bg-[#020817]/50 backdrop-blur-xl z-10">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border border-white/10">
-            <AvatarFallback className="bg-indigo-600 text-white font-bold text-xs">
+          <Avatar className="h-8 w-8 border border-[#1E293B]">
+            <AvatarFallback className="bg-[#8B5CF6] text-white font-bold text-xs">
               {chat?.contacts?.name?.charAt(0) || "U"}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white leading-none">{chat?.contacts?.name || "Usuário"}</h3>
+              <h3 className="text-sm font-bold text-[#E2E8F0] leading-none">{chat?.contacts?.name || "Usuário"}</h3>
               {chat?.contacts?.lead_score && (
                 <div className={cn(
                   "w-1.5 h-1.5 rounded-full",
@@ -77,24 +77,24 @@ export const ChatView = ({
                 )} />
               )}
             </div>
-            <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest">
+            <p className="text-[10px] text-[#94A3B8] font-bold mt-1 uppercase tracking-widest">
               {chat?.queues?.name} • {chat?.status}
             </p>
           </div>
         </div>
 
         {/* CRM Context Integration */}
-        <div className="hidden lg:flex items-center gap-4 bg-white/[0.02] border border-white/5 px-4 py-1.5 rounded-xl mx-4">
+        <div className="hidden lg:flex items-center gap-4 bg-[#0F172A] border border-[#1E293B] px-4 py-1.5 rounded-xl mx-4">
           <div className="flex flex-col">
-            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Negócio Ativo</span>
+            <span className="text-[8px] font-black text-[#94A3B8] uppercase tracking-widest leading-none mb-1">Negócio Ativo</span>
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-3 h-3 text-indigo-400" />
+              <TrendingUp className="w-3 h-3 text-[#8B5CF6]" />
               <span className="text-[10px] font-black text-white uppercase tracking-tighter">Upgrade Enterprise</span>
             </div>
           </div>
-          <div className="w-px h-6 bg-white/5" />
+          <div className="w-px h-6 bg-[#1E293B]" />
           <div className="flex flex-col">
-            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Valor</span>
+            <span className="text-[8px] font-black text-[#94A3B8] uppercase tracking-widest leading-none mb-1">Valor</span>
             <div className="flex items-center gap-1">
               <DollarSign className="w-3 h-3 text-emerald-500" />
               <span className="text-[10px] font-black text-white">R$ 4.500,00</span>
@@ -103,14 +103,14 @@ export const ChatView = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-white transition-all rounded-xl">
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl">
             <Clock className="w-4 h-4"/>
           </Button>
           <Button variant="ghost" size="sm" className="h-9 text-[10px] font-black uppercase tracking-widest gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-xl px-4 border border-emerald-500/20">
             <Plus className="w-3.5 h-3.5" />
             Criar Deal
           </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-white transition-all rounded-xl" onClick={onToggleCustomer360}>
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl" onClick={onToggleCustomer360}>
             {showCustomer360 ? <PanelRightClose className="w-4 h-4"/> : <PanelRightOpen className="w-4 h-4"/>}
           </Button>
         </div>
@@ -132,7 +132,7 @@ export const ChatView = ({
               <Avatar className="h-8 w-8 shrink-0 mt-1">
                 <AvatarFallback className={cn(
                   "text-[10px] font-bold",
-                  isNote ? "bg-amber-500/20 text-amber-500" : "bg-slate-800 text-slate-500"
+                  isNote ? "bg-amber-500/20 text-amber-500" : "bg-[#0F172A] text-[#94A3B8]"
                 )}>
                   {isNote ? "IA" : (item.sender_profile_id ? "AG" : "CL")}
                 </AvatarFallback>
@@ -142,7 +142,7 @@ export const ChatView = ({
                   "p-4 rounded-2xl text-sm leading-relaxed shadow-sm border",
                   isNote 
                     ? "bg-amber-500/10 border-amber-500/20 text-amber-200 rounded-tr-none" 
-                    : "bg-white/[0.03] border-white/[0.08] text-slate-200 rounded-tl-none"
+                    : "bg-[#0F172A] border-[#1E293B] text-[#E2E8F0] rounded-tl-none"
                 )}>
                   {isNote && (
                     <div className="flex items-center gap-1.5 mb-1 justify-end">
@@ -152,7 +152,7 @@ export const ChatView = ({
                   )}
                   {item.body || item.content}
                 </div>
-                <span className="text-[10px] text-slate-600 font-bold uppercase">
+                <span className="text-[10px] text-[#94A3B8] font-bold uppercase">
                   {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
@@ -162,7 +162,7 @@ export const ChatView = ({
       </div>
 
       {/* Input */}
-      <div className="p-6 border-t border-white/5 bg-[#020617]/50 backdrop-blur-xl shrink-0">
+      <div className="p-6 border-t border-[#1E293B] bg-[#020817]/50 backdrop-blur-xl shrink-0">
         <div className="flex gap-2 mb-3 px-1">
           <Button 
             variant="ghost" 
@@ -170,7 +170,7 @@ export const ChatView = ({
             onClick={() => setMessageType('public')}
             className={cn(
               "h-7 text-[10px] font-black uppercase tracking-widest px-3 rounded-lg",
-              messageType === 'public' ? "bg-indigo-600/10 text-indigo-400" : "text-slate-500"
+              messageType === 'public' ? "bg-[#8B5CF6]/10 text-[#8B5CF6]" : "text-[#94A3B8]"
             )}
           >
             <User className="w-3 h-3 mr-1.5" />
@@ -182,7 +182,7 @@ export const ChatView = ({
             onClick={() => setMessageType('internal')}
             className={cn(
               "h-7 text-[10px] font-black uppercase tracking-widest px-3 rounded-lg",
-              messageType === 'internal' ? "bg-amber-500/10 text-amber-500" : "text-slate-500"
+              messageType === 'internal' ? "bg-amber-500/10 text-amber-500" : "text-[#94A3B8]"
             )}
           >
             <Lock className="w-3 h-3 mr-1.5" />
@@ -191,28 +191,28 @@ export const ChatView = ({
         </div>
         
         <div className={cn(
-          "bg-white/[0.02] border rounded-[1.5rem] flex items-center p-1.5 transition-all shadow-inner group",
-          messageType === 'internal' ? "border-amber-500/30" : "border-white/5 focus-within:border-indigo-500/30"
+          "bg-[#0F172A] border rounded-[1.5rem] flex items-center p-1.5 transition-all shadow-inner group",
+          messageType === 'internal' ? "border-amber-500/30" : "border-[#1E293B] focus-within:border-[#8B5CF6]/30"
         )}>
-          <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-500 hover:text-white transition-colors rounded-xl">
+          <Button variant="ghost" size="icon" className="h-10 w-10 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
             <Paperclip className="w-4 h-4" />
           </Button>
           <input 
-            className="flex-1 bg-transparent px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none" 
+            className="flex-1 bg-transparent px-3 py-2 text-sm text-[#E2E8F0] placeholder:text-[#94A3B8] focus:outline-none" 
             placeholder={messageType === 'internal' ? "Escreva uma nota interna (cliente não visualiza)..." : "Pressione Alt + S para sugestões da IA..."}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
           />
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-white transition-colors rounded-xl">
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
               <Mic className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-white transition-colors rounded-xl">
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
               <Smile className="w-4 h-4" />
             </Button>
             <Button className={cn(
               "h-10 w-10 rounded-xl p-0 transition-all shadow-lg active:scale-95",
-              messageType === 'internal' ? "bg-amber-600 hover:bg-amber-500 shadow-amber-600/20" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20"
+              messageType === 'internal' ? "bg-amber-600 hover:bg-amber-500 shadow-amber-600/20" : "bg-[#8B5CF6] hover:bg-[#A78BFA] shadow-[#8B5CF6]/20"
             )}>
               <Send className="w-4 h-4 text-white"/>
             </Button>
