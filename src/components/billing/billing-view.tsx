@@ -12,11 +12,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { useCurrentSubscription } from "@/hooks/billing/use-billing";
+import { useCurrentSubscription, useUsageMeters } from "@/hooks/billing/use-billing";
 import { cn } from "@/lib/utils";
 
 export const BillingView = () => {
   const { data: currentSub, isLoading } = useCurrentSubscription();
+  const { data: usageMeters } = useUsageMeters();
+
 
   return (
     <GlobalErrorBoundary name="Billing">
@@ -69,7 +71,7 @@ export const BillingView = () => {
         <div className="flex-1 overflow-y-auto no-scrollbar p-8">
             <div className="max-w-7xl mx-auto space-y-12">
                 {/* Banner de Plano Atual se estiver em Trial */}
-                {currentSub?.status === 'trial' && (
+                {currentSub?.subscription_status === 'trial' && (
                     <div className="bg-gradient-to-r from-amber-600 to-amber-500 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl shadow-amber-600/20">
                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
                         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
@@ -84,6 +86,7 @@ export const BillingView = () => {
                         </div>
                     </div>
                 )}
+
 
                 {/* Grid de Planos */}
                 <div>

@@ -8,12 +8,12 @@ export const PlansGrid = () => {
   const { data: plans, isLoading } = usePlans();
   const { data: currentSub } = useCurrentSubscription();
 
-  const getIcon = (name: string) => {
-    switch (name) {
-      case 'STARTER': return <Zap className="w-5 h-5 text-emerald-400" />;
-      case 'PROFESSIONAL': return <Rocket className="w-5 h-5 text-indigo-400" />;
-      case 'BUSINESS': return <ShieldCheck className="w-5 h-5 text-indigo-500" />;
-      case 'ENTERPRISE': return <Crown className="w-5 h-5 text-amber-400" />;
+  const getIcon = (code: string) => {
+    switch (code?.toLowerCase()) {
+      case 'starter': return <Zap className="w-5 h-5 text-emerald-400" />;
+      case 'professional': return <Rocket className="w-5 h-5 text-indigo-400" />;
+      case 'business': return <ShieldCheck className="w-5 h-5 text-indigo-500" />;
+      case 'enterprise': return <Crown className="w-5 h-5 text-amber-400" />;
       default: return <Zap className="w-5 h-5" />;
     }
   };
@@ -24,7 +24,7 @@ export const PlansGrid = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       {plans?.map((plan) => {
         const isCurrent = currentSub?.plan_id === plan.id;
-        const features = plan.features as any;
+        const features = (plan.features_config as any) || {};
 
         return (
           <div 
@@ -42,11 +42,13 @@ export const PlansGrid = () => {
 
             <div className="mb-8">
               <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center mb-6">
-                {getIcon(plan.name)}
+                {getIcon(plan.plan_code)}
               </div>
-              <h3 className="text-lg font-black text-white uppercase tracking-tight italic">{plan.name}</h3>
+              <h3 className="text-lg font-black text-white uppercase tracking-tight italic">{plan.plan_name}</h3>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-black text-white">R$ {Number(plan.price).toLocaleString('pt-BR')}</span>
+                <span className="text-3xl font-black text-white">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(plan.price_monthly))}
+                </span>
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">/mês</span>
               </div>
             </div>
@@ -54,11 +56,11 @@ export const PlansGrid = () => {
             <div className="space-y-4 flex-1 mb-8">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">O que está incluído:</p>
               {[
-                { label: `${features.max_users} Usuários`, active: true },
-                { label: `${features.max_channels} Canais Omnichannel`, active: true },
-                { label: `${Number(features.max_messages).toLocaleString()} Mensagens/mês`, active: true },
-                { label: 'Inteligência Artificial', active: features.ai_enabled },
-                { label: 'White Label Integrado', active: plan.name === 'ENTERPRISE' },
+                { label: `${features.max_users || 1} Usuários`, active: true },
+                { label: `${features.max_channels || 1} Canais Omnichannel`, active: true },
+                { label: `${Number(features.max_messages || 1000).toLocaleString()} Mensagens/mês`, active: true },
+                { label: 'Inteligência Artificial', active: !!features.ai_enabled },
+                { label: 'White Label Integrado', active: plan.plan_code === 'enterprise' },
               ].map((feature, idx) => (
                 <div key={idx} className={cn("flex items-center gap-3", feature.active ? "text-slate-300" : "text-slate-700")}>
                   <Check className={cn("w-3.5 h-3.5", feature.active ? "text-emerald-500" : "text-slate-800")} />
@@ -83,3 +85,4 @@ export const PlansGrid = () => {
     </div>
   );
 };
+

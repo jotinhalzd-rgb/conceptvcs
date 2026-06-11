@@ -1,16 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/auth/use-auth";
 
 export function usePlans() {
   return useQuery({
-    queryKey: ["subscription-plans"],
+    queryKey: ["billing-plans-v2"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("subscription_plans")
+        .from("billing_plans_v2")
         .select("*")
-        .eq("is_active", true)
-        .order("price", { ascending: true });
+        .eq("is_public", true)
+        .order("price_monthly", { ascending: true });
 
       if (error) throw error;
       return data;
@@ -19,49 +20,87 @@ export function usePlans() {
 }
 
 export function useCurrentSubscription() {
+  const { data: profile } = useProfile();
+  const orgId = profile?.organization_id;
+
   return useQuery({
-    queryKey: ["current-subscription"],
+    queryKey: ["current-subscription-v2", orgId],
     queryFn: async () => {
-      const { data: profile } = await supabase.auth.getUser();
-      if (!profile.user) return null;
-
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("company_id")
-        .eq("id", profile.user.id)
-        .single();
-
-      if (!userProfile?.company_id) return null;
-
       const { data, error } = await supabase
-        .from("subscriptions")
+        .from("billing_subscriptions_v2")
         .select(`
           *,
-          plan:subscription_plans(*)
+          plan:billing_plans_v2(*)
         `)
-        .eq("company_id", userProfile.company_id)
-
-        .order("created_at", { ascending: false })
-        .limit(1)
+        .eq("organization_id", orgId!)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
+    enabled: !!orgId,
+  });
+}
+
+export function useUsageMeters() {
+  const { data: profile } = useProfile();
+  const orgId = profile?.organization_id;
+
+  return useQuery({
+    queryKey: ["billing-usage-meters", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("billing_usage_meters")
+        .select("*")
+        .eq("organization_id", orgId!);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orgId,
   });
 }
 
 export function useInvoices() {
+  const { data: profile } = useProfile();
+  const orgId = profile?.organization_id;
+
   return useQuery({
-    queryKey: ["invoices"],
+    queryKey: ["billing-invoices-v2", orgId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("invoices")
+        .from("billing_invoices_v2")
         .select("*")
+        .eq("organization_id", orgId!)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
+    enabled: !!orgId,
   });
 }
+
+export function useCommissions() {
+  const { data: profile } = useProfile();
+  const orgId = profile?.organization_id;
+
+  return useQuery({
+    queryKey: ["billing-commissions-v2", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("billing_commissions_v2")
+        .select(`
+          *,
+          asset:hub_assets_marketplace(asset_title)
+        `)
+        .eq("partner_org_id", orgId!)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!orgId,
+  });
+}
+
