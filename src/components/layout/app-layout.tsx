@@ -355,7 +355,7 @@ export function AppLayout() {
             
             <div className={cn(
               "relative z-10 h-full",
-              (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && "max-w-7xl mx-auto"
+              (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "max-w-7xl mx-auto"
             )}>
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />
