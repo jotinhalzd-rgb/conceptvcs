@@ -34,8 +34,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { SoftphoneWidget } from "@/components/voice/softphone-widget";
+import { ProfileAwareContainer } from "@/components/mobile/layout/profile-aware-container";
 
 export function AppLayout() {
+
 
   const { user, loading: authLoading } = useAuth();
   const { data: profile } = useProfile();
@@ -131,7 +133,9 @@ export function AppLayout() {
 
   return (
     <GlobalErrorBoundary name="AppLayout">
+      <ProfileAwareContainer>
       <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
+
       <SoftphoneWidget />
       <TooltipProvider delayDuration={0}>
 
@@ -356,6 +360,8 @@ export function AppLayout() {
         </div>
       </TooltipProvider>
       </div>
+      </ProfileAwareContainer>
     </GlobalErrorBoundary>
+
   );
 }
