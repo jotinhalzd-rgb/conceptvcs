@@ -115,7 +115,7 @@ const InboxContent = () => {
       channel: "whatsapp",
       queue: "Financeiro",
       agent: "IA Copilot",
-      urgency: "Alta"
+      urgencyLabel: "Alta"
     },
   ];
 
