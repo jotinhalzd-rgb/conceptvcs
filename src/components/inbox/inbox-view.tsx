@@ -111,14 +111,10 @@ const InboxContent = () => {
       time: "2h", 
       sentiment: "neutral", 
       urgency: "Alta",
-      unread: 1, 
-      channel: "whatsapp",
-      queue: "Financeiro",
-      agent: "IA Copilot",
     },
   ];
 
-  const currentChat = chats.find(c => c.id === selectedChat);
+  const currentChat = chats.find(c => c.id === selectedChat) || chats[0];
   const { analysis, isAnalyzing } = useAICopilot(currentChat?.lastMsg || "");
 
   return (
@@ -158,7 +154,7 @@ const InboxContent = () => {
                     <Avatar className="h-10 w-10 border border-white/5">
                         <AvatarFallback className="bg-slate-800 text-slate-400 font-bold text-[10px]">{chat.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    {chat.unread > 0 && (
+                    {(chat.unread ?? 0) > 0 && (
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full border-2 border-[#030712] flex items-center justify-center text-[8px] font-black text-white">
                             {chat.unread}
                         </div>

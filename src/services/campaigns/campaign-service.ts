@@ -17,13 +17,18 @@ export interface Campaign {
 
 export const CampaignService = {
   async list() {
-    const { data, error } = await supabase
-      .from('campaigns')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error listing campaigns:", error);
+      throw error;
+    }
   },
 
   async create(campaign: Omit<Campaign, 'id'>) {
