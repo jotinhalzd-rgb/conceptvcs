@@ -7,9 +7,9 @@ import {
   BarChart3, 
   Settings,
   Bell,
-  Search,
   Zap,
-  Phone
+  Phone,
+  MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -18,7 +18,7 @@ export const MobileNavigation = ({ activeTab, onChange }: { activeTab: string, o
   const { data: profile } = useProfile();
   const role = profile?.role || 'agent';
 
-  // Configuração de abas por perfil
+  // Configuração de abas por perfil - Estendido para Mobile Platform
   const getTabsByRole = () => {
     switch (role) {
       case 'ceo_master':
@@ -40,8 +40,16 @@ export const MobileNavigation = ({ activeTab, onChange }: { activeTab: string, o
         return [
           { id: 'dashboard', label: 'Equipe', icon: LayoutDashboard },
           { id: 'inbox', label: 'Operação', icon: MessageSquare },
-          { id: 'queues', label: 'Filas', icon: Users },
+          { id: 'visits', label: 'Campo', icon: MapPin },
           { id: 'voice', label: 'Voz', icon: Phone }
+        ];
+      case 'vendedor':
+      case 'sales':
+        return [
+          { id: 'crm', label: 'Negócios', icon: Users },
+          { id: 'visits', label: 'Visitas', icon: MapPin },
+          { id: 'inbox', label: 'Inbox', icon: MessageSquare },
+          { id: 'profile', label: 'Eu', icon: Settings }
         ];
       default: // agent
         return [
@@ -56,21 +64,21 @@ export const MobileNavigation = ({ activeTab, onChange }: { activeTab: string, o
   const tabs = getTabsByRole();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-20 bg-[#030712]/80 backdrop-blur-xl border-t border-white/5 px-6 flex items-center justify-between z-50">
+    <div className="fixed bottom-0 left-0 right-0 h-20 bg-[#030712]/80 backdrop-blur-xl border-t border-white/5 px-6 flex items-center justify-between z-50 pb-safe">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          className="flex flex-col items-center gap-1 group relative py-2 px-3"
+          className="flex flex-col items-center gap-1 group relative py-2 px-2 min-w-[60px]"
         >
           <div className={cn(
             "p-2 rounded-xl transition-all duration-300",
-            activeTab === tab.id ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-500 group-hover:text-slate-300"
+            activeTab === tab.id ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 scale-110" : "text-slate-500 group-hover:text-slate-300"
           )}>
             <tab.icon className="w-5 h-5" />
           </div>
           <span className={cn(
-            "text-[9px] font-black uppercase tracking-widest transition-colors",
+            "text-[8px] font-black uppercase tracking-tighter transition-colors",
             activeTab === tab.id ? "text-indigo-400" : "text-slate-600"
           )}>
             {tab.label}
