@@ -31,9 +31,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-
-  const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
-
 export function AppLayout() {
   const { user, loading } = useAuth();
   const { data: profile } = useProfile();
