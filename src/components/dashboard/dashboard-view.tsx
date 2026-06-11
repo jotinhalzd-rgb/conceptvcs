@@ -61,7 +61,7 @@ function DashboardContent() {
              isManager ? "Team Hub" : "My Workspace"}
           </h1>
           <p className="text-slate-400 font-medium max-w-xl">
-            Olá, {profile?.full_name || "Operador"}. {isCEOMaster ? "A plataforma processou 1.2M eventos nas últimas 24h sem falhas críticas detectadas." : "Sincronização omnichannel ativa em 4 canais simultâneos."}
+            Olá, {profile?.full_name || "Operador"}. {isCEOMaster ? "Business AI detectou 2 novas oportunidades de receita nas últimas 12h." : "Sincronização omnichannel ativa em 4 canais simultâneos."}
           </p>
         </div>
         

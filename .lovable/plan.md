@@ -1,66 +1,68 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 8 (VOICE & PBX CLOUD)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 9 (BUSINESS AI - EXECUTIVE BRAIN)
 
-Este plano detalha a unificação da comunicação por voz ao ecossistema OneContact, transformando o sistema em uma central de atendimento 360º (Omnichannel Real).
+Este plano detalha a criação da camada de inteligência central que interpretará dados operacionais para fornecer recomendações estratégicas, alertas de risco e visibilidade executiva em tempo real.
 
 ---
 
-## 1. ARQUITETURA PBX CLOUD (ABSTRAÇÃO)
+## 1. ARQUITETURA BUSINESS AI (DATA HUB)
 
-Implementaremos uma camada de abstração de voz para permitir a conexão com múltiplos provedores SIP/WebRTC sem dependência de um único fornecedor.
+A Business AI atuará como um orquestrador que consome eventos de todas as fases anteriores para gerar uma camada de conhecimento executivo.
 
 ### Novas Entidades de Dados
-- **`voice_extensions` (Ramais):** `number`, `agent_id` (FK), `status` (available, busy, offline, ringing), `voicemail_config`.
-- **`call_logs` (Chamadas):** `direction` (inbound/outbound), `from_number`, `to_number`, `duration`, `recording_url`, `transcription_text`, `ai_summary`, `deal_id` (FK CRM), `contact_id` (FK).
-- **`ivr_flows` (URA):** Estrutura JSON para árvores de decisão de voz.
+- **`business_health_scores`**: Mapeamento diário de saúde por empresa/departamento baseado em (Atendimento + Vendas + SLA + NPS).
+- **`executive_insights`**: Recomendações geradas pela IA (ex: "Aumentar time de suporte entre 14h-16h").
+- **`churn_risk_signals`**: Registro de padrões de comportamento que indicam risco de cancelamento.
+- **`ai_analytical_queries`**: Log de perguntas feitas pelos gestores para aprendizado contínuo do modelo.
 
 ---
 
-## 2. EXPERIÊNCIA INTEGRADA (VOICE + INBOX + CRM)
+## 2. EXECUTIVE COMMAND CENTER (VISUAL)
 
-A telefonia será um componente nativo da interface, não um popup externo.
+Interface exclusiva para tomadores de decisão, focada em "O que precisa de ação agora?".
 
-- **Softphone Nativo:** Widget flutuante ou integrado à sidebar para discagem, mudo, transferência e conferência.
-- **Vincular Chamada:** Ao receber uma ligação de um número conhecido, a Inbox abre automaticamente o **Customer 360** desse contato.
-- **Conversão Automática:** Botão "Gerar Negócio" disponível durante a chamada para alimentar o CRM instantaneamente.
-
----
-
-## 3. INTELIGÊNCIA DE VOZ (AI COPILOT VOICE)
-
-A IA atuará após e durante as chamadas para aumentar a produtividade.
-
-- **Transcrição em Tempo Real:** Conexão preparada para Deepgram/Whisper para transformar áudio em texto.
-- **Motor de Insights:** Geração automática de resumo do motivo do contato e identificação de tarefas ("follow-up amanhã").
-- **URA Inteligente (NLP):** Preparação para roteamento por voz ("Diga em poucas palavras o que você precisa").
+### Componentes Principais
+- **Executive Smart Feed:** Timeline cronológica de eventos críticos (ROI de campanha, queda de conversão, meta atingida).
+- **Revenue Intelligence Widget:** Gráficos dinâmicos de faturamento por canal, comparando performance real vs. forecast.
+- **Decision Support System:** Botões de ação sugeridos pela IA abaixo de cada insight (ex: Insight "SLA baixo no Suporte" -> Ação "Habilitar transbordo para Comercial").
 
 ---
 
-## 4. ESTRATÉGIA DE CUSTOS E ESCALABILIDADE
+## 3. MOTORES DE PREVISÃO E ANÁLISE
 
-- **Mídia:** Armazenamento de gravações em Supabase Storage com políticas de retenção configuráveis.
-- **Latência:** Uso de sinalização WebRTC para voz de alta fidelidade diretamente no navegador.
-- **Custos:** Aproximadamente $0.005/min para transcrição e armazenamento.
+Utilizaremos modelos LLM avançados integrados aos dados do Supabase.
+
+- **Predictive Churn Engine:** Analisa tempo sem contato e sentimento histórico para classificar o risco do cliente no Customer 360.
+- **Opportunity Engine:** Varredura em contatos inativos e deals perdidos para sugerir reativação com base no Lead Score.
+- **Linguagem Natural (Ask Business AI):** Interface de chat para gestores consultarem dados do banco sem conhecer SQL (text-to-query dinâmico).
+
+---
+
+## 4. ESTRATÉGIA DE CUSTOS E CACHE
+
+- **Batch Processing:** A maioria das análises de tendência será feita em lotes (ex: 1x por hora) para reduzir custos de tokens.
+- **Realtime Critical:** Apenas eventos de alto risco (ex: SLA estourado para cliente VIP) dispararão análise imediata.
+- **Embeddings Históricos:** Armazenamento de tendências mensais em vetores para busca rápida de padrões sazonais.
 
 ---
 
 ## 5. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
 
-**Passo 1: Voice Schema & Migrations**  
-Criação das tabelas de ramais, chamadas e URA.
+**Passo 1: Business Intelligence Schema**  
+Criação das tabelas de health score, tendências e logs analíticos.
 
-**Passo 2: Painel de Telefonia (Softphone UI)**  
-Desenvolvimento da interface de discagem e controle de chamadas na Sidebar.
+**Passo 2: Executive Command Center UI**  
+Construção da tela "Master View" para CEOs com o Smart Feed integrado.
 
-**Passo 3: Integração com Filas Omnichannel**  
-Lógica para fazer chamadas caírem nas mesmas filas de WhatsApp/Email (Round Robin de Voz).
+**Passo 3: Módulo de Revenue Intelligence**  
+Implementação dos dashboards de faturamento cruzado entre CRM e Canais.
 
-**Passo 4: Monitoramento em Tempo Real (Wallboard)**  
-Dashboard para gestores visualizarem quem está em linha e tempo médio de espera.
+**Passo 4: Motor de Churn & Oportunidade**  
+Desenvolvimento da lógica de classificação preditiva no Customer 360.
 
-**Passo 5: Módulo de Transcrição & IA**  
-Processamento automático de chamadas finalizadas para gerar resumos no Customer 360.
+**Passo 5: IA Conversacional Analítica**  
+Interface de perguntas e respostas para dados corporativos via linguagem natural.
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para iniciar a construção da central de voz definitiva do ONECONTACT OS.
+Aguardando seu "sim" para transformar o ONECONTACT OS no cérebro estratégico da sua empresa para os próximos 10 anos.
