@@ -1,42 +1,50 @@
-# Plano de Implementação: EIN (Executive Intelligence Network)
+# Plano de Implementação: OneContact Hub (Marketplace & Ecossistema)
 
-O EIN representa o topo da pirâmide de inteligência do OneContact OS, transformando o ecossistema em uma rede de conhecimento compartilhado e anonimizado que atua como um "CEO Advisor" em tempo real.
+O Hub transformará o OneContact OS de um software em uma **plataforma expansível**, criando um efeito de rede onde desenvolvedores, consultores e empresas trocam ativos digitais e serviços.
 
-## 1. Arquitetura de Conhecimento (Global Aggregation)
+## 1. Arquitetura do Ecossistema (Hub Schema)
 
-Para garantir anonimato absoluto e performance em escala de milhões de empresas, o EIN utilizará uma estrutura desacoplada da operação:
+A estrutura será dividida em Ativos (Apps/Templates) e Entidades (Parceiros/Serviços):
 
-- `public.ein_benchmarks`: Tabela global de agregados por indústria/porte (Segmento, SLA Médio, Conversão Média, Ticket Médio).
-- `public.ein_sector_trends`: Registro de tendências macro (Ex: Queda de demanda em "Varejo" na região "Sudeste").
-- `public.ein_best_practices`: Repositório de ações recomendadas validadas estatisticamente.
-- `public.ein_advisor_logs`: Cache de conselhos personalizados gerados para cada CEO/Executivo.
+- `public.hub_marketplace_assets`: Tabela central de itens (Apps, Bots, AI Agents, Templates).
+    - `type`: 'app', 'bot', 'ai_agent', 'template', 'workflow'.
+    - `category`: 'crm', 'marketing', 'support', 'finance'.
+    - `pricing_model`: 'free', 'one_time', 'subscription'.
+- `public.hub_asset_installs`: Registro de quais empresas instalaram quais ativos.
+- `public.hub_partners`: Perfis de parceiros (Consultores, Agências, Devs).
+    - `certification_level`: 'partner', 'expert', 'specialist', 'elite'.
+- `public.hub_service_offers`: Catálogo de serviços profissionais (Implantação, Treinamento).
+- `public.hub_reviews`: Avaliações e ratings para ativos e parceiros.
+- `public.hub_revenue_share`: Log de transações para repasse de comissões.
 
-## 2. Camada de Anonimização & Compliance
+## 2. Governança e Validação
 
-O fluxo de dados OIL -> EIN seguirá regras rígidas:
-- **K-Anonymity**: Só gera benchmarks para segmentos com no mínimo $N$ empresas ativas.
-- **Differential Privacy**: Adição de ruído estatístico em métricas sensíveis para evitar engenharia reversa de dados.
-- **Isolation**: O EIN lê do OIL apenas agregados numéricos, nunca metadados ou PII (Personally Identifiable Information).
+- **Asset State**: Todo item passará por estados: `draft` -> `pending_review` -> `certified` -> `published`.
+- **Sandboxing**: Apps instalados via Hub operarão via API com escopos limitados, respeitando o RLS do tenant.
 
-## 3. Componentes Executivos (CEO Advisor UI)
+## 3. Componentes Frontend (Hub UI)
 
-### A. Executive Dashboard (EIN View)
-- `MarketComparisonCard`: Gráficos de "Sua Empresa vs. Mercado" para métricas chave.
-- `SectorTrendFeed`: Feed de notícias e mudanças de comportamento no segmento da empresa.
+### A. Marketplace Central (`MarketplaceView`)
+- `AssetExplorer`: Grade de descoberta com filtros por categoria e popularidade.
+- `AssetDetailCard`: Página completa do item com screenshots, documentação e botão "Instalar".
 
-### B. CEO Advisor Chat/Feed
-- `AdvisorInsightCard`: Recomendações práticas e diretas (Ex: "Aumente seu time em 1 pessoa para bater a média de SLA do mercado").
-- `OpportunityHeatmap`: Mapa de calor de onde a empresa está perdendo para concorrentes anônimos.
+### B. Portal do Parceiro (`PartnerDashboard`)
+- Gestão de portfólio e ativos publicados.
+- Monitoramento de instalações e receita gerada (Revenue Share).
 
-## 4. Motores Analíticos (Cross-Tenant Engine)
+### C. Gestão de Ativos Instalados
+- Central de controle para gerenciar APIs, webhooks e configurações de extensões instaladas.
 
-- **Peer Grouping**: Agrupamento automático de empresas por perfil (Ex: Clínicas com 10-20 funcionários).
-- **Correlation Engine**: Identifica quais práticas em empresas líderes de segmento podem ser replicadas (Ex: Automação de WhatsApp aumenta conversão em 15% no setor de Franquias).
+## 4. Estratégia de Monetização e Escalabilidade
 
-## Fluxo de Inteligência
+- **Universal Installer**: Sistema de "um clique" que executa scripts de configuração (tabelas, webhooks, bots) ao instalar um ativo.
+- **Isolamento**: `company_id` em todos os registros de instalação e transação.
+- **Repasse Automático**: Preparação para integração com gateways de pagamento para divisão de receita (Stripe Connect / Paddle).
+
+## Fluxo do Hub
 
 ```text
-DADOS BRUTOS -> OIL (Análise por Tenant) -> AGREGADOR ANONIMIZADO -> EIN (Benchmark de Rede) -> CONSELHO EXECUTIVO
+PUBLICAÇÃO (Dev/Parceiro) -> HOMOLOGAÇÃO (OneContact) -> MARKETPLACE (Descoberta) -> INSTALAÇÃO (Empresa) -> VALOR (Efeito de Rede)
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de benchmarks globais e a interface do CEO Advisor.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das tabelas de marketplace e a interface de exploração de aplicativos.
