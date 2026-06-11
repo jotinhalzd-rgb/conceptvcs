@@ -42,6 +42,8 @@ export function AppLayout() {
   const isCampaigns = location.startsWith("/campaigns");
   const isCustomers = location.startsWith("/customers");
   const isQueues = location.startsWith("/queues");
+  const isCRM = location.startsWith("/crm");
+
 
   const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
 
@@ -283,7 +285,7 @@ export function AppLayout() {
         {/* Topbar & Content */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#020617]">
           {/* Header */}
-          {!isInbox && !isCampaigns && !isCustomers && !isQueues && (
+          {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && (
             <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
                 <div className="relative max-w-md w-full group hidden md:block">
@@ -318,10 +320,10 @@ export function AppLayout() {
           {/* Main Content Area */}
           <main className={cn(
             "flex-1 overflow-hidden relative",
-            (!isInbox && !isCampaigns && !isCustomers && !isQueues) && "p-8 overflow-y-auto no-scrollbar"
+            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && "p-8 overflow-y-auto no-scrollbar"
           )}>
             {/* Background Gradient Spotlights */}
-            {(!isInbox && !isCampaigns && !isCustomers && !isQueues) && (
+            {(!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && (
 
               <>
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
@@ -331,7 +333,7 @@ export function AppLayout() {
             
             <div className={cn(
               "relative z-10 h-full",
-              (!isInbox && !isCampaigns && !isCustomers && !isQueues) && "max-w-7xl mx-auto"
+              (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM) && "max-w-7xl mx-auto"
             )}>
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />
