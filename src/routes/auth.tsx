@@ -51,7 +51,10 @@ function AuthPage() {
   };
 
   const handleDemoAccess = async () => {
-    if (loading) return;
+    if (loading) {
+      console.log("Already loading, ignoring click");
+      return;
+    }
     
     console.log("CEO Demo clicked");
     setLoading(true);
@@ -60,65 +63,74 @@ function AuthPage() {
     const demoPassword = "Demo@123456";
     
     try {
-      // Se já houver sessão, redireciona direto
-      if (session) {
-        console.log("Session exists, redirecting to dashboard");
-        navigate({ to: "/dashboard" });
-        return;
-      }
-
-      console.log("Attempting login");
+      console.log("Starting demo login flow");
       
       // 1. Tentar login direto
+      console.log("Attempting direct login with signInWithPassword");
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: demoPassword,
       });
 
+      console.log("Auth response:", { data, error: signInError });
+
       if (signInError) {
-        console.warn("User not found or login error. Attempting to create demo account automatically...", signInError.message);
+        console.warn("Direct login failed, checking error type...", signInError.message);
         
-        // 2. Se falhar (usuário não existe), tentar cadastrar
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: demoEmail,
-          password: demoPassword,
-          options: {
-            data: {
-              full_name: "CEO Demo",
-              role: "ceo",
-              organization_name: "ONECONTACT DEMO COMPANY",
+        // Se o erro for de credenciais inválidas ou usuário não encontrado, tentamos criar
+        if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("Email not confirmed")) {
+          console.log("Attempting to create demo account automatically...");
+          
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: demoEmail,
+            password: demoPassword,
+            options: {
+              data: {
+                full_name: "CEO Demo",
+                role: "ceo",
+                organization_name: "ONECONTACT DEMO COMPANY",
+              }
+            }
+          });
+
+          console.log("SignUp response:", { data: signUpData, error: signUpError });
+
+          if (signUpError) {
+            if (signUpError.message.includes("already registered")) {
+              console.log("User already registered but login failed. Trying one last time after a small delay...");
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              const { error: retryError } = await supabase.auth.signInWithPassword({
+                email: demoEmail,
+                password: demoPassword,
+              });
+              if (retryError) throw retryError;
+            } else {
+              throw signUpError;
             }
           }
-        });
-
-        if (signUpError) {
-          // Se o erro for que o usuário já existe mas a senha está errada, reportamos
-          if (signUpError.message.includes("already registered")) {
-            throw new Error("O usuário demo já existe mas as credenciais falharam. Por favor, contate o administrador.");
+          
+          // Se o cadastro funcionou e não logou automático, logamos agora
+          if (!signUpData?.session) {
+            console.log("Manual login after signup...");
+            const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+              email: demoEmail,
+              password: demoPassword,
+            });
+            if (finalSignInError) throw finalSignInError;
           }
-          throw signUpError;
+        } else {
+          throw signInError;
         }
-
-        console.log("Demo user created successfully. Finalizing login...");
-        
-        // 3. Login após cadastro (algumas configs de auth exigem isso ou auto-login)
-        const { error: finalSignInError } = await supabase.auth.signInWithPassword({
-          email: demoEmail,
-          password: demoPassword,
-        });
-
-        if (finalSignInError) throw finalSignInError;
       }
 
-      console.log("Login successful");
-      console.log("Redirecting to dashboard");
-      
+      console.log("Login successful, redirecting to dashboard");
       toast.success("Acesso DEMO CEO ativado!");
-      navigate({ to: "/dashboard" });
+      
+      // Forçamos o redirecionamento imediato
+      window.location.href = "/dashboard";
     } catch (error: any) {
-      console.error("Critical error during demo access:", error);
+      console.error("CRITICAL ERROR during demo access:", error);
       toast.error(`Falha no acesso demo: ${error.message}`);
-    } finally {
       setLoading(false);
     }
   };
