@@ -1,77 +1,84 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 3 (INBOX UNIVERSAL)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 4 (CRM OPERACIONAL)
 
-Este plano detalha a construção da central operacional de atendimento do ONECONTACT OS, focando em produtividade, automação de distribuição e gestão de SLA.
-
----
-
-## 1. ARQUITETURA E ESTRUTURA DE DADOS
-
-A fundação de dados foi expandida para suportar a complexidade de uma operação Enterprise.
-
-### Entidade: Conversation (Conversas)
-- **Status:** Implementação de máquina de estados: `new` (Novo), `active` (Em Atendimento), `waiting_customer` (Aguardando Cliente), `transferred` (Transferido), `resolved` (Finalizado), `archived` (Arquivado).
-- **Inteligência:** Campos de `priority`, `sla_status`, `temperature` e `last_message_preview`.
-- **Relações:** Vinculação obrigatória a uma `queue_id` (Fila) e opcional a um `agent_id` (Responsável).
-
-### Tabelas de Suporte (Implementadas)
-- `internal_notes`: Mensagens colaborativas entre agentes (amarelas/privadas).
-- `conversation_audit`: Histórico imutável de movimentações (quem transferiu, quando mudou status).
-- `routing_rules`: Base do motor de distribuição por palavras-chave (ex: "financeiro" -> Fila Financeiro).
+Este plano detalha a transformação do ONECONTACT OS em um ecossistema de vendas integrado à comunicação, onde cada conversa é uma oportunidade de receita.
 
 ---
 
-## 2. INTERFACE INBOX UNIVERSAL (VISUAL & UX)
+## 1. ARQUITETURA DE DADOS (DATABASE)
 
-O design seguirá o padrão **Linear/Intercom**: máxima densidade de informação com clareza visual.
+Expandiremos o schema para suportar a gestão de oportunidades e metas.
 
-### Layout Split-Pane
-- **Sidebar (Canais/Filas):** Filtros rápidos por departamento e canal (WhatsApp, IG, Email).
-- **Lista de Conversas:** Card compacto com indicadores de tempo de espera, SLA (bolinha colorida) e canal.
-- **Área de Chat:** 
-  - Balões diferenciados para cliente, agente e IA.
-  - Notas internas integradas na timeline.
-  - Botões rápidos de transferência e finalização.
-- **Painel Customer 360 (Lateral Direita):** Exibição de dados do CRM, tags, timeline de eventos e score de saúde do cliente.
+### Nova Entidade: `deals` (Negócios)
+- **Campos:** `title`, `value` (decimal), `probability` (0-100), `status` (open, won, lost), `expected_close_date`, `closed_at`, `origin_conversation_id` (FK).
+- **Relações:** Vinculado obrigatoriamente a um `contact_id`, `pipeline_id` e `stage_id`.
 
----
+### Extensão: `contacts` & `lead_scores`
+- **Lead Status:** Adição de flag `is_lead` e `lifecycle_stage` em `contacts`.
+- **Pontuação:** Criação da tabela `lead_scores` para motor de temperatura (Cold, Warm, Hot, Priority).
 
-## 3. MOTOR DE DISTRIBUIÇÃO E OPERAÇÃO
-
-### Lógica de Roteamento (Simulation Engine)
-- **Classificação:** Ao receber uma mensagem (mock), a engine verificará `routing_rules`.
-- **Distribuição:** 
-  - Se `agent_id` estiver vago -> Enviar para a Fila.
-  - Se houver `agent_id` (Sticky Agent) -> Notificar o responsável.
-- **Transferência:** Interface para mover conversas entre Filas ou Agentes com registro automático em `conversation_audit`.
-
-### Monitoramento de SLA
-- Cronômetro visual regressivo baseado no `waiting_since`.
-- Mudança de cor dinâmica: Verde (Normal) -> Laranja (Atenção) -> Vermelho (Breached).
+### Gestão de Metas: `sales_goals`
+- **Campos:** `target_value`, `current_value`, `type` (individual, team, company), `period` (YYYY-MM).
 
 ---
 
-## 4. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
+## 2. EXPERIÊNCIA INTEGRADA (INBOX + CRM)
 
-**Passo 1: Componentização do Inbox v2**  
-Refatoração do `InboxView` para utilizar dados reais do Supabase e hooks de tempo real.
+A filosofia é "Zero Context Switching". O CRM vive dentro do chat.
 
-**Passo 2: Sistema de Mensagens e Notas**  
-Implementação da timeline unificada que distingue `messages` de `internal_notes`.
-
-**Passo 3: Módulo de Distribuição & Transferência**  
-Criação dos modais de transferência e lógica de atualização de `agent_id`/`queue_id`.
-
-**Passo 4: Integração Customer 360**  
-Conexão do painel lateral com os dados de `customer_scores` e `customer_events`.
+### Interface no Chat (Inbox)
+- **Barra de Contexto CRM:** No topo ou lateral do chat, exibição do negócio ativo vinculado ao contato.
+- **Ações Rápidas:**
+  - Botão "Criar Oportunidade" (abre pequeno popover com valor e pipeline).
+  - Seletor de Etapa do Funil direto na conversa.
+  - Indicador visual de "Lead Score" ao lado do nome do cliente.
 
 ---
 
-## TÉCNICO
-- **Realtime:** Uso de `supabase.channel()` para refletir novas mensagens e mudanças de status instantaneamente.
-- **Performance:** Virtualização da lista de chats para evitar gargalos em operações com >100 conversas simultâneas.
-- **UX:** Atalhos de teclado (Alt+S para notas, Alt+T para transferir).
+## 3. MÓDULO CRM (KANBAN & FORECAST)
+
+Uma visão macro para gestão de fluxo.
+
+- **Visualização Kanban:** Colunas por `stages`, cartões com `value`, `contact_name` e `last_interaction_time`.
+- **Drag & Drop:** Movimentação entre etapas com atualização instantânea no banco e registro em `crm_audit`.
+- **Painel de Forecast:**
+  - Receita Prevista (Soma dos valores * probabilidade).
+  - Receita Realizada (Soma dos deals 'won').
+  - Gráfico de funil de conversão.
 
 ---
 
-**PARANDO PARA APROVAÇÃO.**
-Aguardando sua aprovação para iniciar a implementação da fundação visual e lógica do Inbox Universal.
+## 4. MOTOR DE LEAD SCORING (LOGIC ENGINE)
+
+Algoritmo inicial para classificação automática:
+- **+20 pts:** Interação nas últimas 2h.
+- **+30 pts:** Palavras-chave de intenção ("preço", "comprar", "pix").
+- **-10 pts:** Tempo de resposta do agente acima do SLA.
+- **Categorização:**
+  - 0-30: Frio | 31-60: Morno | 61-90: Quente | 91+: Prioritário.
+
+---
+
+## 5. CRONOGRAMA DE EXECUÇÃO
+
+**Passo 1: Schema & Migrations**  
+Criação das tabelas `deals`, `sales_goals` e índices de performance.
+
+**Passo 2: CRM Core UI**  
+Desenvolvimento da tela de Pipelines e o componente de Kanban.
+
+**Passo 3: Integração Inbox Universal**  
+Implementação dos widgets de CRM dentro do terminal de chat e automação de criação de Lead.
+
+**Passo 4: Dashboards de Gestão**  
+Construção da visão de Metas e Previsão de Receita para CEO e Gerentes.
+
+---
+
+## IMPACTO NAS ENTIDADES EXISTENTES
+- **Customer 360:** Ganha aba "Oportunidades" com histórico de negociações.
+- **Audit Logs:** Passa a registrar cada mudança de valor ou etapa de negócio para transparência total.
+
+---
+
+**PARANDO PARA APROVAÇÃO.**  
+Aguardando seu "sim" para iniciar a construção do CRM nativo integrado.
