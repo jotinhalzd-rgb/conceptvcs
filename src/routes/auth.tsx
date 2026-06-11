@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, Crown, Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
@@ -41,6 +42,19 @@ function AuthPage() {
     }
   };
 
+  const handleDemoAccess = async () => {
+    setLoading(true);
+    setEmail("demo@onecontact.ai");
+    setPassword("demo123456");
+    
+    // In a real scenario, we'd sign in. For now, we simulate the experience
+    setTimeout(() => {
+      toast.success("Acesso DEMO CEO ativado!");
+      navigate({ to: "/dashboard" });
+      setLoading(false);
+    }, 1200);
+  };
+
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#020617]">
       {/* Background Decorative Elements */}
@@ -50,37 +64,37 @@ function AuthPage() {
       </div>
 
       <main className="relative z-10 w-full max-w-[440px] px-6 py-12">
-        <div className="flex flex-col items-center mb-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-emerald-500 p-0.5 shadow-lg shadow-indigo-500/20 mb-6">
+        <header className="flex flex-col items-center mb-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-500 p-0.5 shadow-2xl shadow-indigo-500/20 mb-6">
             <div className="w-full h-full rounded-[14px] bg-[#020617] flex items-center justify-center">
-              <ShieldCheck className="w-8 h-8 text-white" />
+              <ShieldCheck className="w-9 h-9 text-white" />
             </div>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
             ONECONTACT OS
           </h1>
-          <p className="text-slate-400 text-sm max-w-[280px]">
+          <p className="text-slate-400 text-sm max-w-[280px] leading-relaxed">
             {isSignUp 
               ? "Crie sua conta corporativa para gerenciar suas operações em escala." 
-              : "Entre no sistema operacional definitivo para sua empresa."}
+              : "O sistema operacional definitivo para empresas de alto crescimento."}
           </p>
-        </div>
+        </header>
 
-        <div className="backdrop-blur-xl bg-white/[0.02] border border-white/[0.08] rounded-3xl p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-500">
-          <form onSubmit={handleAuth} className="space-y-5">
+        <section className="backdrop-blur-2xl bg-white/[0.03] border border-white/[0.08] rounded-3xl p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-500">
+          <form onSubmit={handleAuth} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+              <label htmlFor="email" className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em] ml-1">
                 E-mail Corporativo
               </label>
               <div className="relative group">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
                 <Input 
                   id="email"
                   type="email" 
                   placeholder="exemplo@empresa.com" 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/50 focus:ring-indigo-500/20 text-white pl-11 h-12 rounded-xl transition-all"
+                  className="bg-white/[0.02] border-white/[0.08] focus:border-indigo-500/50 focus:ring-indigo-500/20 text-white pl-12 h-14 rounded-2xl transition-all placeholder:text-slate-600"
                   required 
                 />
               </div>
@@ -88,67 +102,102 @@ function AuthPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between ml-1">
-                <label htmlFor="password" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <label htmlFor="password" className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em]">
                   Senha
                 </label>
                 {!isSignUp && (
-                  <button type="button" className="text-[11px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+                  <button type="button" className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
                     Esqueceu a senha?
                   </button>
                 )}
               </div>
               <div className="relative group">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
                 <Input 
                   id="password"
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   placeholder="••••••••"
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/[0.03] border-white/[0.08] focus:border-indigo-500/50 focus:ring-indigo-500/20 text-white pl-11 h-12 rounded-xl transition-all"
+                  className="bg-white/[0.02] border-white/[0.08] focus:border-indigo-500/50 focus:ring-indigo-500/20 text-white pl-12 pr-12 h-14 rounded-2xl transition-all placeholder:text-slate-600"
                   required 
                 />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
             <Button 
               id="auth-submit"
               type="submit" 
-              className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-300 active:scale-[0.98] group" 
+              className="w-full h-14 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/20 transition-all duration-300 active:scale-[0.98] group relative overflow-hidden" 
               disabled={loading}
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Processando...</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span className="tracking-wide">Processando...</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  <span>{isSignUp ? "Criar Minha Conta" : "Acessar Plataforma"}</span>
-                  {isSignUp ? <UserPlus className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /> : <LogIn className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
+                  <span className="tracking-wide">{isSignUp ? "Criar Minha Conta" : "Acessar Plataforma"}</span>
+                  {isSignUp ? <UserPlus className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> : <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                 </div>
               )}
             </Button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-white/[0.05]">
-            <p className="text-center text-sm text-slate-500">
+          <div className="mt-8 pt-6 border-t border-white/[0.05] text-center">
+            <p className="text-sm text-slate-500">
               {isSignUp ? "Já possui uma conta ativa?" : "Ainda não tem acesso?"}{" "}
               <button 
                 id="toggle-auth-mode"
                 type="button"
-                className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors flex items-center gap-1 mx-auto mt-2"
+                className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors inline-flex items-center gap-1 group"
                 onClick={() => setIsSignUp(!isSignUp)}
               >
-                <span>{isSignUp ? "Entrar no sistema" : "Solicitar acesso agora"}</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>{isSignUp ? "Entrar no sistema" : "Solicitar acesso"}</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </p>
           </div>
-        </div>
+        </section>
 
-        <footer className="mt-12 text-center text-[11px] text-slate-600 uppercase tracking-[0.2em] font-medium">
-          &copy; {new Date().getFullYear()} OneContact Enterprise SaaS OS
+        <section className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="h-px flex-1 bg-white/[0.05]" />
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">Acesso Rápido</span>
+            <div className="h-px flex-1 bg-white/[0.05]" />
+          </div>
+          
+          <button
+            onClick={handleDemoAccess}
+            disabled={loading}
+            className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:bg-white/[0.05] hover:border-indigo-500/30 transition-all duration-300 group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <Crown className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-sm font-bold text-white tracking-wide">CEO DEMO</h3>
+                <p className="text-[11px] text-slate-500">Acesso completo para demonstração</p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/[0.03] flex items-center justify-center text-slate-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </button>
+        </section>
+
+        <footer className="mt-12 text-center text-[10px] text-slate-600 uppercase tracking-[0.3em] font-bold opacity-50">
+          &copy; {new Date().getFullYear()} OneContact Enterprise SaaS
         </footer>
       </main>
     </div>
