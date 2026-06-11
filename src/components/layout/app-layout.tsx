@@ -22,8 +22,10 @@ import {
   Briefcase,
   Ticket,
   Rocket,
-  CreditCard
+  CreditCard,
+  Sparkles
 } from "lucide-react";
+
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
