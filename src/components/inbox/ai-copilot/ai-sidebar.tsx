@@ -48,7 +48,8 @@ export const AISidebar = ({ chat, onApplyReply }: AISidebarProps) => {
     if (chat?.last_message_preview) {
       handleAnalyze();
     }
-  }, [chat?.last_message_preview]);
+  }, [chat?.last_message_preview, selectedAgentId]);
+
 
   const handleAnalyze = async () => {
     setIsLoading(true);
