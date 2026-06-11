@@ -1,19 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Clock, Timer, Star, TrendingUp, AlertCircle, PlayCircle, PauseCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StatsBox } from "../widgets/stats-box";
 
 const RankingItem = ({ pos, name, value, color }: any) => (
-  <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/[0.05]">
-    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs", color)}>
+  <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/[0.05] group">
+    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] uppercase tracking-tighter", color)}>
       {pos}
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-bold text-white truncate">{name}</p>
+      <p className="text-sm font-bold text-white truncate group-hover:text-indigo-400 transition-colors">{name}</p>
       <div className="w-full h-1 bg-white/[0.05] rounded-full mt-2 overflow-hidden">
-        <div className="h-full bg-indigo-500" style={{ width: `${value}%` }} />
+        <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${value}%` }} />
       </div>
     </div>
-    <span className="text-sm font-bold text-slate-400 tabular-nums">{value}%</span>
+    <span className="text-xs font-black text-slate-500 tabular-nums">{value}%</span>
   </div>
 );
 
@@ -21,46 +22,10 @@ export function ManagerDashboard() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-white/[0.02] border-white/[0.08]">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <Clock className="w-6 h-6 text-indigo-400" />
-              <div className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded">-12%</div>
-            </div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Tempo Médio de Resposta</p>
-            <h4 className="text-2xl font-black text-white mt-1">1m 42s</h4>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/[0.02] border-white/[0.08]">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <Timer className="w-6 h-6 text-emerald-400" />
-              <div className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded">+5%</div>
-            </div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Tempo Médio Atendimento</p>
-            <h4 className="text-2xl font-black text-white mt-1">14m 20s</h4>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/[0.02] border-white/[0.08]">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <Star className="w-6 h-6 text-amber-400" />
-              <div className="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded">Top</div>
-            </div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Avaliação da Equipe</p>
-            <h4 className="text-2xl font-black text-white mt-1">4.85</h4>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/[0.02] border-white/[0.08]">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <TrendingUp className="w-6 h-6 text-purple-400" />
-              <div className="bg-purple-500/10 text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded">Meta</div>
-            </div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Conversões</p>
-            <h4 className="text-2xl font-black text-white mt-1">24.2%</h4>
-          </CardContent>
-        </Card>
+        <StatsBox icon={Clock} label="Tempo de Resposta" value="1m 42s" color="bg-indigo-500/10 text-indigo-400" trend={{ value: "-12%", positive: true }} />
+        <StatsBox icon={Timer} label="Tempo Atendimento" value="14m 20s" color="bg-emerald-500/10 text-emerald-400" trend={{ value: "+5%", positive: true }} />
+        <StatsBox icon={Star} label="Avaliação Equipe" value="4.85" color="bg-amber-500/10 text-amber-400" />
+        <StatsBox icon={TrendingUp} label="Conversões" value="24.2%" color="bg-purple-500/10 text-purple-400" trend={{ value: "Meta", positive: true }} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
