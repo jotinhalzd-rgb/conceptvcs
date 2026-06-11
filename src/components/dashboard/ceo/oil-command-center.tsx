@@ -18,9 +18,10 @@ import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 
 export const OILCommandCenter = () => {
-  const { recommendations, healthScores, isLoading } = useOIL();
+  const { recommendations, healthHistory, latestScore, alerts, isLoading } = useOIL();
 
   if (isLoading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest animate-pulse">Iniciando Camada de Inteligência...</div>;
+
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
