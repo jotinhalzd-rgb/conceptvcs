@@ -189,11 +189,13 @@ export const InboxView = () => {
             
             <div className="flex gap-4 max-w-[80%]">
               <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-slate-800 text-slate-400 text-xs font-bold">RA</AvatarFallback>
+                <AvatarFallback className="bg-slate-800 text-slate-400 text-xs font-bold">
+                  {currentChat?.name.split(' ').map(n => n[0]).join('') || "RA"}
+                </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
                 <div className="bg-white/[0.03] border border-white/[0.08] text-slate-200 p-4 rounded-3xl rounded-tl-none shadow-sm">
-                  Olá, estou muito insatisfeito com a demora no suporte. Quero cancelar meu plano imediatamente.
+                  {currentChat?.lastMsg || "Olá, como posso ajudar?"}
                 </div>
                 <span className="text-[10px] text-slate-600 font-bold ml-2">12:30</span>
               </div>
