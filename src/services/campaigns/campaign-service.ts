@@ -32,31 +32,49 @@ export const CampaignService = {
   },
 
   async create(campaign: Omit<Campaign, 'id'>) {
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data, error } = await supabase
-      .from('campaigns')
-      .insert([{ 
-        ...campaign, 
-        created_by: user?.id,
-        company_id: campaign.company_id || '00000000-0000-0000-0000-000000000000' // Placeholder para multi-empresa
-      }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    try {
+      // Validações básicas
+      if (!campaign.name) throw new Error("O nome da campanha é obrigatório.");
+      if (!campaign.channel) throw new Error("O canal de disparo deve ser selecionado.");
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sessão expirada. Por favor, faça login novamente.");
+
+      const { data, error } = await supabase
+        .from('campaigns')
+        .insert([{ 
+          ...campaign, 
+          created_by: user?.id,
+          company_id: campaign.company_id || '00000000-0000-0000-0000-000000000000'
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error("Error creating campaign:", error);
+      throw new Error(error.message || "Falha ao criar campanha. Tente novamente.");
+    }
   },
 
   async update(id: string, updates: Partial<Campaign>) {
-    const { data, error } = await supabase
-      .from('campaigns')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    try {
+      if (!id) throw new Error("ID da campanha não fornecido.");
+
+      const { data, error } = await supabase
+        .from('campaigns')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error(`Error updating campaign ${id}:`, error);
+      throw new Error(error.message || "Erro ao atualizar dados. Verifique sua conexão.");
+    }
   },
 
   async delete(id: string) {
