@@ -257,6 +257,8 @@ export const InboxView = () => {
               <input 
                 className="flex-1 bg-transparent border-none text-slate-200 placeholder:text-slate-600 text-sm py-3 px-2 focus:outline-none" 
                 placeholder="Responda com ajuda da IA... (Alt + S para sugestões)" 
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
               />
               <div className="flex items-center gap-1 pr-2">
                 <Button variant="ghost" size="icon" className="rounded-2xl text-slate-500 hover:text-white h-10 w-10 transition-all">
