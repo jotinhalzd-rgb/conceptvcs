@@ -18,6 +18,17 @@ export function useSendMessage() {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Usuário não autenticado");
 
+      // Fetch user profile to get organization_id
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (profileError || !profile?.organization_id) {
+        throw new Error("Organização não encontrada para o usuário");
+      }
+
       if (type === 'internal') {
         const { data, error } = await supabase
           .from("internal_notes")
@@ -36,6 +47,7 @@ export function useSendMessage() {
           .from("messages")
           .insert({
             conversation_id: conversationId,
+            organization_id: profile.organization_id,
             body: body,
             type: 'text',
             sender_profile_id: userData.user.id,
