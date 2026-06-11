@@ -269,6 +269,6 @@ export function AppLayout() {
           </main>
         </div>
       </TooltipProvider>
-    </div>
+    </GlobalErrorBoundary>
   );
 }
