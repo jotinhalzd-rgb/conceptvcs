@@ -7,9 +7,5 @@ export const Route = createFileRoute('/campaigns')({
 });
 
 function CampaignsPage() {
-  return (
-    <AppLayout>
-      <CampaignManager />
-    </AppLayout>
-  );
+  return <CampaignManager />;
 }
