@@ -31,21 +31,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAICopilot } from "@/hooks/inbox/use-ai-copilot";
 
 export const InboxView = () => {
-  const [selectedChat, setSelectedChat] = useState(1);
+  const [selectedChat, setSelectedChat] = useState<number>(1);
   const [showCopilot, setShowCopilot] = useState(true);
   const [inputMessage, setInputMessage] = useState("");
   
-  // Exemplo de uso do Hook de Refatoração (Etapa 2)
-  const lastCustomerMessage = "Quero cancelar meu plano imediatamente."; 
-  const { analysis, isAnalyzing } = useAICopilot(lastCustomerMessage);
-
-
+  // Encontrar o chat selecionado para pegar a última mensagem real
   const chats = [
     { id: 1, name: "Roberto Almeida", lastMsg: "Quero cancelar meu plano.", time: "2 min", sentiment: "negative", risk: "high", unread: 2, channel: "whatsapp" },
     { id: 2, name: "TechFlow Solutions", lastMsg: "Como faço o upgrade?", time: "15 min", sentiment: "positive", intent: "sale", unread: 0, channel: "instagram" },
     { id: 3, name: "Mariana Costa", lastMsg: "Obrigada pela ajuda!", time: "1h", sentiment: "positive", unread: 0, channel: "messenger" },
     { id: 4, name: "Carlos Edu", lastMsg: "Ainda não recebi o boleto.", time: "2h", sentiment: "neutral", urgency: "medium", unread: 1, channel: "whatsapp" },
   ];
+
+  const currentChat = chats.find(c => c.id === selectedChat);
+  const { analysis, isAnalyzing } = useAICopilot(currentChat?.lastMsg || "");
 
   const queues = [
     { name: "Comercial", count: 12, color: "bg-emerald-500" },
