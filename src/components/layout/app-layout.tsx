@@ -49,6 +49,7 @@ export function AppLayout() {
       { icon: ShieldCheck, label: "Auditoria Global", href: "/admin/audit", group: "Governança" },
     ] : []),
     { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
+    { icon: LifeBuoy, label: "Filas de Atendimento", href: "/queues", group: "Operação" },
     { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
     { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
     { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
@@ -56,6 +57,7 @@ export function AppLayout() {
     { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
     { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
+
   ];
 
   useEffect(() => {
