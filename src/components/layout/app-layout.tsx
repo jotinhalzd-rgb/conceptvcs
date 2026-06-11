@@ -247,7 +247,9 @@ export function AppLayout() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/5 blur-[120px] pointer-events-none rounded-full" />
             
             <div className="relative z-10 max-w-7xl mx-auto">
-              <Outlet />
+              <GlobalErrorBoundary name="RouteOutlet">
+                <Outlet />
+              </GlobalErrorBoundary>
             </div>
           </main>
         </div>
