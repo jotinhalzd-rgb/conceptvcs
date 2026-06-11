@@ -1,24 +1,45 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AlertTriangle, ChevronRight } from "lucide-react";
 
 interface ActionItemProps {
-  label: string;
+  type: 'risk' | 'opportunity' | 'bottleneck' | 'kpi';
+  level: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
   description: string;
-  urgency: 'high' | 'medium';
+  actionLabel?: string;
+  onClick?: () => void;
 }
 
-export const ActionItem = ({ label, description, urgency }: ActionItemProps) => (
-  <div className="flex items-start gap-4 p-4 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] transition-colors group cursor-pointer">
-    <div className={cn(
-      "p-2 rounded-lg transition-transform group-hover:scale-110", 
-      urgency === 'high' ? 'bg-rose-500/10 text-rose-400' : 'bg-amber-500/10 text-amber-400'
-    )}>
-      <AlertTriangle className="w-5 h-5" />
+export const ActionItem = ({ type, level, title, description, actionLabel, onClick }: ActionItemProps) => {
+  const getLevelColors = () => {
+    switch (level) {
+      case 'critical': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      case 'high': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'medium': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+      default: return 'bg-white/[0.03] text-slate-400 border-white/[0.05]';
+    }
+  };
+
+  return (
+    <div 
+      onClick={onClick}
+      className={cn(
+        "flex items-start gap-4 p-4 rounded-xl border bg-[#030712]/50 hover:bg-[#030712] transition-all group cursor-pointer",
+        getLevelColors()
+      )}
+    >
+      <div className="p-2 rounded-lg bg-white/[0.05]">
+        <AlertTriangle className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm font-black uppercase italic tracking-tight text-white mb-0.5">{title}</h4>
+        <p className="text-xs text-slate-400 font-medium line-clamp-2 leading-relaxed">{description}</p>
+        {actionLabel && (
+          <div className="flex items-center gap-1 mt-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:translate-x-1 transition-transform">
+            {actionLabel} <ChevronRight className="w-3 h-3" />
+          </div>
+        )}
+      </div>
     </div>
-    <div className="flex-1 min-w-0">
-      <h4 className="text-sm font-bold text-white truncate">{label}</h4>
-      <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{description}</p>
-    </div>
-  </div>
-);
+  );
+};

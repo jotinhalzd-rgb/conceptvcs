@@ -50,6 +50,56 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_insights: {
+        Row: {
+          action_label: string | null
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          insight_type: string
+          is_resolved: boolean | null
+          level: string
+          metadata: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_label?: string | null
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          insight_type: string
+          is_resolved?: boolean | null
+          level: string
+          metadata?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_label?: string | null
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          insight_type?: string
+          is_resolved?: boolean | null
+          level?: string
+          metadata?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -186,7 +236,9 @@ export type Database = {
       }
       companies: {
         Row: {
+          ai_config: Json | null
           created_at: string | null
+          global_kpis: Json | null
           id: string
           limits: Json | null
           name: string
@@ -195,7 +247,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_config?: Json | null
           created_at?: string | null
+          global_kpis?: Json | null
           id?: string
           limits?: Json | null
           name: string
@@ -204,7 +258,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_config?: Json | null
           created_at?: string | null
+          global_kpis?: Json | null
           id?: string
           limits?: Json | null
           name?: string
@@ -451,6 +507,47 @@ export type Database = {
           },
         ]
       }
+      customer_scores: {
+        Row: {
+          churn_risk: string | null
+          created_at: string | null
+          customer_id: string
+          health_score: number | null
+          id: string
+          last_calculated_at: string | null
+          ltv_estimated: number | null
+          potential_purchase_score: number | null
+        }
+        Insert: {
+          churn_risk?: string | null
+          created_at?: string | null
+          customer_id: string
+          health_score?: number | null
+          id?: string
+          last_calculated_at?: string | null
+          ltv_estimated?: number | null
+          potential_purchase_score?: number | null
+        }
+        Update: {
+          churn_risk?: string | null
+          created_at?: string | null
+          customer_id?: string
+          health_score?: number | null
+          id?: string
+          last_calculated_at?: string | null
+          ltv_estimated?: number | null
+          potential_purchase_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_scores_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base: {
         Row: {
           category: string | null
@@ -692,25 +789,43 @@ export type Database = {
         Row: {
           color: string | null
           created_at: string | null
+          department: string | null
           description: string | null
           id: string
+          max_capacity: number | null
+          metadata: Json | null
           name: string
+          priority_level: number | null
+          sla_threshold: string | null
+          supervisor_id: string | null
           updated_at: string | null
         }
         Insert: {
           color?: string | null
           created_at?: string | null
+          department?: string | null
           description?: string | null
           id?: string
+          max_capacity?: number | null
+          metadata?: Json | null
           name: string
+          priority_level?: number | null
+          sla_threshold?: string | null
+          supervisor_id?: string | null
           updated_at?: string | null
         }
         Update: {
           color?: string | null
           created_at?: string | null
+          department?: string | null
           description?: string | null
           id?: string
+          max_capacity?: number | null
+          metadata?: Json | null
           name?: string
+          priority_level?: number | null
+          sla_threshold?: string | null
+          supervisor_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
