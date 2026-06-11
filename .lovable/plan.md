@@ -1,69 +1,68 @@
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 5 (IA COPILOT OPERACIONAL)
+# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 6 (OMNICHANNEL REAL)
 
-Este plano detalha a inteligência artificial como um assistente de produtividade em tempo real para toda a operação.
-
----
-
-## 1. ESTRATÉGIA DE IA E CONSUMO
-
-Utilizaremos uma arquitetura Híbrida para otimizar custos e latência:
-- **Modelo Principal:** GPT-4o (via Lovable AI Gateway) para análise de contexto complexo e geração de resumos.
-- **Modelo de Latência:** GPT-4o-mini para sugestões de resposta em tempo real e detecção de intenção.
-- **Estratégia de Cache:** Redis/Supabase Cache para respostas a FAQs idênticas e documentos da Base de Conhecimento.
-- **Consumo Estimado:** ~0.02 USD por atendimento completo (análise de ~20 mensagens + 1 resumo final).
+Este plano detalha a arquitetura para transformar o sistema em uma central de comunicação escalável, capaz de processar milhões de mensagens de diversos canais de forma unificada.
 
 ---
 
-## 2. ARQUITETURA TÉCNICA (DATA & ENGINE)
+## 1. ARQUITETURA DE CANAIS (ABSTRAÇÃO)
 
-### Base de Conhecimento (RAG)
-- Utilização da tabela `knowledge_base` existente.
-- Implementação de Busca Vetorial (pgvector) no Supabase para recuperar documentos relevantes baseados no contexto da última mensagem.
+Para evitar dependência de fornecedores únicos (vendor lock-in), implementaremos uma **Omni-Gateway Layer**.
 
-### Engine de Processamento
-- **Copilot Stream:** Um canal de realtime que envia "pensamentos" da IA enquanto o cliente fala.
-- **Detecção Automática:**
-  - **Intenção:** Atualiza `ai_intent` na tabela `conversations`.
-  - **Sentimento/Risco:** Alimenta `ai_sentiment` e `ai_urgency_score`.
-  - **Oportunidade:** Sugere a criação de um `Deal` se detectar interesse comercial.
+- **Provider Adapter Pattern:** O sistema falará com uma interface genérica. Plugins específicos (Meta, 360Dialog, Evolution API, etc.) traduzirão as mensagens para o formato OneContact.
+- **Identidade Única (Unified Contact):** Busca automática por CPF/Email/Telefone em todos os canais para vincular ao mesmo `contact_id`.
+- **Canal Padrão:** Toda conversa terá um `channel_type` (whatsapp, instagram, email, telegram, webchat) e um `provider_id`.
 
 ---
 
-## 3. INTERFACE IA COPILOT (UX/UI)
+## 2. ESTRATÉGIA DE SINCRONIZAÇÃO E ESCALABILIDADE
 
-A IA será um "copiloto silencioso" no painel direito ou em widgets flutuantes.
-
-### Chat Side-Panel (IA Hub)
-- **Sugestões Ativas:** Cards de resposta com botão "Aplicar" (copia para o input).
-- **Contexto Rápido:** Resumo em 3 tópicos da conversa atual.
-- **Alertas de Gestão:** "SLA em 5 min", "Cliente VIP detectado", "Sentimento Negativo".
-
-### Base de Conhecimento Hub
-- Tela para upload de PDFs e criação de FAQs que treinam o modelo.
+- **Webhooks de Alta Performance:** Utilização de Edge Functions (Deno) para receber webhooks externos. Elas apenas validam e jogam a mensagem em uma fila de processamento (Supabase/PGMQ) para garantir resposta < 200ms aos provedores.
+- **Worker de Distribuição:** Um worker processará a fila, aplicará as `routing_rules` (Motor de Distribuição) e notificará o front-end via Realtime.
+- **Sincronização de E-mail:** Implementação via IMAP/SMTP com workers de polling (ou SendGrid/Resend Inbound) para transformar e-mails em threads de conversa na Inbox.
 
 ---
 
-## 4. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
+## 3. MOTOR DE DISTRIBUIÇÃO E TRANSBORDO (ENGINE)
 
-**Passo 1: Fundação de Vetores & RAG**  
-Configuração de `pgvector` no banco de dados e hook para busca na base de conhecimento.
-
-**Passo 2: Painel Copilot no Chat**  
-Construção do painel lateral de IA dentro da `InboxView` com sugestões de resposta dinâmicas.
-
-**Passo 3: Motor de Resumo & Audit**  
-Implementação da lógica que gera e salva o resumo ao trocar de `status` para `resolved`.
-
-**Passo 4: Dashboard de Insights para Gestores**  
-Widget de IA para gerentes com análise de performance da equipe e gargalos operacionais.
+- **Distribuição Inteligente:** Regras baseadas em carga de trabalho (quem tem menos chats ativos), horário de funcionamento e palavras-chave.
+- **Lógica de Transbordo:** 
+  - Se `waiting_since` > 5 min -> Reatribuir para Fila de Contingência.
+  - Se `queue_capacity` atingida -> Notificar gestor via IA e sugerir transbordo entre departamentos.
 
 ---
 
-## ENTIDADES E MODELOS
-- `ai_suggestions_log`: Para medir o aprendizado (aceitas vs rejeitadas).
-- `knowledge_base`: Expansão para suporte a embeddings vetoriais.
+## 4. CUSTOS ESTIMADOS (INFRAESTRUTURA)
+
+- **Mensageria (Provedores):** De acordo com a tabela da Meta/Provedor (~$0.01 por conversa 24h).
+- **Processamento:** Baixo impacto inicial em Edge Functions.
+- **Escalabilidade de Banco:** Supabase suporta milhões de registros; utilizaremos particionamento de tabela para `messages` se o volume ultrapassar 10M/mês.
+
+---
+
+## 5. CRONOGRAMA DE EXECUÇÃO (STEP-BY-STEP)
+
+**Passo 1: Omni-Gateway Setup**  
+Criação da estrutura de tabelas `channel_configs` e `external_identifiers` para mapear IDs de diferentes redes ao mesmo cliente.
+
+**Passo 2: Central de Canais UI**  
+Desenvolvimento da tela de gestão onde o gestor conecta e monitora o status (Online/Offline) de cada canal.
+
+**Passo 3: Módulo de E-mail Corporativo**  
+Integração de recebimento e envio de e-mails diretamente pela timeline da Inbox.
+
+**Passo 4: Webchat White Label**  
+Criação do script injetável para sites que abre o canal de chat direto do OneContact.
+
+**Passo 5: Motor de Transbordo & Dashboard Realtime**  
+Implementação dos triggers de escala e visualização macro de saúde das integrações.
+
+---
+
+## ESTRUTURA DE ENTIDADES (MODELO)
+- `channel_accounts`: Credenciais e configurações (Meta Token, API Keys).
+- `customer_identities`: Mapa de `(provider_name, external_id) -> contact_id`.
 
 ---
 
 **PARANDO PARA APROVAÇÃO.**  
-Aguardando seu "sim" para transformar a IA no braço direito da sua equipe operacional.
+Aguardando seu "sim" para iniciar a construção da fundação omnichannel definitiva para os próximos 5 anos.
