@@ -4,6 +4,7 @@ import { useAuth, useProfile } from "@/hooks/auth/use-auth";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Navigate } from "@tanstack/react-router";
+import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { 
   Users, 
   MessageSquare, 
@@ -18,6 +19,7 @@ import {
   Target,
   DollarSign
 } from "lucide-react";
+
 import { 
   Card, 
   CardContent, 
@@ -57,6 +59,14 @@ const performanceData = [
 ];
 
 export function Dashboard() {
+  return (
+    <GlobalErrorBoundary name="Dashboard">
+      <DashboardContent />
+    </GlobalErrorBoundary>
+  );
+}
+
+function DashboardContent() {
   const { user, loading } = useAuth();
   const { data: profile } = useProfile();
 
@@ -254,4 +264,5 @@ export function Dashboard() {
     </motion.div>
   );
 }
+
 

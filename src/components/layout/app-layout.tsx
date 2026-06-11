@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useUIStore } from "@/hooks/core/use-ui-store";
 import { motion, AnimatePresence } from "framer-motion";
+import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { 
   LayoutDashboard, 
   Inbox, 
@@ -29,6 +30,7 @@ import { useAuth, useProfile } from "@/hooks/auth/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 const navItems = [
   { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
@@ -245,7 +247,9 @@ export function AppLayout() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/5 blur-[120px] pointer-events-none rounded-full" />
             
             <div className="relative z-10 max-w-7xl mx-auto">
-              <Outlet />
+              <GlobalErrorBoundary name="RouteOutlet">
+                <Outlet />
+              </GlobalErrorBoundary>
             </div>
           </main>
         </div>
