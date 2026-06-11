@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useIntegrationApps, useConnectedIntegrations } from "@/hooks/marketplace/use-marketplace";
+import { useHubAssets, useHubInstalls } from "@/hooks/marketplace/use-marketplace";
 import { AppCard } from "./app-card";
 import { 
   Grid3X3, 
@@ -19,19 +19,18 @@ import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-bo
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 
-
 export const MarketplaceView = () => {
   const navigate = useNavigate();
-  const { data: apps, isLoading: loadingApps } = useIntegrationApps();
-
-  const { data: connected, isLoading: loadingConnected } = useConnectedIntegrations();
+  const { data: assets, isLoading: loadingApps } = useHubAssets();
+  const { data: installs, isLoading: loadingConnected } = useHubInstalls();
   const [activeCategory, setActiveTab] = useState('all');
 
-  const categories = ['all', 'erp', 'ecommerce', 'marketing', 'payments', 'productivity'];
+  const categories = ['all', 'crm', 'marketing', 'support', 'finance', 'telecom'];
 
-  const filteredApps = apps?.filter(app => 
-    activeCategory === 'all' || app.category === activeCategory
+  const filteredAssets = assets?.filter((asset: any) => 
+    activeCategory === 'all' || asset.asset_category_code === activeCategory
   );
+
 
   return (
     <GlobalErrorBoundary name="Marketplace">
