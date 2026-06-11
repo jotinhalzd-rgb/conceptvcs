@@ -1,72 +1,71 @@
-# PLANO DE IMPLEMENTAÇÃO: ECOSSISTEMA EMPRESARIAL GLOBAL (ONECONTACT HUB) - FASE 15
+# PLANO DE IMPLEMENTAÇÃO: ENTERPRISE INTELLIGENCE NETWORK (EIN) - FASE 16
 
-Este plano detalha a transformação do ONECONTACT OS em uma plataforma de rede empresarial (Ecosystem-as-a-Service), conectando empresas, parceiros e fornecedores em um ambiente seguro e colaborativo.
-
----
-
-## 1. ARQUITETURA DO ECOSSISTEMA (THE HUB)
-
-O novo módulo **Business Hub** funcionará como a camada social e de rede da plataforma.
-
-### A. Business Registry & Network Graph
-*   **Company Profiles**: Cada tenant (empresa) terá um perfil público (opcional) destacando especialidades, selos de reputação e serviços oferecidos.
-*   **Relationship Mapping**: Implementação de tipos de conexões: *Partner, Vendor, Franchisee, Subsidiary*.
-*   **Visual Network**: Grafo interativo mostrando como as empresas se conectam e geram valor mútuo.
-
-### B. Marketplace de Ativos & Serviços (Business Exchange)
-*   **Asset Sharing**: Ambiente para as empresas compartilharem (ou venderem) templates de automação, prompts de agentes IA e playbooks de atendimento.
-*   **Service Procurement**: Área para contratação de parceiros verificados diretamente pela plataforma (Consultoria, Suporte, Marketing).
+Este plano detalha a criação da camada máxima de inteligência coletiva do ONECONTACT OS. O **EIN** transforma padrões operacionais anônimos em insights estratégicos para cada empresa da rede, criando o primeiro "Waze para Negócios".
 
 ---
 
-## 2. INTELIGÊNCIA DE REDE (MATCHING & SCORE)
+## 1. ARQUITETURA DE INTELIGÊNCIA COLETIVA
 
-### A. Business Matching Engine
-*   IA que analisa gargalos operacionais de uma empresa (detectados pelo OIL na Fase 14) e sugere parceiros no ecossistema que resolvem esses problemas.
-*   Exemplo: "Detectamos queda em conversão de anúncios. Conecte-se com a *Agência X* (Parceira Gold) para otimização."
+O EIN funcionará processando os dados do **OIL (Fase 14)** em uma camada de agregação global.
 
-### B. Business Score & Reputação
-*   Sistema de pontuação baseado em:
-    *   **Performance**: Eficiência operacional medida pelo sistema.
-    *   **Trust**: Tempo de plataforma e histórico de parcerias bem-sucedidas.
-    *   **Feedback**: Avaliações de outras empresas do ecossistema.
+### A. Anonymization & Aggregation Layer
+*   **Data Scrubbing**: Processo automático que remove PII (Personal Identifiable Information) antes de qualquer análise.
+*   **Industry Clustering**: Agrupamento de dados por CNAE/Setor (Farmácias, Varejo, Serviços) para gerar benchmarks contextuais.
 
----
-
-## 3. INFRAESTRUTURA E PRIVACIDADE (MULTI-TENANT 2.0)
-
-*   **Privacy Wall**: Garantia técnica de que o compartilhamento é apenas de metadados e ativos autorizados. Dados de clientes (CRM) e conversas permanecem isolados e criptografados.
-*   **Auditoria de Conexão**: Log completo de todas as interações e trocas de informações entre empresas.
+### B. Benchmarking Inteligente (Peer Analysis)
+*   **Relative Performance Index**: Comparação de KPIs (Time to First Response, CSAT, Conversão) contra a média e o "Top 10%" do setor.
+*   **Gap Analysis**: Identificação automática de onde a empresa está performando abaixo de seus pares.
 
 ---
 
-## 4. DASHBOARD CEO MASTER (GLOBAL ECOSYSTEM VIEW)
+## 2. COMPONENTES DO SISTEMA (ADVISORY & EVOLUTION)
 
-Uma nova camada de controle para a gestão do ecossistema:
-*   **Ecosystem Health**: KPIs de crescimento da rede, volume de transações no marketplace e taxa de conexões.
-*   **Top Partners**: Ranking de empresas que mais agregam valor à rede.
-*   **Revenue Share**: Monitoramento de comissões e transações geradas pelo hub.
+### A. CEO Advisor (O Conselheiro Virtual)
+Uma interface de diálogo e alertas que fornece insights executivos baseados no ecossistema:
+*   *"Empresas do seu setor que adotaram o AI Studio reduziram o tempo de resposta em 65%. Deseja aplicar o template padrão de Suporte?"*
+*   *"Seu NPS de 72 está 12 pontos abaixo da média das clínicas odontológicas. O OIL detectou que a demora no agendamento é o principal fator."*
 
----
-
-## 5. CRONOGRAMA DE IMPLEMENTAÇÃO
-
-**Passo 1: Database Migration (Ecossistema)**
-Criação das tabelas de `hub_connections`, `hub_marketplace_assets` e `company_reputation`.
-
-**Passo 2: Business Hub Interface**
-Desenvolvimento da UI de rede, perfis empresariais e marketplace.
-
-**Passo 3: Matching & Referral Engine**
-Implementação da lógica de indicação e comissionamento automatizado.
-
-**Passo 4: CEO Master Global View**
-Finalização com a visão estratégica de toda a rede OneContact.
+### B. Evolution Engine (Best Practices AI)
+*   **Playbook Discovery**: Detecção de processos que geram maior receita no ecossistema e transformação em recomendações de configuração (Templates de fluxos, scripts e prompts).
 
 ---
 
-## 6. RISCOS E MITIGAÇÃO
-*   **Risco**: Vazamento acidental de dados entre empresas competidoras.
-*   **Mitigação**: RLS (Row Level Security) ultra-rigoroso e camadas de aprovação explícitas para qualquer conexão de dados.
+## 3. INFRAESTRUTURA DE DADOS (MIGRAÇÕES)
 
-**AGUARDANDO APROVAÇÃO PARA TRANSFORMAR O ONECONTACT NO MAIOR ECOSSISTEMA EMPRESARIAL DO MERCADO.**
+Criação das tabelas de inteligência agregada:
+*   `ein_industry_benchmarks`: Médias e quartis de performance por setor.
+*   `ein_best_practices`: Repositório de padrões operacionais de alta performance anonimizados.
+*   `ein_advisor_logs`: Histórico de insights estratégicos entregues ao CEO.
+
+---
+
+## 4. DASHBOARD CEO MASTER (GLOBAL NETWORK INTELLIGENCE)
+
+Visão consolidada para o gestor do ecossistema:
+*   **Economic Pulse**: Crescimento agregado por setor dentro da plataforma.
+*   **Efficiency Map**: Quais segmentos estão performando melhor com as ferramentas de IA.
+*   **Network Risks**: Detecção de anomalias sistêmicas (ex: queda generalizada de faturamento em um setor específico).
+
+---
+
+## 5. CRONOGRAMA DE EXECUÇÃO
+
+**Passo 1: Aggregation Engine**
+Implementação das rotinas de processamento de dados do OIL para gerar os primeiros Benchmarks anônimos.
+
+**Passo 2: CEO Advisor UI**
+Criação do componente de conselheiro estratégico dentro do Dashboard executivo.
+
+**Passo 3: Benchmarking Modules**
+Interface visual para comparação "Sua Empresa vs. Mercado".
+
+**Passo 4: Playbook Recommendation**
+Sistema que sugere a instalação de ativos do Marketplace (Fase 15) com base em gaps de performance.
+
+---
+
+## 6. SEGURANÇA E COMPLIANCE
+*   **LGPD-by-Design**: Toda inteligência é estatística; nenhum dado individual de cliente ou transação sai do isolamento do tenant original.
+*   **Audit Trail**: Transparência total sobre quais dados foram anonimizados para compor a rede de inteligência.
+
+**AGUARDANDO APROVAÇÃO PARA TRANSFORMAR DADOS EM SABEDORIA COLETIVA.**
