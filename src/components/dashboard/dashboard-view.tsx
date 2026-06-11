@@ -106,24 +106,24 @@ export function Dashboard() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <Card key={i} className="bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] transition-all duration-300 group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/[0.05] to-transparent -mr-8 -mt-8 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={cn("p-3 rounded-2xl", stat.bg)}>
-                  <stat.icon className={cn("w-6 h-6", stat.color)} />
+          <Card key={i} className="bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-500 group overflow-hidden relative rounded-[2rem] shadow-2xl">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent -mr-12 -mt-12 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className={cn("p-4 rounded-2xl shadow-inner", stat.bg)}>
+                  <stat.icon className={cn("w-7 h-7", stat.color)} />
                 </div>
                 <div className={cn(
-                  "flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full",
-                  stat.trend.startsWith('+') ? "text-emerald-400 bg-emerald-500/10" : "text-rose-400 bg-rose-500/10"
+                  "flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-full tracking-wider uppercase",
+                  stat.trend.startsWith('+') ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" : "text-rose-400 bg-rose-500/10 border border-rose-500/20"
                 )}>
-                  {stat.trend.startsWith('+') ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {stat.trend.startsWith('+') ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                   {stat.trend}
                 </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">{stat.label}</p>
-                <h3 className="text-2xl font-bold text-white">{stat.value}</h3>
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1">{stat.label}</p>
+                <h3 className="text-3xl font-black text-white tabular-nums tracking-tighter">{stat.value}</h3>
               </div>
             </CardContent>
           </Card>
