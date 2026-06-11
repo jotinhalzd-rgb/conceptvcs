@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, Crown, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, Crown, Eye, EyeOff, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -83,6 +83,17 @@ function AuthPage() {
     } catch (error: any) {
       toast.error(`Falha no bypass: ${error.message}`);
       setLoading(false);
+    }
+  };
+
+  const handleGlobalExit = async () => {
+    try {
+      localStorage.removeItem("onecontact_bypass_session");
+      await supabase.auth.signOut();
+      toast.success("Sessão encerrada.");
+      window.location.href = "/";
+    } catch (error) {
+      window.location.href = "/";
     }
   };
 
@@ -231,8 +242,18 @@ function AuthPage() {
           </div>
         </section>
 
-        <footer className="mt-12 text-center text-[10px] text-slate-600 uppercase tracking-[0.3em] font-bold opacity-50">
-          &copy; {new Date().getFullYear()} OneContact Enterprise SaaS
+        <footer className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-white/5 pt-8">
+          <button
+            id="global-exit-btn"
+            onClick={handleGlobalExit}
+            className="flex items-center gap-2 text-[10px] font-black text-slate-500 hover:text-rose-400 uppercase tracking-[0.2em] transition-all group"
+          >
+            <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+            <span>{session ? "Sair do Sistema" : "Voltar ao Início"}</span>
+          </button>
+          <div className="text-center text-[10px] text-slate-600 uppercase tracking-[0.3em] font-bold opacity-50">
+            &copy; {new Date().getFullYear()} OneContact Enterprise SaaS
+          </div>
         </footer>
       </main>
     </div>
