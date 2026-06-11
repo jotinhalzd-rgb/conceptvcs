@@ -39,8 +39,11 @@ export function AppLayout() {
   const location = typeof window !== 'undefined' ? window.location.pathname : '';
   const isInbox = location.startsWith("/inbox");
   const isCampaigns = location.startsWith("/campaigns");
+  const isCustomers = location.startsWith("/customers");
+  const isQueues = location.startsWith("/queues");
 
   const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
+
 
   const navItems = [
     { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
@@ -241,7 +244,7 @@ export function AppLayout() {
         {/* Topbar & Content */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#020617]">
           {/* Header */}
-          {!isInbox && !isCampaigns && (
+          {!isInbox && !isCampaigns && !isCustomers && !isQueues && (
             <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
                 <div className="relative max-w-md w-full group hidden md:block">
@@ -276,10 +279,11 @@ export function AppLayout() {
           {/* Main Content Area */}
           <main className={cn(
             "flex-1 overflow-hidden relative",
-            (!isInbox && !isCampaigns) && "p-8 overflow-y-auto no-scrollbar"
+            (!isInbox && !isCampaigns && !isCustomers && !isQueues) && "p-8 overflow-y-auto no-scrollbar"
           )}>
             {/* Background Gradient Spotlights */}
-            {(!isInbox && !isCampaigns) && (
+            {(!isInbox && !isCampaigns && !isCustomers && !isQueues) && (
+
               <>
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/5 blur-[120px] pointer-events-none rounded-full" />
@@ -288,7 +292,7 @@ export function AppLayout() {
             
             <div className={cn(
               "relative z-10 h-full",
-              (!isInbox && !isCampaigns) && "max-w-7xl mx-auto"
+              (!isInbox && !isCampaigns && !isCustomers && !isQueues) && "max-w-7xl mx-auto"
             )}>
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />
