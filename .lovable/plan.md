@@ -1,59 +1,54 @@
-# Plano de Implementação: Marketing Automation Enterprise
+# Plano de Implementação: Billing & Subscription Platform
 
-O objetivo é construir uma engine de automação de jornadas de alta escala, permitindo que as empresas criem fluxos complexos de comunicação e operação que respondem em tempo real a eventos do ecossistema.
+O objetivo é construir a espinha dorsal financeira do ecossistema OneContact OS, permitindo a gestão de assinaturas recorrentes, cobrança por consumo, marketplace de terceiros e distribuição de comissões.
 
-## 1. Arquitetura da Engine (Automation Schema)
+## 1. Arquitetura Financeira (Universal Billing Schema)
 
-A estrutura será baseada em uma arquitetura de grafos orientada a eventos:
+A plataforma será dividida em três pilares: **Core Subscriptions**, **Usage Metering** e **Ecosystem Revenue**.
 
-- `public.automation_workflows`: Definição do fluxo (nome, trigger inicial, status, versão).
-- `public.automation_nodes`: Os blocos individuais do fluxo (Trigger, Condição, Ação, Espera).
-    - Armazenados como nós de um grafo com `parent_id` e `branch_config`.
-- `public.automation_executions`: Log de cada vez que um fluxo é disparado para um contato específico.
-- `public.automation_execution_logs`: Histórico detalhado de cada passo percorrido pelo contato no fluxo.
-- `public.marketing_templates`: Repositório de modelos de E-mail (HTML) e WhatsApp (JSON/HSM).
-- `public.marketing_campaigns`: Agrupador de automações para fins de relatório e ROI.
+- `public.billing_plans_v2`: Definição de planos e seus recursos (JSON com limites).
+- `public.billing_subscriptions_v2`: Registro da assinatura ativa por tenant, ciclo de faturamento e status.
+- `public.billing_usage_meters`: Log de consumo em tempo real (ex: mensagens enviadas, tokens de IA).
+- `public.billing_invoices_v2`: Faturas geradas, histórico de pagamentos e links para recibos.
+- `public.billing_commissions_v2`: Gestão de repasses para parceiros e afiliados.
+- `public.billing_gateways_config`: Configuração abstrata de conectores (Stripe, Asaas, etc).
 
-## 2. Motor de Execução (The Runner)
+## 2. Camada de Abstração de Pagamentos (Gateway Adapter)
 
-O processamento será desacoplado da interface para garantir que milhões de eventos não travem o sistema:
-- **Event Dispatcher**: Triggers no banco de dados (ex: novo Deal) enviam um sinal para uma Edge Function (`workflow-dispatcher`).
-- **Step Processor**: A função avalia as condições do nó atual e agenda a próxima ação.
-- **Scheduler**: Sistema de filas para "Aguardar X dias" ou "Enviar em horário otimizado".
+Para evitar o acoplamento a um único provedor, utilizaremos o padrão **Adapter**:
+- Interface comum para `createCustomer`, `subscribe`, `processRefund`.
+- Webhook Handler unificado que traduz eventos externos (ex: `invoice.paid`) em ações internas.
 
-## 3. Workflow Builder (Visual UI)
+## 3. Controle de Consumo & Overage (Metering Engine)
 
-Criaremos um construtor de jornadas moderno utilizando `React Flow`:
-- **Canvas Infinito**: Arrastar e soltar nós de Trigger, Condição (IF/ELSE) e Ação.
-- **Painel de Configuração**: Lateral dinâmica para configurar o conteúdo do E-mail ou a regra da Tag.
-- **Live Preview**: Simulação do caminho que um contato faria no fluxo.
+O sistema monitorará limites de forma proativa:
+- **Hard Limits**: Impedir criação de novos usuários se o limite do plano for atingido.
+- **Soft/Overage Limits**: Permitir o uso excedente (ex: IA) e cobrar na fatura do mês seguinte.
+- **OIL Integration**: Alerta automático quando uma empresa atinge 90% da cota.
 
-## 4. Integração com IA e OIL
+## 4. Componentes Frontend (Finance UI)
 
-- **AI Segmenter**: Integração com `OIL Signals` para disparar fluxos baseados em predição (ex: disparar fluxo de retenção quando `churn_risk` > 80%).
-- **AI Content Generator**: Assistente no editor de e-mail/WhatsApp para gerar variações de texto.
+### A. Billing Center (Visão do Cliente)
+- `PlansGrid`: Comparativo de recursos e botão de upgrade.
+- `UsageDashboard`: Gráficos de barras mostrando o consumo atual vs. limite do plano.
+- `InvoicesHistory`: Lista para download de comprovantes.
 
-## 5. Escalabilidade e Multi-Tenancy
+### B. Partner Portal (Comissões)
+- `RevenueShareTracker`: Extrato de ganhos por vendas no Marketplace ou indicações.
 
-- **Isolamento RLS**: Garantia de que fluxos e contatos de uma empresa nunca vazem para outra.
-- **Throttling**: Limitação de execuções simultâneas por plano para proteger a infraestrutura global.
-- **Versionamento**: Cada publicação de fluxo gera uma versão imutável, permitindo auditoria forense de por que um e-mail foi enviado há 6 meses.
+## 5. Escalabilidade e Segurança
 
-## Detalhes do Nó (JSON Node)
+- **Idempotency**: Garantia de que uma cobrança nunca seja processada duas vezes via chaves de idempotência.
+- **RLS Financeiro**: Acesso estritamente restrito. Somente donos da organização e administradores financeiros podem visualizar faturas.
+- **Audit Log**: Todo upgrade/downgrade será registrado com metadados do autor e timestamp.
 
-```json
-{
-  "type": "condition",
-  "config": {
-    "field": "lead_score",
-    "operator": "greater_than",
-    "value": 50
-  },
-  "branches": {
-    "true": "node_uuid_success",
-    "false": "node_uuid_fallback"
-  }
-}
+## Detalhes do Modelo de Monetização
+
+```text
+REVENUE SHARE MARKETPLACE:
+- 70% Partner (Desenvolvedor do App)
+- 20% OneContact Platform
+- 10% Afiliado (Se houver indicação)
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de grafos para automação e o esqueleto do Workflow Builder.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de planos, assinaturas e o motor de controle de consumo.

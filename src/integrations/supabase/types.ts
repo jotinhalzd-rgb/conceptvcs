@@ -741,6 +741,217 @@ export type Database = {
           },
         ]
       }
+      billing_commissions_v2: {
+        Row: {
+          amount_total: number
+          asset_id: string | null
+          commission_amount: number
+          commission_type: string
+          created_at: string | null
+          id: string
+          partner_org_id: string
+          payout_status: string | null
+          source_org_id: string
+        }
+        Insert: {
+          amount_total: number
+          asset_id?: string | null
+          commission_amount: number
+          commission_type: string
+          created_at?: string | null
+          id?: string
+          partner_org_id: string
+          payout_status?: string | null
+          source_org_id: string
+        }
+        Update: {
+          amount_total?: number
+          asset_id?: string | null
+          commission_amount?: number
+          commission_type?: string
+          created_at?: string | null
+          id?: string
+          partner_org_id?: string
+          payout_status?: string | null
+          source_org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_commissions_v2_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "hub_assets_marketplace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_commissions_v2_partner_org_id_fkey"
+            columns: ["partner_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_commissions_v2_source_org_id_fkey"
+            columns: ["source_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_invoices_v2: {
+        Row: {
+          amount_total: number
+          created_at: string | null
+          currency_code: string | null
+          due_date: string | null
+          external_invoice_id: string | null
+          id: string
+          invoice_pdf_url: string | null
+          invoice_status: string | null
+          organization_id: string
+          paid_at: string | null
+          subscription_id: string | null
+        }
+        Insert: {
+          amount_total: number
+          created_at?: string | null
+          currency_code?: string | null
+          due_date?: string | null
+          external_invoice_id?: string | null
+          id?: string
+          invoice_pdf_url?: string | null
+          invoice_status?: string | null
+          organization_id: string
+          paid_at?: string | null
+          subscription_id?: string | null
+        }
+        Update: {
+          amount_total?: number
+          created_at?: string | null
+          currency_code?: string | null
+          due_date?: string | null
+          external_invoice_id?: string | null
+          id?: string
+          invoice_pdf_url?: string | null
+          invoice_status?: string | null
+          organization_id?: string
+          paid_at?: string | null
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_v2_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "billing_subscriptions_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_plans_v2: {
+        Row: {
+          created_at: string | null
+          features_config: Json | null
+          id: string
+          is_public: boolean | null
+          plan_code: string
+          plan_name: string
+          price_monthly: number
+          price_yearly: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          features_config?: Json | null
+          id?: string
+          is_public?: boolean | null
+          plan_code: string
+          plan_name: string
+          price_monthly: number
+          price_yearly: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          features_config?: Json | null
+          id?: string
+          is_public?: boolean | null
+          plan_code?: string
+          plan_name?: string
+          price_monthly?: number
+          price_yearly?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      billing_subscriptions_v2: {
+        Row: {
+          billing_cycle: string | null
+          cancel_at_period_end: boolean | null
+          current_period_end: string | null
+          current_period_start: string | null
+          external_customer_id: string | null
+          external_subscription_id: string | null
+          id: string
+          organization_id: string
+          payment_method_type: string | null
+          plan_id: string
+          subscription_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          billing_cycle?: string | null
+          cancel_at_period_end?: boolean | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          external_customer_id?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          organization_id: string
+          payment_method_type?: string | null
+          plan_id: string
+          subscription_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          billing_cycle?: string | null
+          cancel_at_period_end?: boolean | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          external_customer_id?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          organization_id?: string
+          payment_method_type?: string | null
+          plan_id?: string
+          subscription_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_subscriptions_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_subscriptions_v2_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_transactions: {
         Row: {
           amount: number
@@ -785,6 +996,41 @@ export type Database = {
           },
           {
             foreignKeyName: "billing_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_usage_meters: {
+        Row: {
+          id: string
+          organization_id: string
+          quantity_used: number | null
+          reset_cycle_at: string | null
+          resource_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          quantity_used?: number | null
+          reset_cycle_at?: string | null
+          resource_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          quantity_used?: number | null
+          reset_cycle_at?: string | null
+          resource_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_usage_meters_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
