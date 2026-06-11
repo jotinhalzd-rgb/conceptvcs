@@ -51,13 +51,24 @@ function AuthPage() {
   };
 
   const handleDemoAccess = async () => {
-    setLoading(true);
-    const demoEmail = "demo@onecontact.ai";
-    const demoPassword = "demo123456";
+    if (loading) return;
     
-    console.log("Iniciando acesso CEO Demo...");
+    console.log("CEO Demo clicked");
+    setLoading(true);
+    
+    const demoEmail = "demo@onecontact.ai";
+    const demoPassword = "Demo@123456";
     
     try {
+      // Se já houver sessão, redireciona direto
+      if (session) {
+        console.log("Session exists, redirecting to dashboard");
+        navigate({ to: "/dashboard" });
+        return;
+      }
+
+      console.log("Attempting login");
+      
       // 1. Tentar login direto
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: demoEmail,
@@ -65,9 +76,9 @@ function AuthPage() {
       });
 
       if (signInError) {
-        console.warn("Usuário demo não encontrado ou erro no login. Tentando criar automaticamente...", signInError.message);
+        console.warn("User not found or login error. Attempting to create demo account automatically...", signInError.message);
         
-        // 2. Se falhar, tentar cadastrar
+        // 2. Se falhar (usuário não existe), tentar cadastrar
         const { error: signUpError } = await supabase.auth.signUp({
           email: demoEmail,
           password: demoPassword,
@@ -88,9 +99,9 @@ function AuthPage() {
           throw signUpError;
         }
 
-        console.log("Usuário demo criado com sucesso. Realizando login...");
+        console.log("Demo user created successfully. Finalizing login...");
         
-        // 3. Login após cadastro
+        // 3. Login após cadastro (algumas configs de auth exigem isso ou auto-login)
         const { error: finalSignInError } = await supabase.auth.signInWithPassword({
           email: demoEmail,
           password: demoPassword,
@@ -99,11 +110,13 @@ function AuthPage() {
         if (finalSignInError) throw finalSignInError;
       }
 
-      console.log("Login demo realizado com sucesso!");
+      console.log("Login successful");
+      console.log("Redirecting to dashboard");
+      
       toast.success("Acesso DEMO CEO ativado!");
       navigate({ to: "/dashboard" });
     } catch (error: any) {
-      console.error("Erro crítico no acesso demo:", error);
+      console.error("Critical error during demo access:", error);
       toast.error(`Falha no acesso demo: ${error.message}`);
     } finally {
       setLoading(false);
