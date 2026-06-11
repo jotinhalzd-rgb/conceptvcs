@@ -234,35 +234,85 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_webhooks_log: {
+        Row: {
+          channel_id: string | null
+          error_message: string | null
+          id: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+          status: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          error_message?: string | null
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          provider: string
+          status?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_webhooks_log_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           created_at: string | null
           credentials: Json | null
+          error_log: string | null
           id: string
           is_active: boolean | null
+          last_sync_at: string | null
           name: string
           organization_id: string
           provider: string
+          settings: Json | null
+          status: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           credentials?: Json | null
+          error_log?: string | null
           id?: string
           is_active?: boolean | null
+          last_sync_at?: string | null
           name: string
           organization_id: string
           provider: string
+          settings?: Json | null
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           credentials?: Json | null
+          error_log?: string | null
           id?: string
           is_active?: boolean | null
+          last_sync_at?: string | null
           name?: string
           organization_id?: string
           provider?: string
+          settings?: Json | null
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -650,6 +700,41 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_identities: {
+        Row: {
+          contact_id: string
+          created_at: string | null
+          external_id: string
+          id: string
+          metadata: Json | null
+          provider: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json | null
+          provider: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json | null
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_identities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
         ]
