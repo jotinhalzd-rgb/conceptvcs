@@ -128,27 +128,51 @@ export const CEOAdvisorView = () => {
             </h3>
             
             <div className="space-y-4">
-                {[
-                    { type: 'gap', title: 'Gap de Atendimento', content: 'Seu tempo de resposta médio aumentou 20% enquanto o mercado reduziu 5%. Risco de perda de leads detectado.', priority: 'high' },
-                    { type: 'strategy', title: 'Oportunidade de Expansão', content: 'Base de dados indica que 15% dos seus clientes são da região Sul, onde você ainda não possui operação física.', priority: 'medium' },
-                    { type: 'trend', title: 'Ajuste de Fluxo', content: 'Modelos de IA sugerem reduzir etapas de qualificação no WhatsApp para aumentar conversão em 12%.', priority: 'medium' },
-                ].map((insight, i) => (
-                    <motion.div 
-                        key={i}
-                        whileHover={{ scale: 1.02 }}
-                        className={`p-6 rounded-3xl border ${insight.priority === 'high' ? 'bg-rose-500/5 border-rose-500/10' : 'bg-white/[0.02] border-white/[0.05]'} transition-all cursor-pointer`}
-                    >
-                        <div className="flex justify-between items-start mb-3">
-                            <Badge className={insight.priority === 'high' ? 'bg-rose-500/20 text-rose-400' : 'bg-indigo-600/10 text-indigo-400'}>
-                                {insight.type.toUpperCase()}
-                            </Badge>
-                            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">Agora</span>
-                        </div>
-                        <h4 className="text-sm font-black text-white uppercase tracking-tight mb-2">{insight.title}</h4>
-                        <p className="text-xs text-slate-500 leading-relaxed">{insight.content}</p>
-                    </motion.div>
-                ))}
+                {insights && insights.length > 0 ? (
+                    insights.map((insight: any, i: number) => (
+                        <motion.div 
+                            key={i}
+                            whileHover={{ scale: 1.02 }}
+                            className={`p-6 rounded-3xl border ${insight.priority === 'high' ? 'bg-rose-500/5 border-rose-500/10' : 'bg-white/[0.02] border-white/[0.05]'} transition-all cursor-pointer`}
+                        >
+                            <div className="flex justify-between items-start mb-3">
+                                <Badge className={insight.priority === 'high' ? 'bg-rose-500/20 text-rose-400' : 'bg-indigo-600/10 text-indigo-400'}>
+                                    {insight.type?.toUpperCase()}
+                                </Badge>
+                                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">Agora</span>
+                            </div>
+                            <h4 className="text-sm font-black text-white uppercase tracking-tight mb-2">{insight.title}</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">{insight.content}</p>
+                        </motion.div>
+                    ))
+                ) : (
+                    <>
+                        <motion.div 
+                            whileHover={{ scale: 1.02 }}
+                            className="p-6 rounded-3xl border bg-rose-500/5 border-rose-500/10 transition-all cursor-pointer"
+                        >
+                            <div className="flex justify-between items-start mb-3">
+                                <Badge className="bg-rose-500/20 text-rose-400">GAP</Badge>
+                                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">Agora</span>
+                            </div>
+                            <h4 className="text-sm font-black text-white uppercase tracking-tight mb-2">Gap de Atendimento</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">Seu tempo de resposta médio aumentou 20% enquanto o mercado reduziu 5%. Risco de perda de leads detectado.</p>
+                        </motion.div>
+                        <motion.div 
+                            whileHover={{ scale: 1.02 }}
+                            className="p-6 rounded-3xl border bg-white/[0.02] border-white/[0.05] transition-all cursor-pointer"
+                        >
+                            <div className="flex justify-between items-start mb-3">
+                                <Badge className="bg-indigo-600/10 text-indigo-400">STRATEGY</Badge>
+                                <span className="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">Agora</span>
+                            </div>
+                            <h4 className="text-sm font-black text-white uppercase tracking-tight mb-2">Oportunidade de Expansão</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">Base de dados indica que 15% dos seus clientes são da região Sul, onde você ainda não possui operação física.</p>
+                        </motion.div>
+                    </>
+                )}
             </div>
+
 
             <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
                 <ShieldCheck className="w-12 h-12 text-white/20 mb-4" />
