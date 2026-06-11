@@ -51,86 +51,36 @@ function AuthPage() {
   };
 
   const handleDemoAccess = async () => {
-    if (loading) {
-      console.log("Already loading, ignoring click");
-      return;
-    }
+    if (loading) return;
     
-    console.log("CEO Demo clicked");
+    console.log("CEO Demo Bypass clicked");
     setLoading(true);
     
-    const demoEmail = "demo@onecontact.ai";
-    const demoPassword = "Demo@123456";
-    
     try {
-      console.log("Starting demo login flow");
-      
-      // 1. Tentar login direto
-      console.log("Attempting direct login with signInWithPassword");
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      });
-
-      console.log("Auth response:", { data, error: signInError });
-
-      if (signInError) {
-        console.warn("Direct login failed, checking error type...", signInError.message);
-        
-        // Se o erro for de credenciais inválidas ou usuário não encontrado, tentamos criar
-        if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("Email not confirmed")) {
-          console.log("Attempting to create demo account automatically...");
-          
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: demoEmail,
-            password: demoPassword,
-            options: {
-              data: {
-                full_name: "CEO Demo",
-                role: "ceo",
-                organization_name: "ONECONTACT DEMO COMPANY",
-              }
-            }
-          });
-
-          console.log("SignUp response:", { data: signUpData, error: signUpError });
-
-          if (signUpError) {
-            if (signUpError.message.includes("already registered")) {
-              console.log("User already registered but login failed. Trying one last time after a small delay...");
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              const { error: retryError } = await supabase.auth.signInWithPassword({
-                email: demoEmail,
-                password: demoPassword,
-              });
-              if (retryError) throw retryError;
-            } else {
-              throw signUpError;
-            }
+      // Mock session data for bypass
+      const mockSession = {
+        user: {
+          id: "bypass-ceo-id",
+          email: "demo@onecontact.ai",
+          user_metadata: {
+            full_name: "CEO Demo",
+            role: "ceo"
           }
-          
-          // Se o cadastro funcionou e não logou automático, logamos agora
-          if (!signUpData?.session) {
-            console.log("Manual login after signup...");
-            const { error: finalSignInError } = await supabase.auth.signInWithPassword({
-              email: demoEmail,
-              password: demoPassword,
-            });
-            if (finalSignInError) throw finalSignInError;
-          }
-        } else {
-          throw signInError;
-        }
-      }
+        },
+        access_token: "bypass-token",
+        expires_at: Math.floor(Date.now() / 1000) + 3600
+      };
 
-      console.log("Login successful, redirecting to dashboard");
-      toast.success("Acesso DEMO CEO ativado!");
+      localStorage.setItem("onecontact_bypass_session", JSON.stringify(mockSession));
       
-      // Forçamos o redirecionamento imediato
+      console.log("Bypass login successful, redirecting to dashboard");
+      toast.success("Acesso DEMO CEO ativado (Bypass)!");
+      
+      // Immediate reload to trigger useAuth hook with bypass data
       window.location.href = "/dashboard";
     } catch (error: any) {
-      console.error("CRITICAL ERROR during demo access:", error);
-      toast.error(`Falha no acesso demo: ${error.message}`);
+      console.error("Bypass error:", error);
+      toast.error(`Falha no bypass: ${error.message}`);
       setLoading(false);
     }
   };
