@@ -242,7 +242,7 @@ export function Customer360({ contactId }: { contactId?: string }) {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500">Última Transação</span>
                 <span className="text-slate-300">
-                  {transactions?.[0] ? format(new Date(transactions[0].created_at), "dd/MM/yyyy") : "15/05/2026"}
+                  {transactions?.[0]?.created_at ? format(new Date(transactions[0].created_at), "dd/MM/yyyy") : "15/05/2026"}
                 </span>
               </div>
             </CardContent>
