@@ -50,6 +50,99 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          new_values: Json | null
+          old_values: Json | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          channel: string
+          company_id: string
+          content_template: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          objective: string | null
+          priority: string | null
+          scheduled_at: string | null
+          segmentation_filters: Json | null
+          status: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          channel: string
+          company_id: string
+          content_template?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          objective?: string | null
+          priority?: string | null
+          scheduled_at?: string | null
+          segmentation_filters?: Json | null
+          status?: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: string
+          company_id?: string
+          content_template?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          objective?: string | null
+          priority?: string | null
+          scheduled_at?: string | null
+          segmentation_filters?: Json | null
+          status?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       channels: {
         Row: {
           created_at: string | null
@@ -297,6 +390,44 @@ export type Database = {
             columns: ["queue_id"]
             isOneToOne: false
             referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_events: {
+        Row: {
+          campaign_id: string | null
+          channel: string
+          created_at: string | null
+          customer_id: string
+          event_type: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          channel: string
+          created_at?: string | null
+          customer_id: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          campaign_id?: string | null
+          channel?: string
+          created_at?: string | null
+          customer_id?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
         ]
@@ -549,6 +680,42 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      satisfaction_surveys: {
+        Row: {
+          agent_id: string | null
+          comment: string | null
+          conversation_id: string | null
+          created_at: string | null
+          customer_id: string
+          id: string
+          metadata: Json | null
+          score: number
+          type: string
+        }
+        Insert: {
+          agent_id?: string | null
+          comment?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          customer_id: string
+          id?: string
+          metadata?: Json | null
+          score: number
+          type: string
+        }
+        Update: {
+          agent_id?: string | null
+          comment?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          customer_id?: string
+          id?: string
+          metadata?: Json | null
+          score?: number
+          type?: string
         }
         Relationships: []
       }

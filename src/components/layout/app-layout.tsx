@@ -35,6 +35,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const navItems = [
   { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
   { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
+  { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
   { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
   { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
   { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
@@ -49,8 +50,9 @@ export function AppLayout() {
   const { data: profile } = useProfile();
   const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed } = useUIStore();
   const navigate = useNavigate();
-  const location = window.location.pathname;
+  const location = typeof window !== 'undefined' ? window.location.pathname : '';
   const isInbox = location.startsWith("/inbox");
+  const isCampaigns = location.startsWith("/campaigns");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -81,7 +83,8 @@ export function AppLayout() {
   const groups = [...new Set(navItems.map(item => item.group))];
 
   return (
-    <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
+    <GlobalErrorBoundary name="AppLayout">
+      <div className="flex h-screen bg-[#020617] text-slate-200 overflow-hidden font-sans">
       <TooltipProvider delayDuration={0}>
         {/* Sidebar */}
         <aside 
@@ -212,7 +215,7 @@ export function AppLayout() {
         {/* Topbar & Content */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#020617]">
           {/* Header */}
-          {!isInbox && (
+          {!isInbox && !isCampaigns && (
             <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
                 <div className="relative max-w-md w-full group hidden md:block">
@@ -247,10 +250,10 @@ export function AppLayout() {
           {/* Main Content Area */}
           <main className={cn(
             "flex-1 overflow-hidden relative",
-            !isInbox && "p-8 overflow-y-auto no-scrollbar"
+            (!isInbox && !isCampaigns) && "p-8 overflow-y-auto no-scrollbar"
           )}>
             {/* Background Gradient Spotlights */}
-            {!isInbox && (
+            {(!isInbox && !isCampaigns) && (
               <>
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] pointer-events-none rounded-full" />
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/5 blur-[120px] pointer-events-none rounded-full" />
@@ -259,7 +262,7 @@ export function AppLayout() {
             
             <div className={cn(
               "relative z-10 h-full",
-              !isInbox && "max-w-7xl mx-auto"
+              (!isInbox && !isCampaigns) && "max-w-7xl mx-auto"
             )}>
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />
@@ -268,6 +271,7 @@ export function AppLayout() {
           </main>
         </div>
       </TooltipProvider>
-    </div>
+      </div>
+    </GlobalErrorBoundary>
   );
 }
