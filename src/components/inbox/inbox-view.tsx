@@ -232,7 +232,7 @@ export const InboxView = () => {
                       {analysis.intent === 'churn' && (
                         <div className="flex items-start gap-3 bg-rose-500/10 p-3 rounded-2xl border border-rose-500/20">
                           <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                          <p className="text-xs text-rose-200 font-medium">Detectado risco alto de churn. Cliente estratégico.</p>
+                          <p className="text-xs text-rose-200 font-medium">Detectado risco de {analysis.intent === 'churn' ? 'churn' : 'cancelamento'}. Cliente estratégico.</p>
                         </div>
                       )}
                       
