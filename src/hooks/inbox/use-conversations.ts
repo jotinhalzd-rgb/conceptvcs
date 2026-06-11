@@ -11,8 +11,10 @@ export function useConversations(queueId?: string) {
           *,
           contacts(name, email),
           profiles(full_name),
-          queues(name)
+          queues(name),
+          channels(name, provider)
         `)
+
         .order("last_message_at", { ascending: false });
 
       if (queueId) {
