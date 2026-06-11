@@ -1271,6 +1271,145 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_audit_logs_v2: {
+        Row: {
+          action_type: string
+          actor_org_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          network_id: string
+          target_org_id: string
+        }
+        Insert: {
+          action_type: string
+          actor_org_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          network_id: string
+          target_org_id: string
+        }
+        Update: {
+          action_type?: string
+          actor_org_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          network_id?: string
+          target_org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_audit_logs_v2_actor_org_id_fkey"
+            columns: ["actor_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_audit_logs_v2_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "channel_networks_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_audit_logs_v2_target_org_id_fkey"
+            columns: ["target_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_hierarchy_v2: {
+        Row: {
+          child_org_id: string
+          created_at: string | null
+          hierarchy_level: string
+          id: string
+          network_id: string
+          parent_org_id: string
+        }
+        Insert: {
+          child_org_id: string
+          created_at?: string | null
+          hierarchy_level: string
+          id?: string
+          network_id: string
+          parent_org_id: string
+        }
+        Update: {
+          child_org_id?: string
+          created_at?: string | null
+          hierarchy_level?: string
+          id?: string
+          network_id?: string
+          parent_org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_hierarchy_v2_child_org_id_fkey"
+            columns: ["child_org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_hierarchy_v2_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "channel_networks_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_hierarchy_v2_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_networks_v2: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          master_org_id: string
+          network_name: string
+          network_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          master_org_id: string
+          network_name: string
+          network_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          master_org_id?: string
+          network_name?: string
+          network_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_networks_v2_master_org_id_fkey"
+            columns: ["master_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channel_webhooks_log: {
         Row: {
           channel_id: string | null
@@ -4799,6 +4938,65 @@ export type Database = {
             foreignKeyName: "webhook_subscriptions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      white_label_configs_v2: {
+        Row: {
+          created_at: string | null
+          custom_domain: string | null
+          email_template_config: Json | null
+          favicon_url: string | null
+          help_center_url: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          organization_id: string
+          platform_name: string
+          primary_color: string | null
+          secondary_color: string | null
+          support_email: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_domain?: string | null
+          email_template_config?: Json | null
+          favicon_url?: string | null
+          help_center_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          organization_id: string
+          platform_name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          support_email?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_domain?: string | null
+          email_template_config?: Json | null
+          favicon_url?: string | null
+          help_center_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          organization_id?: string
+          platform_name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          support_email?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "white_label_configs_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },

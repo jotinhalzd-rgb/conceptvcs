@@ -1,54 +1,52 @@
-# Plano de Implementação: Billing & Subscription Platform
+# Plano de Implementação: White Label, Franquias e Canais
 
-O objetivo é construir a espinha dorsal financeira do ecossistema OneContact OS, permitindo a gestão de assinaturas recorrentes, cobrança por consumo, marketplace de terceiros e distribuição de comissões.
+O objetivo é transformar o OneContact OS em um ecossistema multi-camada, permitindo que a plataforma seja distribuída sob diferentes marcas e hierarquias (Franquias, Revendas, White Label).
 
-## 1. Arquitetura Financeira (Universal Billing Schema)
+## 1. Arquitetura de Canais (Distribution Schema)
 
-A plataforma será dividida em três pilares: **Core Subscriptions**, **Usage Metering** e **Ecosystem Revenue**.
+A fundação de dados será estendida para suportar relações de parentesco e personalização visual:
 
-- `public.billing_plans_v2`: Definição de planos e seus recursos (JSON com limites).
-- `public.billing_subscriptions_v2`: Registro da assinatura ativa por tenant, ciclo de faturamento e status.
-- `public.billing_usage_meters`: Log de consumo em tempo real (ex: mensagens enviadas, tokens de IA).
-- `public.billing_invoices_v2`: Faturas geradas, histórico de pagamentos e links para recibos.
-- `public.billing_commissions_v2`: Gestão de repasses para parceiros e afiliados.
-- `public.billing_gateways_config`: Configuração abstrata de conectores (Stripe, Asaas, etc).
+- `public.white_label_configs`: Configurações visuais por marca (Logo, Cores, Domínio, Nome).
+- `public.channel_networks`: Estrutura de redes (ex: Franquia X, Rede de Consultoria Y).
+- `public.channel_hierarchy`: Mapeamento de relações (Parent/Child) entre organizações.
+    - `parent_org_id` -> `child_org_id`.
+    - Níveis: 'Master', 'Franchise', 'Unit', 'Partner'.
+- `public.channel_permissions`: Escopo de visibilidade (ex: Master vê agregados de todas as Units).
 
-## 2. Camada de Abstração de Pagamentos (Gateway Adapter)
+## 2. White Label Engine (Dynamic Branding)
 
-Para evitar o acoplamento a um único provedor, utilizaremos o padrão **Adapter**:
-- Interface comum para `createCustomer`, `subscribe`, `processRefund`.
-- Webhook Handler unificado que traduz eventos externos (ex: `invoice.paid`) em ações internas.
+Implementaremos um sistema de injeção de marca em tempo real:
+- **Theme Provider**: Lê a `white_label_config` baseada no `window.location.hostname`.
+- **Asset Resolver**: Alterna logos, favicons e e-mails de sistema dinamicamente.
+- **Subdomain Routing**: Mapeamento de `marca-a.onecontact.os` para o perfil visual correspondente.
 
-## 3. Controle de Consumo & Overage (Metering Engine)
+## 3. Painéis Hierárquicos (The Network Views)
 
-O sistema monitorará limites de forma proativa:
-- **Hard Limits**: Impedir criação de novos usuários se o limite do plano for atingido.
-- **Soft/Overage Limits**: Permitir o uso excedente (ex: IA) e cobrar na fatura do mês seguinte.
-- **OIL Integration**: Alerta automático quando uma empresa atinge 90% da cota.
+### A. Franchise Dashboard (Master View)
+- Visão agregada de receita (MRR) de toda a rede.
+- Ranking de performance entre unidades.
+- Benchmark interno (EIN focado na rede).
 
-## 4. Componentes Frontend (Finance UI)
+### B. Unit/Partner Dashboard (Local View)
+- Interface operacional padrão, mas com indicação da rede vinculada.
+- Gestão de carteira para consultores e agências.
 
-### A. Billing Center (Visão do Cliente)
-- `PlansGrid`: Comparativo de recursos e botão de upgrade.
-- `UsageDashboard`: Gráficos de barras mostrando o consumo atual vs. limite do plano.
-- `InvoicesHistory`: Lista para download de comprovantes.
+## 4. Governança e Repasses (Billing Integration)
 
-### B. Partner Portal (Comissões)
-- `RevenueShareTracker`: Extrato de ganhos por vendas no Marketplace ou indicações.
+- **Revenue Split**: Integração com a `Billing Platform` para automatizar o split de pagamentos.
+- **Certification Badges**: Visualização do nível de parceria no perfil do Hub.
 
-## 5. Escalabilidade e Segurança
+## 5. Escalabilidade e Segurança (RLS Cross-Tenant)
 
-- **Idempotency**: Garantia de que uma cobrança nunca seja processada duas vezes via chaves de idempotência.
-- **RLS Financeiro**: Acesso estritamente restrito. Somente donos da organização e administradores financeiros podem visualizar faturas.
-- **Audit Log**: Todo upgrade/downgrade será registrado com metadados do autor e timestamp.
+- **Hierarchical RLS**: Política que permite ao `parent_org_id` ler (SELECT) dados agregados de seus filhos, sem permitir escrita direta.
+- **Isolation**: Garantia de que a Marca A nunca acesse a configuração de marca B.
 
-## Detalhes do Modelo de Monetização
+## Detalhes da Hierarquia
 
 ```text
-REVENUE SHARE MARKETPLACE:
-- 70% Partner (Desenvolvedor do App)
-- 20% OneContact Platform
-- 10% Afiliado (Se houver indicação)
+MASTER FRANQUIA (Vê Tudo)
+   └── FRANQUEADO REGIONAL (Vê sua Região)
+       └── UNIDADE LOCAL (Vê sua Unidade)
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de planos, assinaturas e o motor de controle de consumo.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das tabelas de configuração White Label e a infraestrutura de hierarquia de organizações.
