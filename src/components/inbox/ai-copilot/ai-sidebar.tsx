@@ -15,6 +15,15 @@ import { cn } from "@/lib/utils";
 import { SuggestionCard } from "./suggestion-card";
 import { CopilotEngine } from "@/services/ai/copilot-engine";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAgents } from "@/hooks/ai/use-agents";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 interface AISidebarProps {
   chat: any;
