@@ -1,16 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Clock, Users, Target, Activity, Star, Rocket, TrendingUp } from "lucide-react";
+import { MessageSquare, Clock, Users, Target, Activity, Star, Rocket, TrendingUp, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StatsBox } from "../widgets/stats-box";
 
-const StatsBox = ({ icon: Icon, label, value, color }: any) => (
-  <div className="flex flex-col p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-    <div className={cn("p-2 w-fit rounded-lg mb-3", color)}>
-      <Icon className="w-5 h-5" />
-    </div>
-    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</p>
-    <h4 className="text-xl font-black text-white">{value}</h4>
-  </div>
-);
 
 export function CompanyDashboard() {
   return (
@@ -18,7 +10,7 @@ export function CompanyDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatsBox icon={MessageSquare} label="Conversas Abertas" value="142" color="bg-indigo-500/10 text-indigo-400" />
         <StatsBox icon={Clock} label="Aguardando Resposta" value="12" color="bg-amber-500/10 text-amber-400" />
-        <StatsBox icon={Target} label="Vendas Hoje" value="R$ 12.4k" color="bg-emerald-500/10 text-emerald-400" />
+        <StatsBox icon={DollarSign} label="Vendas Hoje" value="R$ 12.4k" color="bg-emerald-500/10 text-emerald-400" trend={{ value: "+8%", positive: true }} />
         <StatsBox icon={Activity} label="SLA em Risco" value="3" color="bg-rose-500/10 text-rose-400" />
         <StatsBox icon={Star} label="Avaliação Média" value="4.9" color="bg-purple-500/10 text-purple-400" />
       </div>

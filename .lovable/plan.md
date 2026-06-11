@@ -1,38 +1,53 @@
 text
-# PLANO DE IMPLEMENTAÇÃO: ONECONTACT OS - FASE 6 (GOVERNANÇA & HIERARQUIA ENTERPRISE)
+# OneContact OS - Fase 2: Centro de Controle Operacional (CCO)
 
-Este plano estabelece a espinha dorsal de controle e segurança do sistema, permitindo a gestão multi-nível desde o CEO Master até o Atendente Operacional.
+O objetivo é transformar o dashboard atual em um verdadeiro Centro de Comando adaptativo, onde cada perfil de usuário (CEO, Gestor, Gerente, Atendente) visualiza apenas o que é essencial para sua tomada de decisão e produtividade.
 
-## 1. Arquitetura de Governança & RLS
-*   **Novos Perfis de Acesso:** Implementar o campo `role` na tabela `profiles`: `ceo_master`, `admin` (Gestor), `manager` (Gerente), `agent` (Atendente).
-*   **Isolamento de Dados (Multi-tenancy):** Refinar as políticas de RLS para que:
-    *   `ceo_master`: Visualiza e edita TUDO (todas as empresas).
-    *   `admin`: Visualiza apenas dados da sua `company_id`.
-    *   `manager`: Visualiza dados da sua empresa e subordinados.
-    *   `agent`: Visualiza apenas suas próprias conversas e dados operacionais básicos.
+## 1. Arquitetura Adaptativa de Dashboard
+Implementaremos uma lógica de renderização baseada em perfis (Roles) para o `DashboardView`.
 
-## 2. Dashboard CEO Master (Painel Global)
-*   **Métricas Agregadas:** Visão em tempo real de todas as empresas integradas.
-*   **Gestão de Inquilinos (Tenants):** Interface para criar, suspender e gerenciar limites de uso de IA e mensagens de cada empresa.
-*   **Módulo de Impersonação:** Sistema de "Acesso por Atribuição" que permite ao CEO assumir a sessão de qualquer usuário para suporte técnico, com registro obrigatório em log de auditoria.
+### Perfis e Blocos de Comando:
 
-## 3. Gestão de Equipe & Hierarquia Funcional
-*   **Painel do Gestor Master:** Controle total sobre os usuários da sua empresa (Admin -> Gerente -> Atendente).
-*   **Painel do Gerente Operacional:** Foco em monitoramento de SLA e produtividade da equipe sob seu comando.
-*   **IA Supervisora:** Alertas em tempo real para o Gerente sobre filas congestionadas e riscos de SLA.
+#### CEO Master (Visão Estratégica)
+*   **KPIs Críticos:** Receita da plataforma, Consumo total de IA, Crescimento mensal.
+*   **Alertas de Risco:** Empresas sem atividade, quedas bruscas de performance.
+*   **Oportunidades:** Empresas atingindo limites de plano, alto volume de leads.
+*   **Ações Recomendadas:** Sugestões baseadas em dados (Ex: "Empresa X precisa de upgrade").
 
-## 4. Auditoria Total & Compliance
-*   **Rastreabilidade Extrema:** Registro de cada login, logout e troca de perfil.
-*   **Log de Impersonação:** Registro de quem, quando e por que um CEO Master acessou uma conta de cliente.
-*   **IP & User-Agent Tracking:** Captura automática de metadados em cada ação crítica.
+#### Gestor de Empresa (Visão Operacional)
+*   **Status em Tempo Real:** Conversas abertas/aguardando, atendentes/gerentes online.
+*   **Métricas de Conversão:** Leads e Vendas do dia.
+*   **Painel "Necessita Atenção":** Clientes VIP aguardando, filas congestionadas, SLAs em risco.
 
-## 5. Experiência de Login & Demonstração
-*   **Acesso Rápido 2.0:** Botões na tela de login para alternar instantaneamente entre os 4 níveis de demonstração.
-*   **Sistema de Logout Robusto:** Botão global que limpa estados de impersonação, cache e redireciona ao login com segurança.
+#### Gerente de Equipe (Visão Tática)
+*   **Performance de Equipe:** Ranking de atendentes, Tempo Médio de Resposta (TMR) e Atendimento (TMA).
+*   **Monitoramento em Tempo Real:** Visualização de carga de trabalho (quem está parado vs. sobrecarregado).
+*   **Qualidade:** Avaliações médias e conversões.
 
----
+#### Atendente (Visão de Execução)
+*   **Foco Total:** "Minhas Conversas", "Minhas Tarefas", Metas individuais.
+*   **Produtividade:** Agenda do dia, avisos importantes e ranking pessoal.
 
-### Especificações Técnicas
-*   **Tabelas de Apoio:** `companies`, `audit_logs` (já criada, será expandida), `user_permissions`.
-*   **Segurança:** Implementação de JWT Claims personalizados (via hooks do Supabase) para facilitar a verificação de permissões no lado do cliente.
-*   **Performance:** Índices compostos por `company_id` em todas as tabelas transacionais.
+## 2. Customer 360 (Módulo de Inteligência)
+Evolução da visualização de clientes para um perfil omnichannel completo.
+*   **Timeline:** Histórico unificado de interações, compras, tickets e campanhas.
+*   **IA Insights:** Score de propensão à compra, risco de churn (cancelamento) e perfil comportamental.
+*   **Contexto:** Último atendente/gerente, canal de origem e tags de segmentação.
+
+## 3. Arquitetura de Filas Enterprise
+Estrutura robusta para gestão de tráfego de mensagens.
+*   **Configurações:** SLA por fila, níveis de prioridade, supervisores dedicados.
+*   **Operação:** Suporte a transferência entre filas/atendentes e regras de escalonamento.
+*   **Visual:** Indicadores de volume e "calor" da fila (congestionamento).
+
+## 4. Design System & UX (Estética Premium Dark)
+Refinamento visual seguindo referências como Linear e Stripe.
+*   **Cards de Comando:** Bordas sutis, tipografia clara, uso semântico de cores para alertas.
+*   **Micro-interações:** Feedback imediato em ações de comando.
+*   **Responsividade:** Interface adaptada para operação em diferentes tamanhos de tela sem perda de densidade de informação.
+
+## Detalhes Técnicos
+*   **Componentes:** Criação de `CommandCenter` component para gerenciar os diferentes widgets por perfil.
+*   **Estado:** Utilização de hooks customizados para simular dados em tempo real (Real-time updates).
+*   **Tipagem:** Extensão das interfaces de `User`, `Customer` e `Queue` para suportar os novos campos de inteligência e operação.
+*   **Performance:** Memoization de componentes pesados e carregamento lazy de módulos do Customer 360.
