@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { TwilioProvider } from "../_shared/providers/twilio.ts";
 import { MetaProvider } from "../_shared/providers/meta.ts";
+import { ThreeSixtyProvider } from "../_shared/providers/360dialog.ts";
+import { EvolutionProvider } from "../_shared/providers/evolution.ts";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -10,8 +12,10 @@ const supabaseAdmin = createClient(
 
 const providers: any = {
   twilio: new TwilioProvider(),
-  whatsapp: new TwilioProvider(), // Alias for backward compatibility
+  whatsapp: new TwilioProvider(), 
   meta: new MetaProvider(),
+  "360dialog": new ThreeSixtyProvider(),
+  evolution: new EvolutionProvider(),
 };
 
 serve(async (req) => {
@@ -66,7 +70,7 @@ serve(async (req) => {
         sender_profile_id: user.id,
         provider_message_id: result.sid,
         delivery_status: 'sent',
-        metadata: { mediaUrl }
+        metadata: { mediaUrl, provider: providerKey }
       })
       .select().single();
 
