@@ -2614,6 +2614,44 @@ export type Database = {
           },
         ]
       }
+      oil_alerts_v2: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_resolved: boolean | null
+          message: string
+          organization_id: string
+          resolved_at: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          message: string
+          organization_id: string
+          resolved_at?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          message?: string
+          organization_id?: string
+          resolved_at?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_alerts_v2_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oil_entity_graph: {
         Row: {
           created_at: string
@@ -2705,6 +2743,44 @@ export type Database = {
           },
         ]
       }
+      oil_health_history: {
+        Row: {
+          dimension_scores: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          measured_at: string | null
+          organization_id: string
+          score: number
+        }
+        Insert: {
+          dimension_scores?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          measured_at?: string | null
+          organization_id: string
+          score: number
+        }
+        Update: {
+          dimension_scores?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          measured_at?: string | null
+          organization_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_health_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oil_health_scores: {
         Row: {
           calculated_at: string
@@ -2736,6 +2812,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "oil_health_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oil_insights_v2: {
+        Row: {
+          action_suggestion: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          impact_estimate: string | null
+          metadata: Json | null
+          organization_id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_suggestion?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact_estimate?: string | null
+          metadata?: Json | null
+          organization_id: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_suggestion?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact_estimate?: string | null
+          metadata?: Json | null
+          organization_id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_insights_v2_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2786,6 +2912,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "oil_recommendations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oil_signals_v2: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          inference: string | null
+          organization_id: string
+          payload: Json | null
+          severity: string
+          source: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          inference?: string | null
+          organization_id: string
+          payload?: Json | null
+          severity?: string
+          source: string
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          inference?: string | null
+          organization_id?: string
+          payload?: Json | null
+          severity?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oil_signals_v2_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

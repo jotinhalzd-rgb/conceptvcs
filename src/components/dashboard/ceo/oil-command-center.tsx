@@ -18,9 +18,10 @@ import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 
 export const OILCommandCenter = () => {
-  const { recommendations, healthScores, isLoading } = useOIL();
+  const { recommendations, healthHistory, latestScore, alerts, isLoading } = useOIL();
 
   if (isLoading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest animate-pulse">Iniciando Camada de Inteligência...</div>;
+
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -128,7 +129,7 @@ export const OILCommandCenter = () => {
                 <ShieldCheck className="w-12 h-12 text-white/20 mb-4" />
                 <p className="text-indigo-100/60 text-[10px] font-black uppercase tracking-widest mb-1">Health Score Global</p>
                 <div className="flex items-end gap-2 mb-6">
-                    <span className="text-5xl font-black text-white">94</span>
+                    <span className="text-5xl font-black text-white">{latestScore}</span>
                     <span className="text-indigo-200 text-sm font-bold mb-1">/100</span>
                 </div>
                 <div className="flex items-center gap-2 text-indigo-100 text-[10px] font-black uppercase">
@@ -137,6 +138,7 @@ export const OILCommandCenter = () => {
                 </div>
                 <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 blur-3xl rounded-full" />
             </div>
+
 
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-3xl p-6">
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Digital Twin Activity</h4>

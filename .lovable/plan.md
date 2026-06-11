@@ -1,54 +1,59 @@
-# Plano de Implementação: CRM Enterprise
+# Plano de Implementação: OIL (OneContact Intelligence Layer)
 
-O objetivo é transformar o CRM em uma engine de vendas e relacionamento de alta escala, nativamente integrada ao ecossistema de inteligência (OIL/EIN) e atendimento (Inbox).
+O OIL é o "cérebro" do OneContact OS, transformando o fluxo bruto de dados em sinais estratégicos e ações preditivas.
 
-## 1. Arquitetura de Dados (Database Schema)
+## 1. Arquitetura de Dados (Intelligence Schema)
 
-A fundação será expandida para suportar pipelines ilimitados, automações e previsibilidade:
+Para suportar análises em tempo real sem degradar a performance operacional, o OIL utilizará tabelas de agregação e sinais:
 
-- `public.pipelines`: Estrutura de funis (Vendas, Pós-venda, etc).
-- `public.pipeline_stages`: Etapas customizáveis com ordenação e regras.
-- `public.deals`: Tabela de negócios com `company_id`, `probability`, `expected_close_date` e `tags`.
-- `public.crm_tasks`: Tarefas vinculadas a negócios ou clientes.
-- `public.crm_automation_rules`: Definição de gatilhos (triggers) por etapa.
-- `public.crm_goals`: Metas por organização, time ou usuário.
-- `public.crm_forecast`: Tabela de cache para projeções de receita geradas por IA.
+- `public.oil_signals`: Captura de eventos brutos de todos os módulos (CRM, Inbox, Tickets).
+- `public.oil_insights`: Tabela de resultados processados (Riscos, Oportunidades, Recomendações).
+- `public.oil_health_scores`: Histórico de scores (Customer, Team, Organization).
+- `public.oil_alerts`: Central de notificações críticas geradas automaticamente.
+- `public.oil_prediction_models`: Metadados e versões dos modelos de IA aplicados a cada tenant.
 
-## 2. Componentes Frontend (UI/UX)
+## 2. Motores de Análise (Logic Engine)
 
-### A. Visão Kanban & Lista
-- `CRMView`: Tela principal com alternador de pipelines e visões (Kanban/Lista).
-- `KanbanBoard`: Implementação de Drag & Drop performático com `dnd-kit`.
-- `DealCard`: Resumo visual com indicadores de temperatura (IA Score) e atrasos.
+O processamento será dividido em três camadas:
 
-### B. Gestão e Metas
-- `GoalTracker`: Widgets de progresso de metas em tempo real.
-- `PipelineEditor`: Interface visual para criar e ordenar etapas.
+### A. Real-Time Monitor (SLA & Riscos)
+- Monitoramento de filas e SLAs.
+- Gatilhos instantâneos para "Atendimento Sobrecarregado" ou "Negócio Esquecido".
 
-### C. Inteligência & Forecast
-- `ForecastPanel`: Gráficos de receita prevista vs. realizada.
-- `DealAIAdvisor`: Painel lateral no detalhe do negócio com "Próxima Melhor Ação".
+### B. Analytical Engine (Tendências & Performance)
+- Agregadores diários de conversão, ticket médio e produtividade.
+- Comparação histórica para detectar anomalias (quedas ou picos repentinos).
 
-## 3. Fluxos de Automação
+### C. Predictive Engine (IA Strategy)
+- Modelos de propensão de Churn e Probabilidade de Fechamento.
+- Sugestão de "Next Best Action" (Próxima melhor ação) personalizada por cliente.
 
-O sistema utilizará **Postgres Triggers** e **Edge Functions** para:
-- Mover um negócio para "Ganhos" -> Gerar evento no Customer 360 -> Notificar Gerente.
-- Negócio parado por > 5 dias -> IA gera alerta de risco e sugere follow-up.
+## 3. Componentes Frontend (Intelligence UI)
 
-## 4. Escalabilidade e Segurança
+### A. OIL Command Center (Painel Executivo)
+- `OilInsightsFeed`: Feed dinâmico de cards (Alerta, Oportunidade, Sugestão).
+- `OilHealthMap`: Visualização de radar do score global da empresa (Vendas, Atendimento, Retenção).
 
-- **Performance**: Indexação composta por `(organization_id, pipeline_id, stage_id)`.
-- **Isolamento**: RLS garantindo que usuários de uma empresa nunca vejam pipelines de outra.
-- **Cache**: Queries otimizadas com filtros pré-processados no banco.
+### B. Widgets de Contexto (Injetados)
+- Indicador de "Risco de Perda" no detalhe do CRM.
+- Resumo de "Interesses do Cliente" no Inbox.
 
-## Detalhes Técnicos
+## 4. Estratégia de Escalabilidade e IA
 
-```text
-TABELA DE METAS:
-- target_value (numeric)
-- current_value (numeric)
-- target_type (revenue, conversion, activity)
-- period (monthly, quarterly)
+- **Aggregation**: Uso de tabelas de resumo (Materialized Views ou Agregadores) para suportar 100k+ empresas.
+- **Isolamento**: RLS absoluto por `organization_id`. Dados anônimos para benchmarks setoriais (EIN).
+- **Asynchronous Processing**: Toda análise complexa será executada em background via Edge Functions ou Workers dedicados.
+
+## Detalhes Técnicos do Sinal (OIL Signal)
+
+```json
+{
+  "source": "crm",
+  "event": "deal_stagnated",
+  "severity": "high",
+  "entities": ["deal_id", "contact_id"],
+  "inference": "Probabilidade de perda aumentou 30% devido a 5 dias sem contato."
+}
 ```
 
-**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação das novas tabelas de CRM e o desenvolvimento do Kanban Enterprise com suporte a múltiplos pipelines.
+**PRÓXIMO PASSO:** Após sua aprovação, iniciarei a criação da infraestrutura de sinais e o painel de controle do OIL.
