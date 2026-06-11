@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, Crown, Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
@@ -50,36 +51,36 @@ function AuthPage() {
     }
   };
 
-  const handleDemoAccess = async () => {
+  const handleDemoAccess = async (role: 'ceo_master' | 'admin' | 'manager' | 'agent') => {
     if (loading) return;
     
-    console.log("CEO Demo Bypass clicked");
+    const roleLabels = {
+      ceo_master: '👑 CEO MASTER',
+      admin: '🏢 EMPRESA (GESTOR)',
+      manager: '👨‍💼 GERENTE',
+      agent: '🎧 ATENDENTE'
+    };
+
     setLoading(true);
     
     try {
-      // Mock session data for bypass
       const mockSession = {
         user: {
-          id: "bypass-ceo-id",
-          email: "demo@onecontact.ai",
+          id: `bypass-${role}-id`,
+          email: `${role}@onecontact.ai`,
           user_metadata: {
-            full_name: "CEO Demo",
-            role: "ceo"
+            full_name: roleLabels[role].split(' ').slice(1).join(' '),
+            role: role
           }
         },
-        access_token: "bypass-token",
+        access_token: `bypass-token-${role}`,
         expires_at: Math.floor(Date.now() / 1000) + 3600
       };
 
       localStorage.setItem("onecontact_bypass_session", JSON.stringify(mockSession));
-      
-      console.log("Bypass login successful, redirecting to dashboard");
-      toast.success("Acesso DEMO CEO ativado (Bypass)!");
-      
-      // Immediate reload to trigger useAuth hook with bypass data
+      toast.success(`${roleLabels[role]} ativado (Demo)!`);
       window.location.href = "/dashboard";
     } catch (error: any) {
-      console.error("Bypass error:", error);
       toast.error(`Falha no bypass: ${error.message}`);
       setLoading(false);
     }
@@ -202,28 +203,32 @@ function AuthPage() {
         <section className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
           <div className="flex items-center gap-4 mb-4">
             <div className="h-px flex-1 bg-white/[0.05]" />
-            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">Acesso Rápido</span>
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">Acessos Rápidos (DEMO)</span>
             <div className="h-px flex-1 bg-white/[0.05]" />
           </div>
           
-          <button
-            onClick={handleDemoAccess}
-            disabled={loading}
-            className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:bg-white/[0.05] hover:border-indigo-500/30 transition-all duration-300 group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                <Crown className="w-5 h-5" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-sm font-bold text-white tracking-wide">CEO DEMO</h3>
-                <p className="text-[11px] text-slate-500">Acesso completo para demonstração</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/[0.03] flex items-center justify-center text-slate-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </button>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { role: 'ceo_master', label: 'CEO MASTER', icon: Crown, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+              { role: 'admin', label: 'GESTOR', icon: ShieldCheck, color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
+              { role: 'manager', label: 'GERENTE', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+              { role: 'agent', label: 'ATENDENTE', icon: LogIn, color: 'text-slate-400', bg: 'bg-slate-400/10' },
+            ].map((demo) => (
+              <button
+                key={demo.role}
+                onClick={() => handleDemoAccess(demo.role as any)}
+                disabled={loading}
+                className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl hover:bg-white/[0.05] hover:border-indigo-500/30 transition-all group text-left"
+              >
+                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", demo.bg, demo.color)}>
+                  <demo.icon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-[10px] font-black text-white tracking-widest">{demo.label}</h3>
+                </div>
+              </button>
+            ))}
+          </div>
         </section>
 
         <footer className="mt-12 text-center text-[10px] text-slate-600 uppercase tracking-[0.3em] font-bold opacity-50">

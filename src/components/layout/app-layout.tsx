@@ -31,20 +31,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-
-const navItems = [
-  { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
-  { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
-  { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
-  { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
-  { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
-  { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
-  { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
-  { icon: Rocket, label: "Gamificação", href: "/gamification", group: "Operação" },
-  { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
-  { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
-];
-
 export function AppLayout() {
   const { user, loading } = useAuth();
   const { data: profile } = useProfile();
@@ -53,6 +39,24 @@ export function AppLayout() {
   const location = typeof window !== 'undefined' ? window.location.pathname : '';
   const isInbox = location.startsWith("/inbox");
   const isCampaigns = location.startsWith("/campaigns");
+
+  const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
+
+  const navItems = [
+    { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
+    ...(isCEOMaster ? [
+      { icon: Briefcase, label: "Gestão de Empresas", href: "/admin/companies", group: "Governança" },
+      { icon: ShieldCheck, label: "Auditoria Global", href: "/admin/audit", group: "Governança" },
+    ] : []),
+    { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
+    { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
+    { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
+    { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
+    { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
+    { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
+    { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
+    { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
+  ];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -166,7 +170,9 @@ export function AppLayout() {
                     className="flex-1 min-w-0"
                   >
                     <p className="text-sm font-bold text-white truncate leading-none mb-1">{profile?.full_name || "CEO DEMO"}</p>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">CEO / Founder</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">
+                      {profile?.role === 'ceo_master' ? 'CEO MASTER' : (profile?.role === 'admin' ? 'GESTOR MASTER' : (profile?.role === 'manager' ? 'GERENTE' : 'ATENDENTE'))}
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -203,7 +209,7 @@ export function AppLayout() {
                     onClick={handleLogout}
                   >
                     <LogOut className="h-5 w-5" />
-                    {!collapsed && <span>Encerrar Sessão</span>}
+                    {!collapsed && <span>Sair / Encerrar Demo</span>}
                   </Button>
                 </TooltipTrigger>
                 {collapsed && <TooltipContent side="right" className="bg-rose-600 text-white">Sair</TooltipContent>}
