@@ -4,15 +4,11 @@ import {
   Paperclip, 
   Mic, 
   Smile, 
-  Clock, 
   PanelRightClose, 
   PanelRightOpen,
   Lock,
   User,
   ShieldCheck,
-  TrendingUp,
-  Plus, 
-  DollarSign,
   ArrowRightLeft
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
