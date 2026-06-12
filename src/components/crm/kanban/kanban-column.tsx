@@ -8,9 +8,10 @@ interface KanbanColumnProps {
   deals: any[];
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
+  onCardClick?: (deal: any) => void;
 }
 
-export const KanbanColumn = ({ stage, deals, onDragOver, onDrop }: KanbanColumnProps) => {
+export const KanbanColumn = ({ stage, deals, onDragOver, onDrop, onCardClick }: KanbanColumnProps) => {
   const totalValue = deals.reduce((acc, deal) => acc + (Number(deal.value) || 0), 0);
 
   return (
@@ -44,7 +45,7 @@ export const KanbanColumn = ({ stage, deals, onDragOver, onDrop }: KanbanColumnP
 
       <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
         {deals.map((deal) => (
-          <KanbanCard key={deal.id} deal={deal} />
+          <KanbanCard key={deal.id} deal={deal} onClick={() => onCardClick?.(deal)} />
         ))}
       </div>
     </div>
