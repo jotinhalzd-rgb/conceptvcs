@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CommandSignal {
   type: 'risk' | 'opportunity' | 'bottleneck' | 'kpi';
@@ -15,58 +16,34 @@ export function useCommandEngine(role: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulação da Engine de Comando baseada no Perfil
-    const generateMockSignals = () => {
-      const mockSignals: CommandSignal[] = [];
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('oil_insights_v2')
+        .select('insight_type, priority, title, description, metadata')
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-      if (role === 'ceo_master' || role === 'ceo') {
-        mockSignals.push({
-          type: 'risk',
-          level: 'high',
-          source: 'company',
-          title: 'Empresa X - Inatividade Crítica',
-          description: 'Nenhuma interação detectada nos últimos 15 dias. Churn risk em 85%.',
-          action_label: 'Contatar Gestor',
-          metadata: { company_id: '123' }
-        });
-        mockSignals.push({
-          type: 'opportunity',
-          level: 'medium',
-          source: 'company',
-          title: 'Empresa Y - Upgrade Potencial',
-          description: 'Atingiu 95% do limite de mensagens do plano Pro.',
-          action_label: 'Enviar Proposta',
-          metadata: { company_id: '456' }
-        });
+      if (cancelled) return;
+      if (error || !data) {
+        setSignals([]);
+        setLoading(false);
+        return;
       }
-
-      if (role === 'admin' || role === 'manager') {
-        mockSignals.push({
-          type: 'bottleneck',
-          level: 'critical',
-          source: 'queue',
-          title: 'Fila de Suporte Congestionada',
-          description: '80% de ocupação. TMR médio subiu para 12 min.',
-          action_label: 'Intervir na Fila',
-          metadata: { queue_id: '789' }
-        });
-        mockSignals.push({
-          type: 'opportunity',
-          level: 'high',
-          source: 'customer',
-          title: 'Cliente VIP Aguardando',
-          description: 'Eduardo Rocha iniciou conversa há 5 min. Prioridade máxima.',
-          action_label: 'Assumir Atendimento',
-          metadata: { customer_id: '000' }
-        });
-      }
-
-      setSignals(mockSignals);
+      const mapped: CommandSignal[] = data.map((i: any) => ({
+        type: (i.insight_type as CommandSignal['type']) || 'kpi',
+        level: (i.priority as CommandSignal['level']) || 'medium',
+        source: 'company',
+        title: i.title || 'Insight',
+        description: i.description || '',
+        action_label: 'Ver Detalhes',
+        metadata: i.metadata || {},
+      }));
+      setSignals(mapped);
       setLoading(false);
-    };
-
-    const timer = setTimeout(generateMockSignals, 500);
-    return () => clearTimeout(timer);
+    })();
+    return () => { cancelled = true; };
   }, [role]);
 
   return { signals, loading };
