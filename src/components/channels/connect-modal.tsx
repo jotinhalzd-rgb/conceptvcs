@@ -33,17 +33,39 @@ interface ConnectModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const PROVIDER_FIELDS: Record<string, { key: string; label: string; placeholder?: string }[]> = {
+  meta: [
+    { key: "access_token", label: "Meta Access Token" },
+    { key: "phone_number_id", label: "Phone Number ID" },
+    { key: "waba_id", label: "WABA ID" },
+    { key: "verify_token", label: "Verify Token (webhook)" },
+  ],
+  twilio: [
+    { key: "account_sid", label: "Twilio Account SID" },
+    { key: "auth_token", label: "Twilio Auth Token" },
+  ],
+  "360dialog": [
+    { key: "api_key", label: "360Dialog API Key" },
+  ],
+  evolution: [
+    { key: "base_url", label: "Evolution Base URL", placeholder: "https://evo.exemplo.com" },
+    { key: "instance", label: "Instance Name" },
+    { key: "api_key", label: "API Key" },
+  ],
+};
+
 export function ConnectModal({ isOpen, onOpenChange }: ConnectModalProps) {
   const queryClient = useQueryClient();
   const form = useForm({
     defaultValues: {
       name: "",
-      provider: "twilio",
+      provider: "twilio" as keyof typeof PROVIDER_FIELDS,
       identifier: "",
-      account_sid: "",
-      auth_token: "",
+      credentials: {} as Record<string, string>,
     },
   });
+  const provider = form.watch("provider");
+  const fields = PROVIDER_FIELDS[provider] || [];
 
   const connectMutation = useMutation({
     mutationFn: async (values: any) => {
@@ -63,12 +85,9 @@ export function ConnectModal({ isOpen, onOpenChange }: ConnectModalProps) {
           name: values.name,
           provider: values.provider,
           identifier: values.identifier,
-          credentials: {
-            account_sid: values.account_sid,
-            auth_token: values.auth_token
-          },
+          credentials: values.credentials || {},
           is_active: true,
-          status: 'connected'
+          status: 'connected',
         })
         .select()
         .single();
@@ -125,7 +144,10 @@ export function ConnectModal({ isOpen, onOpenChange }: ConnectModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
-                      <SelectItem value="twilio">Twilio WhatsApp</SelectItem>
+                      <SelectItem value="meta">WhatsApp Meta Cloud API</SelectItem>
+                      <SelectItem value="twilio">WhatsApp Twilio</SelectItem>
+                      <SelectItem value="360dialog">WhatsApp 360Dialog</SelectItem>
+                      <SelectItem value="evolution">WhatsApp Evolution API</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -150,32 +172,28 @@ export function ConnectModal({ isOpen, onOpenChange }: ConnectModalProps) {
                 <Key className="w-3.5 h-3.5 text-indigo-400" />
                 <span className="text-[10px] font-black uppercase text-indigo-400">Credenciais Seguras</span>
               </div>
-              
-              <FormField
-                control={form.control}
-                name="account_sid"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-slate-500 font-bold uppercase text-[9px]">Twilio Account SID</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" className="bg-[#020817] border-white/5 h-9" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="auth_token"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-slate-500 font-bold uppercase text-[9px]">Twilio Auth Token</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" className="bg-[#020817] border-white/5 h-9" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              {fields.map((f) => (
+                <FormField
+                  key={f.key}
+                  control={form.control}
+                  name={`credentials.${f.key}` as any}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-500 font-bold uppercase text-[9px]">{f.label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value || ""}
+                          type={f.key.includes("url") || f.key.includes("instance") ? "text" : "password"}
+                          placeholder={f.placeholder}
+                          className="bg-[#020817] border-white/5 h-9"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
 
             <Button 
