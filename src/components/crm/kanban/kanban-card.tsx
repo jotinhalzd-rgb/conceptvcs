@@ -5,11 +5,13 @@ import { Calendar, DollarSign, TrendingUp } from "lucide-react";
 
 interface KanbanCardProps {
   deal: any;
+  onClick?: () => void;
 }
 
-export const KanbanCard = ({ deal }: KanbanCardProps) => {
+export const KanbanCard = ({ deal, onClick }: KanbanCardProps) => {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData("dealId", deal.id);
+    e.dataTransfer.setData("fromStageId", deal.stage_id || "");
   };
 
   const getScoreColor = (score: number) => {
@@ -22,6 +24,7 @@ export const KanbanCard = ({ deal }: KanbanCardProps) => {
     <div 
       draggable
       onDragStart={handleDragStart}
+      onClick={onClick}
       className="p-4 bg-[#030712] border border-white/5 rounded-xl cursor-grab active:cursor-grabbing hover:border-indigo-500/30 transition-all group shadow-lg shadow-black/20"
     >
       <div className="flex items-start justify-between mb-3">

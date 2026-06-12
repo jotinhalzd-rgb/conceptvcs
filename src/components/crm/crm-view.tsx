@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { usePipelines, useCRMGoals, useCRMForecast, useCreateDeal, useDeals } from "@/hooks/crm/use-deals";
+import { usePipelines, useCRMGoals, useCRMForecast, useCreateDeal, useDeals, useComputedForecast, useCreatePipeline } from "@/hooks/crm/use-deals";
+import { Input as UInput } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -44,8 +45,12 @@ export const CRMView = () => {
   const { data: goals } = useCRMGoals();
   const { data: forecast } = useCRMForecast(selectedPipelineId || undefined);
   const { data: deals } = useDeals(selectedPipelineId || undefined);
+  const { data: computed } = useComputedForecast(selectedPipelineId || undefined);
   const createDealMutation = useCreateDeal();
+  const createPipelineMutation = useCreatePipeline();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isPipelineOpen, setIsPipelineOpen] = useState(false);
+  const [newPipelineName, setNewPipelineName] = useState("");
 
   const activePipeline = pipelines?.find(p => p.id === selectedPipelineId) || pipelines?.[0];
   const activeGoal = goals?.[0];
@@ -102,9 +107,7 @@ export const CRMView = () => {
                 <div>
                   <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Forecast Previsto</p>
                   <p className="text-sm font-black text-white leading-none">
-                    {activeForecast?.predicted_revenue 
-                      ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(activeForecast.predicted_revenue))
-                      : "R$ 0,00"}
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(computed?.weighted ?? activeForecast?.predicted_revenue ?? 0))}
                   </p>
                 </div>
               </div>
@@ -180,6 +183,20 @@ export const CRMView = () => {
                 />
               </DialogContent>
             </Dialog>
+            <Dialog open={isPipelineOpen} onOpenChange={setIsPipelineOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="h-10 border-white/10 text-slate-300 hover:bg-white/5 rounded-xl px-4 gap-2">
+                  <Plus className="w-4 h-4" /> Pipeline
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-[#020817] border-white/10 text-white max-w-sm">
+                <DialogHeader><DialogTitle className="text-base font-black uppercase">Novo Pipeline</DialogTitle></DialogHeader>
+                <div className="space-y-4 py-2">
+                  <UInput placeholder="Nome do pipeline" value={newPipelineName} onChange={e => setNewPipelineName(e.target.value)} className="bg-white/5 border-white/10 text-white" />
+                  <Button onClick={async () => { if (!newPipelineName.trim()) return; await createPipelineMutation.mutateAsync({ name: newPipelineName.trim() }); setNewPipelineName(""); setIsPipelineOpen(false); }} className="w-full bg-indigo-600 hover:bg-indigo-500">Criar</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </header>
 
@@ -234,21 +251,23 @@ export const CRMView = () => {
                     </div>
                     <div>
                       <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Receita Projetada</h3>
-                      <p className="text-2xl font-black text-white italic">
-                        {activeForecast?.predicted_revenue 
-                          ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(activeForecast.predicted_revenue))
-                          : "R$ 0,00"}
+                       <p className="text-2xl font-black text-white italic">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(computed?.weighted ?? 0))}
                       </p>
                     </div>
                   </Card>
 
-                  <Card className="bg-white/[0.02] border-white/[0.08] p-6 space-y-4">
+                   <Card className="bg-white/[0.02] border-white/[0.08] p-6 space-y-4">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                       <ArrowUpRight className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Crescimento vs Mês Anterior</h3>
-                      <p className="text-2xl font-black text-emerald-400 italic">+24.5%</p>
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Ganho / Perdido</h3>
+                      <p className="text-2xl font-black text-emerald-400 italic">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(Number(computed?.won ?? 0))}
+                        <span className="text-slate-600 mx-2">/</span>
+                        <span className="text-rose-400">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(Number(computed?.lost ?? 0))}</span>
+                      </p>
                     </div>
                   </Card>
 
@@ -257,10 +276,11 @@ export const CRMView = () => {
                       <BrainCircuit className="w-5 h-5 text-amber-500" />
                     </div>
                     <div>
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Insights Preditivos</h3>
-                      <p className="text-xs text-slate-300 font-medium leading-relaxed italic">
-                        IA detectou uma aceleração de 15% na etapa de Proposta para o pipeline {pipelineTitle}.
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Aberto (Em Andamento)</h3>
+                      <p className="text-2xl font-black text-amber-400 italic">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(computed?.open ?? 0))}
                       </p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">{computed?.count ?? 0} negócios</p>
                     </div>
                   </Card>
                </div>
