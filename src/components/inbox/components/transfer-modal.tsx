@@ -54,9 +54,9 @@ export function TransferModal({ conversationId, isOpen, onOpenChange }: Transfer
       const updateData: any = {};
       if (targetType === 'queue') {
         updateData.queue_id = targetId;
-        updateData.profile_id = null; // Unassign when transferring to a queue
+        updateData.agent_id = null; // Unassign when transferring to a queue
       } else {
-        updateData.profile_id = targetId;
+        updateData.agent_id = targetId;
       }
 
       const { error } = await supabase
