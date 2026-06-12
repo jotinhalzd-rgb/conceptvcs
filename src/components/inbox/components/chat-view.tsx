@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMessages, useInternalNotes } from "@/hooks/inbox/use-messages";
 import { useSendMessage } from "@/hooks/inbox/use-send-message";
+import { useCloseConversation, useAssignToMe } from "@/hooks/inbox/use-conversation-actions";
 import { TransferModal } from "./transfer-modal";
 import { Badge } from "@/components/ui/badge";
 import { useEffect } from 'react';
@@ -48,6 +49,8 @@ export const ChatView = ({
   const { data: messages } = useMessages(chat?.id);
   const { data: notes } = useInternalNotes(chat?.id);
   const sendMessageMutation = useSendMessage();
+  const closeMutation = useCloseConversation();
+  const assignMutation = useAssignToMe();
 
   const handleSendMessage = () => {
     if (!inputMessage.trim() || sendMessageMutation.isPending) return;
@@ -109,23 +112,18 @@ export const ChatView = ({
           </div>
         </div>
 
-        {/* CRM Context Integration */}
-        <div className="hidden lg:flex items-center gap-4 bg-[#0F172A] border border-[#1E293B] px-4 py-1.5 rounded-xl mx-4">
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black text-[#94A3B8] uppercase tracking-widest leading-none mb-1">Negócio Ativo</span>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-3 h-3 text-[#8B5CF6]" />
-              <span className="text-[10px] font-black text-white uppercase tracking-tighter">Upgrade Enterprise</span>
-            </div>
-          </div>
-          <div className="w-px h-6 bg-[#1E293B]" />
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black text-[#94A3B8] uppercase tracking-widest leading-none mb-1">Valor</span>
-            <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-emerald-500" />
-              <span className="text-[10px] font-black text-white">R$ 4.500,00</span>
-            </div>
-          </div>
+        {/* SLA / Status indicators (dados reais) */}
+        <div className="hidden lg:flex items-center gap-3 mx-4">
+          {chat?.sla_status === 'breached' && (
+            <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest">
+              SLA estourado
+            </Badge>
+          )}
+          {chat?.priority && (
+            <Badge className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-black uppercase tracking-widest">
+              Prioridade: {chat.priority}
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -134,15 +132,29 @@ export const ChatView = ({
             size="icon" 
             className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl"
             onClick={() => setIsTransferModalOpen(true)}
+            title="Transferir"
           >
             <ArrowRightLeft className="w-4 h-4"/>
           </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl">
-            <Clock className="w-4 h-4"/>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={assignMutation.isPending || chat?.status === 'closed'}
+            onClick={() => assignMutation.mutate(chat.id)}
+            className="h-9 text-[10px] font-black uppercase tracking-widest gap-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-xl px-4 border border-indigo-500/20"
+          >
+            <User className="w-3.5 h-3.5" />
+            Assumir
           </Button>
-          <Button variant="ghost" size="sm" className="h-9 text-[10px] font-black uppercase tracking-widest gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-xl px-4 border border-emerald-500/20">
-            <Plus className="w-3.5 h-3.5" />
-            Criar Deal
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={closeMutation.isPending || chat?.status === 'closed'}
+            onClick={() => closeMutation.mutate(chat.id)}
+            className="h-9 text-[10px] font-black uppercase tracking-widest gap-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-xl px-4 border border-emerald-500/20"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Encerrar
           </Button>
           <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-all rounded-xl" onClick={onToggleCustomer360}>
             {showCustomer360 ? <PanelRightClose className="w-4 h-4"/> : <PanelRightOpen className="w-4 h-4"/>}
