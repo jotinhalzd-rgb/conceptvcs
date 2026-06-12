@@ -21,7 +21,7 @@ export function useCommandEngine(role: string) {
       setLoading(true);
       const { data, error } = await supabase
         .from('oil_insights_v2')
-        .select('insight_type, priority, title, description, metadata')
+        .select('category, status, title, description, metadata, action_suggestion')
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -32,12 +32,12 @@ export function useCommandEngine(role: string) {
         return;
       }
       const mapped: CommandSignal[] = data.map((i: any) => ({
-        type: (i.insight_type as CommandSignal['type']) || 'kpi',
-        level: (i.priority as CommandSignal['level']) || 'medium',
+        type: 'kpi',
+        level: (i.status === 'critical' ? 'critical' : 'medium') as CommandSignal['level'],
         source: 'company',
         title: i.title || 'Insight',
         description: i.description || '',
-        action_label: 'Ver Detalhes',
+        action_label: i.action_suggestion || 'Ver Detalhes',
         metadata: i.metadata || {},
       }));
       setSignals(mapped);
