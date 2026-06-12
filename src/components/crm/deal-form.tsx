@@ -196,6 +196,42 @@ export function DealForm({ onSubmit, isLoading }: DealFormProps) {
           />
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="expected_close_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-slate-400 font-bold uppercase text-[10px]">Data Prevista</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} className="bg-white/[0.03] border-white/10 text-white rounded-xl h-11" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-slate-400 font-bold uppercase text-[10px]">Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-white/[0.03] border-white/10 text-white rounded-xl h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
+                    <SelectItem value="open">Aberto</SelectItem>
+                    <SelectItem value="won">Ganho</SelectItem>
+                    <SelectItem value="lost">Perdido</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+        </div>
+
         <Button 
           type="submit" 
           disabled={isLoading}
