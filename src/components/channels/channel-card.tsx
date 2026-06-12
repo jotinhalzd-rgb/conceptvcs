@@ -79,18 +79,18 @@ export const ChannelCard = ({ channel, onRefresh }: ChannelCardProps) => {
       </div>
 
       <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-        <div className="flex -space-x-2">
-            {[1,2,3].map(i => (
-                <div key={i} className="w-5 h-5 rounded-full bg-slate-800 border-2 border-[#030712] flex items-center justify-center text-[7px] font-black text-slate-500">
-                    AG
-                </div>
-            ))}
-            <div className="w-5 h-5 rounded-full bg-indigo-600 border-2 border-[#030712] flex items-center justify-center text-[7px] font-black text-white">
-                +4
-            </div>
-        </div>
-        <Badge className="bg-indigo-500/10 text-indigo-400 border-none text-[8px] font-black px-2 py-0.5">
-            1.2k MSGS/DIA
+        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">
+          {channel.identifier || "Sem identificador"}
+        </span>
+        <Badge
+          className={cn(
+            "border-none text-[8px] font-black px-2 py-0.5",
+            channel.is_active
+              ? "bg-emerald-500/10 text-emerald-400"
+              : "bg-slate-500/10 text-slate-400"
+          )}
+        >
+          {channel.is_active ? "ATIVO" : "INATIVO"}
         </Badge>
       </div>
     </div>

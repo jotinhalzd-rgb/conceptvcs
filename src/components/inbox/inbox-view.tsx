@@ -3,9 +3,6 @@ import {
   Search, 
   Filter,
   MessageSquare,
-  Clock,
-  AlertTriangle,
-  Layout
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -181,10 +178,6 @@ const InboxContent = () => {
               </div>
             </div>
 
-            <div className="mt-8 flex items-center gap-2 bg-[#8B5CF6]/5 px-4 py-2 rounded-full border border-[#8B5CF6]/10">
-              <Clock className="w-3.5 h-3.5 text-[#8B5CF6]" />
-              <span className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-wider">Tempo médio de resposta: 4m 32s</span>
-            </div>
           </div>
         </div>
       )}

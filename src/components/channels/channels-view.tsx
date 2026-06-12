@@ -43,15 +43,19 @@ export const ChannelsView = () => {
               <div className="bg-white/[0.02] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3">
                 <Activity className="w-4 h-4 text-emerald-400" />
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Uptime Global</p>
-                  <p className="text-sm font-black text-white leading-none">99.9%</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Canais Ativos</p>
+                  <p className="text-sm font-black text-white leading-none">
+                    {channels?.filter((c: any) => c.is_active).length || 0}
+                  </p>
                 </div>
               </div>
               <div className="bg-white/[0.02] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3">
                 <Zap className="w-4 h-4 text-indigo-400" />
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Msgs Processadas</p>
-                  <p className="text-sm font-black text-white leading-none">425k</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Total</p>
+                  <p className="text-sm font-black text-white leading-none">
+                    {channels?.length || 0}
+                  </p>
                 </div>
               </div>
             </div>
