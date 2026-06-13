@@ -38,6 +38,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { SoftphoneWidget } from "@/components/voice/softphone-widget";
 import { ProfileAwareContainer } from "@/components/mobile/layout/profile-aware-container";
 import { CommandCenter } from "./command-center";
+import { DeveloperPanel } from "@/components/dev/developer-panel";
 
 export function AppLayout() {
 
@@ -144,6 +145,7 @@ export function AppLayout() {
 
       <CommandCenter />
       <SoftphoneWidget />
+      <DeveloperPanel />
       <TooltipProvider delayDuration={0}>
 
         {/* Sidebar */}

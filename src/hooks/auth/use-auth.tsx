@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { getDevRoleOverride, isDevEnvironment } from "@/lib/dev-mode";
 
 export function useAuth() {
   const [session, setSession] = useState<any>(null);
@@ -45,7 +46,15 @@ export function useAuth() {
 
 export function useProfile() {
   const { user } = useAuth();
-  
+  const [devTick, setDevTick] = useState(0);
+
+  useEffect(() => {
+    if (!isDevEnvironment()) return;
+    const handler = () => setDevTick((t) => t + 1);
+    window.addEventListener("onecontact:dev-role-change", handler);
+    return () => window.removeEventListener("onecontact:dev-role-change", handler);
+  }, []);
+
   return useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -61,5 +70,11 @@ export function useProfile() {
       return data;
     },
     enabled: !!user,
+    select: (data) => {
+      if (!data) return data;
+      const override = getDevRoleOverride();
+      if (!override) return data;
+      return { ...data, role: override, _dev_role_override: true } as typeof data;
+    },
   });
 }
