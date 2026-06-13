@@ -1744,14 +1744,17 @@ export type Database = {
       conversation_tags: {
         Row: {
           conversation_id: string
+          organization_id: string | null
           tag_id: string
         }
         Insert: {
           conversation_id: string
+          organization_id?: string | null
           tag_id: string
         }
         Update: {
           conversation_id?: string
+          organization_id?: string | null
           tag_id?: string
         }
         Relationships: [
@@ -3822,6 +3825,7 @@ export type Database = {
           created_at: string | null
           embedding: string | null
           id: string
+          organization_id: string | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -3832,6 +3836,7 @@ export type Database = {
           created_at?: string | null
           embedding?: string | null
           id?: string
+          organization_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -3842,6 +3847,7 @@ export type Database = {
           created_at?: string | null
           embedding?: string | null
           id?: string
+          organization_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
@@ -4536,6 +4542,7 @@ export type Database = {
           event_type: string
           id: string
           metadata: Json | null
+          organization_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -4544,6 +4551,7 @@ export type Database = {
           event_type: string
           id?: string
           metadata?: Json | null
+          organization_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -4552,6 +4560,7 @@ export type Database = {
           event_type?: string
           id?: string
           metadata?: Json | null
+          organization_id?: string | null
         }
         Relationships: []
       }
@@ -4763,6 +4772,7 @@ export type Database = {
           max_capacity: number | null
           metadata: Json | null
           name: string
+          organization_id: string | null
           priority_level: number | null
           sla_threshold: string | null
           supervisor_id: string | null
@@ -4777,6 +4787,7 @@ export type Database = {
           max_capacity?: number | null
           metadata?: Json | null
           name: string
+          organization_id?: string | null
           priority_level?: number | null
           sla_threshold?: string | null
           supervisor_id?: string | null
@@ -4791,6 +4802,7 @@ export type Database = {
           max_capacity?: number | null
           metadata?: Json | null
           name?: string
+          organization_id?: string | null
           priority_level?: number | null
           sla_threshold?: string | null
           supervisor_id?: string | null
@@ -5071,18 +5083,21 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          organization_id: string | null
         }
         Insert: {
           color?: string | null
           created_at?: string | null
           id?: string
           name: string
+          organization_id?: string | null
         }
         Update: {
           color?: string | null
           created_at?: string | null
           id?: string
           name?: string
+          organization_id?: string | null
         }
         Relationships: []
       }
@@ -5315,12 +5330,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_org: { Args: never; Returns: string }
       get_org_by_channel_identifier: {
         Args: { p_identifier: string }
         Returns: string
       }
       get_user_company: { Args: never; Returns: string }
       get_user_role: { Args: never; Returns: string }
+      is_org_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

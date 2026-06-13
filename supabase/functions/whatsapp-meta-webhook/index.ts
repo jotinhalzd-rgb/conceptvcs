@@ -8,6 +8,22 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );
 
+async function verifyMetaSignature(rawBody: string, signatureHeader: string, appSecret: string): Promise<boolean> {
+  if (!signatureHeader.startsWith("sha256=")) return false;
+  const provided = signatureHeader.slice("sha256=".length);
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(appSecret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, enc.encode(rawBody));
+  const expected = Array.from(new Uint8Array(mac)).map(b => b.toString(16).padStart(2, "0")).join("");
+  if (expected.length !== provided.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ provided.charCodeAt(i);
+  return diff === 0;
+}
+
 serve(async (req) => {
   const url = new URL(req.url);
   
@@ -24,8 +40,16 @@ serve(async (req) => {
   }
 
   try {
-    const payload = await req.json();
-    console.log("Meta Payload:", JSON.stringify(payload));
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-hub-signature-256") ?? "";
+    const appSecret = Deno.env.get("META_APP_SECRET") ?? "";
+    if (!signature || !appSecret) {
+      console.error("Meta webhook: missing signature or META_APP_SECRET");
+      return new Response("Forbidden", { status: 403 });
+    }
+    const valid = await verifyMetaSignature(rawBody, signature, appSecret);
+    if (!valid) return new Response("Forbidden", { status: 403 });
+    const payload = JSON.parse(rawBody);
 
     const provider = new MetaProvider();
     const messages = provider.parseWebhook(payload);
@@ -41,6 +65,6 @@ serve(async (req) => {
 
   } catch (err) {
     console.error("Meta Webhook Error:", err);
-    return new Response(err.message, { status: 500 });
+    return new Response("Internal server error", { status: 500 });
   }
 });

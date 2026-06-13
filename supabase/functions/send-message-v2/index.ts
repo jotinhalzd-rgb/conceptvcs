@@ -34,6 +34,14 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
     if (authError || !user) return new Response("Unauthorized", { status: 401 });
 
+    // Org check: caller must belong to the conversation's organization
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    if (!profile?.organization_id) return new Response("Forbidden", { status: 403 });
+
     const { data: conversation, error: convError } = await supabaseAdmin
       .from("conversations")
       .select(`
@@ -45,6 +53,10 @@ serve(async (req) => {
       .single();
 
     if (convError || !conversation) throw new Error("Conversation not found");
+
+    if (conversation.organization_id !== profile.organization_id) {
+      return new Response("Forbidden", { status: 403 });
+    }
 
     const channel = conversation.channels;
     const providerKey = channel.provider.toLowerCase();
@@ -88,7 +100,7 @@ serve(async (req) => {
 
   } catch (err) {
     console.error("Send Error:", err);
-    return new Response(JSON.stringify({ error: err.message }), { 
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
     });
