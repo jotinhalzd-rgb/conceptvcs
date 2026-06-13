@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SupervisorRouteImport } from './routes/supervisor'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as QueuesRouteImport } from './routes/queues'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
@@ -28,6 +29,11 @@ import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 
+const SupervisorRoute = SupervisorRouteImport.update({
+  id: '/supervisor',
+  path: '/supervisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
+  '/supervisor': typeof SupervisorRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
+  '/supervisor': typeof SupervisorRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
+  '/supervisor': typeof SupervisorRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
+    | '/supervisor'
     | '/admin/channels'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
+    | '/supervisor'
     | '/admin/channels'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
+    | '/supervisor'
     | '/admin/channels'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
@@ -253,6 +265,7 @@ export interface RootRouteChildren {
   OpportunitiesRoute: typeof OpportunitiesRoute
   QueuesRoute: typeof QueuesRoute
   ReportsRoute: typeof ReportsRoute
+  SupervisorRoute: typeof SupervisorRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsDeveloperRoute: typeof SettingsDeveloperRoute
@@ -261,6 +274,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/supervisor': {
+      id: '/supervisor'
+      path: '/supervisor'
+      fullPath: '/supervisor'
+      preLoaderRoute: typeof SupervisorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports': {
       id: '/reports'
       path: '/reports'
@@ -418,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   OpportunitiesRoute: OpportunitiesRoute,
   QueuesRoute: QueuesRoute,
   ReportsRoute: ReportsRoute,
+  SupervisorRoute: SupervisorRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsDeveloperRoute: SettingsDeveloperRoute,
