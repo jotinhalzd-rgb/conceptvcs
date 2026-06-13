@@ -11,9 +11,6 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
-    // Demo bypass removed: authentication is always validated against Supabase.
-    try { localStorage.removeItem("onecontact_bypass_session"); } catch {}
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (mounted) {
         setSession(session);
