@@ -29,6 +29,7 @@ import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
 import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 
 const SupervisorRoute = SupervisorRouteImport.update({
   id: '/supervisor',
@@ -130,6 +131,11 @@ const AdminChannelsRoute = AdminChannelsRouteImport.update({
   path: '/admin/channels',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/reports'
     | '/supervisor'
+    | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
     | '/dashboard/ai-studio'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/reports'
     | '/supervisor'
+    | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
     | '/dashboard/ai-studio'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/reports'
     | '/supervisor'
+    | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
     | '/dashboard/ai-studio'
@@ -278,6 +290,7 @@ export interface RootRouteChildren {
   QueuesRoute: typeof QueuesRoute
   ReportsRoute: typeof ReportsRoute
   SupervisorRoute: typeof SupervisorRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCompaniesRoute: typeof AdminCompaniesRoute
   SettingsBillingRoute: typeof SettingsBillingRoute
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChannelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -459,6 +479,7 @@ const rootRouteChildren: RootRouteChildren = {
   QueuesRoute: QueuesRoute,
   ReportsRoute: ReportsRoute,
   SupervisorRoute: SupervisorRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCompaniesRoute: AdminCompaniesRoute,
   SettingsBillingRoute: SettingsBillingRoute,
