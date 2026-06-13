@@ -122,7 +122,7 @@ export const CEODashboard = () => {
               {/* Grid de Canais e Operação */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { label: 'Uptime Global', val: stats?.uptime || '99.9%', icon: ShieldCheck, color: 'text-emerald-400' },
+                  { label: 'Negócios Ganhos', val: (stats?.wonDealsCount ?? 0).toLocaleString(), icon: ShieldCheck, color: 'text-emerald-400' },
                   { label: 'Msgs Processadas', val: stats?.messagesCount.toLocaleString() || '0', icon: Zap, color: 'text-indigo-400' },
                   { label: 'Empresas Ativas', val: stats?.companiesCount.toString() || '0', icon: Globe, color: 'text-indigo-400' },
                   { label: 'Clientes na Base', val: stats?.contactsCount.toString() || '0', icon: Users, color: 'text-amber-400' }
