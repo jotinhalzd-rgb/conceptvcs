@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useUIStore } from "@/hooks/core/use-ui-store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,13 +48,13 @@ export function AppLayout() {
   const { sidebarCollapsed: collapsed, setSidebarCollapsed: setCollapsed, setQuickLaunchOpen } = useUIStore();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const navigate = useNavigate();
-  const location = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isInbox = location.startsWith("/inbox");
-  const isCampaigns = location.startsWith("/campaigns");
-  const isCustomers = location.startsWith("/customers");
-  const isQueues = location.startsWith("/queues");
-  const isCRM = location.startsWith("/crm");
-  const isHub = location.startsWith("/dashboard/hub");
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isInbox = pathname.startsWith("/inbox");
+  const isCampaigns = pathname.startsWith("/campaigns");
+  const isCustomers = pathname.startsWith("/customers");
+  const isQueues = pathname.startsWith("/queues");
+  const isCRM = pathname.startsWith("/crm");
+  const isHub = pathname.startsWith("/dashboard/hub");
 
 
   const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
@@ -96,42 +96,19 @@ export function AppLayout() {
   const handleLogout = async () => {
     try {
       setLogoutLoading(true);
-      console.log("Logout button clicked");
-      console.log("Starting logout process...");
-      
-      // 1. Encerrar sessão no Supabase
+
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.warn("Supabase signOut error (expected if bypass is active):", error.message);
-      }
-      console.log("Supabase signOut completed");
+      if (error) console.warn("Supabase signOut error:", error.message);
 
-      // 2. Limpar Bypass Session
-      localStorage.removeItem("onecontact_bypass_session");
-      console.log("Bypass session removed");
+      // Limpa override de dev impersonation, se ativo
+      try { localStorage.removeItem("onecontact_dev_role"); } catch {}
 
-      // 3. Limpar Tokens do Supabase manualmente (garantia extra)
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('sb-')) {
-          localStorage.removeItem(key);
-        }
-      });
-      console.log("Supabase tokens cleared from localStorage");
-
-      // 4. Limpar SessionStorage
-      sessionStorage.clear();
-      console.log("Session storage cleared");
-
-      // 5. Redirecionar com reload para garantir limpeza de estados em memória
-      console.log("Redirecting to login...");
+      // Reload completo garante limpeza de estado em memória e do Query cache
       window.location.href = "/auth";
-      
     } catch (error: any) {
       console.error("Critical error during logout:", error);
-      // Fallback radical
       window.location.href = "/auth";
     } finally {
-      console.log("Logout process finalized");
       setLogoutLoading(false);
     }
   };

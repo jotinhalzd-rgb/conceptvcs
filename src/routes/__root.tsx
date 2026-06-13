@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -37,7 +37,12 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  
+  // ID estável por instância do boundary (evita mudar a cada re-render)
+  const errorId = useMemo(
+    () => Math.random().toString(36).substring(2, 8).toUpperCase(),
+    [error],
+  );
+
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -81,7 +86,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
           <div className="mt-8 pt-6 border-t border-white/[0.05]">
             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest leading-loose">
-              ID do Erro: {Math.random().toString(36).substring(7).toUpperCase()}
+              ID do Erro: {errorId}
             </p>
           </div>
         </div>
