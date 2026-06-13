@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/auth/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, Crown, Eye, EyeOff, LogOut, CheckCircle2, Zap, Globe, Shield } from "lucide-react";
+import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, Crown, Eye, EyeOff, CheckCircle2, Zap, Globe, Shield, Building2, Headphones, Briefcase, Sparkles, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { ensureDemoData } from "@/lib/demo-seed.functions";
+import { isDevEnvironment } from "@/lib/dev-mode";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -19,8 +22,11 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session } = useAuth();
+  const devMode = isDevEnvironment();
+  const ensureDemoFn = useServerFn(ensureDemoData);
 
   useEffect(() => {
     if (session) {
@@ -51,15 +57,32 @@ function AuthPage() {
     }
   };
 
-  const handleGlobalExit = async () => {
+  const handleDemoLogin = async (demoEmail: string) => {
+    setDemoLoading(demoEmail);
     try {
-      await supabase.auth.signOut();
-      toast.success("Sessão encerrada.");
-      window.location.href = "/";
-    } catch (error) {
-      window.location.href = "/";
+      const res = await ensureDemoFn({ data: { email: demoEmail } });
+      const { error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: res.password,
+      });
+      if (error) throw error;
+      toast.success("Entrando como perfil demo...");
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      console.error("Demo login failed", err);
+      toast.error(err?.message ?? "Falha ao entrar no perfil demo.");
+    } finally {
+      setDemoLoading(null);
     }
   };
+
+  const demoPersonas = [
+    { email: "demo-ceo-master@onecontact.dev", label: "CEO Master", description: "Acesso total + governança global", icon: Crown, accent: "from-amber-500/20 to-amber-500/5 text-amber-300 border-amber-500/30" },
+    { email: "demo-ceo@onecontact.dev",        label: "Empresa Demo", description: "CEO da organização", icon: Building2, accent: "from-indigo-500/20 to-indigo-500/5 text-indigo-300 border-indigo-500/30" },
+    { email: "demo-manager@onecontact.dev",    label: "Gerente Demo", description: "Gestão de equipe e filas", icon: Briefcase, accent: "from-emerald-500/20 to-emerald-500/5 text-emerald-300 border-emerald-500/30" },
+    { email: "demo-agent@onecontact.dev",      label: "Atendente Demo", description: "Operação no inbox universal", icon: Headphones, accent: "from-sky-500/20 to-sky-500/5 text-sky-300 border-sky-500/30" },
+    { email: "demo-supervisor@onecontact.dev", label: "Supervisor IA", description: "Monitoramento e qualidade", icon: Sparkles, accent: "from-fuchsia-500/20 to-fuchsia-500/5 text-fuchsia-300 border-fuchsia-500/30" },
+  ];
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#020617] relative">
@@ -174,18 +197,57 @@ function AuthPage() {
               </button>
             </p>
           </div>
+
+          {devMode && (
+            <div className="mt-10 pt-8 border-t border-white/[0.05]">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-black uppercase tracking-widest">
+                  Dev / Preview
+                </div>
+                <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">
+                  Acessos rápidos
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-500 mb-4 leading-relaxed">
+                Entrar diretamente em um perfil demo sem digitar credenciais. Disponível apenas em ambientes de desenvolvimento e homologação.
+              </p>
+              <div className="grid gap-2">
+                {demoPersonas.map((p) => {
+                  const Icon = p.icon;
+                  const busy = demoLoading === p.email;
+                  return (
+                    <button
+                      key={p.email}
+                      type="button"
+                      onClick={() => handleDemoLogin(p.email)}
+                      disabled={!!demoLoading}
+                      className={cn(
+                        "group flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r border transition-all duration-300",
+                        "hover:scale-[1.01] hover:border-white/20 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed",
+                        p.accent,
+                      )}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center shrink-0">
+                        {busy ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Icon className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1 text-left">
+                        <div className="text-sm font-bold text-white truncate">{p.label}</div>
+                        <div className="text-[11px] text-slate-400 truncate">{p.description}</div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </section>
 
-        <div className="mt-auto pt-12 pb-4">
-          <button
-            id="global-exit-btn"
-            onClick={handleGlobalExit}
-            className="flex items-center gap-2 text-[10px] font-black text-slate-500 hover:text-rose-400 uppercase tracking-[0.2em] transition-all group"
-          >
-            <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            <span>Sair do Sistema</span>
-          </button>
-        </div>
+        <div className="mt-auto pt-12 pb-4" />
       </div>
 
       {/* RIGHT COLUMN: Branding/Institutional (Hidden on mobile) */}
