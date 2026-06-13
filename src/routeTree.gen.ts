@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as QueuesRouteImport } from './routes/queues'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -25,6 +26,11 @@ import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QueuesRoute = QueuesRouteImport.update({
   id: '/queues',
   path: '/queues',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
   '/queues': typeof QueuesRoute
+  '/reports': typeof ReportsRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/customers': typeof CustomersRoute
   '/inbox': typeof InboxRoute
   '/queues': typeof QueuesRoute
+  '/reports': typeof ReportsRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
   '/queues': typeof QueuesRoute
+  '/reports': typeof ReportsRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inbox'
     | '/queues'
+    | '/reports'
     | '/admin/channels'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/inbox'
     | '/queues'
+    | '/reports'
     | '/admin/channels'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inbox'
     | '/queues'
+    | '/reports'
     | '/admin/channels'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
@@ -214,6 +226,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   InboxRoute: typeof InboxRoute
   QueuesRoute: typeof QueuesRoute
+  ReportsRoute: typeof ReportsRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsDeveloperRoute: typeof SettingsDeveloperRoute
@@ -222,6 +235,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/queues': {
       id: '/queues'
       path: '/queues'
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   InboxRoute: InboxRoute,
   QueuesRoute: QueuesRoute,
+  ReportsRoute: ReportsRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsDeveloperRoute: SettingsDeveloperRoute,
@@ -363,3 +384,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
