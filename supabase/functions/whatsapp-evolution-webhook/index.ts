@@ -10,6 +10,13 @@ const supabaseAdmin = createClient(
 
 serve(async (req) => {
   try {
+    const expected = Deno.env.get("EVOLUTION_WEBHOOK_TOKEN") ?? "";
+    const provided = req.headers.get("x-webhook-token") ?? req.headers.get("apikey") ?? "";
+    if (!expected || expected.length !== provided.length) return new Response("Forbidden", { status: 403 });
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ provided.charCodeAt(i);
+    if (diff !== 0) return new Response("Forbidden", { status: 403 });
+
     const payload = await req.json();
     const provider = new EvolutionProvider();
     const messages = provider.parseWebhook(payload);
@@ -20,6 +27,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (err) {
-    return new Response(err.message, { status: 500 });
+    console.error("Evolution Webhook Error:", err);
+    return new Response("Internal server error", { status: 500 });
   }
 });
