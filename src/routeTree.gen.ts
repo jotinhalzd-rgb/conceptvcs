@@ -9,7 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SupervisorRouteImport } from './routes/supervisor'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as QueuesRouteImport } from './routes/queues'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomersRouteImport } from './routes/customers'
@@ -23,11 +27,33 @@ import { Route as SettingsDeveloperRouteImport } from './routes/settings.develop
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
 import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
+import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 
+const SupervisorRoute = SupervisorRouteImport.update({
+  id: '/supervisor',
+  path: '/supervisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QueuesRoute = QueuesRouteImport.update({
   id: '/queues',
   path: '/queues',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InboxRoute = InboxRouteImport.update({
@@ -95,9 +121,19 @@ const DashboardAiStudioRoute = DashboardAiStudioRouteImport.update({
   path: '/ai-studio',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
+  id: '/admin/companies',
+  path: '/admin/companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminChannelsRoute = AdminChannelsRouteImport.update({
   id: '/admin/channels',
   path: '/admin/channels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -109,8 +145,14 @@ export interface FileRoutesByFullPath {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
+  '/reports': typeof ReportsRoute
+  '/supervisor': typeof SupervisorRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
@@ -125,8 +167,14 @@ export interface FileRoutesByTo {
   '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
   '/inbox': typeof InboxRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
+  '/reports': typeof ReportsRoute
+  '/supervisor': typeof SupervisorRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
@@ -143,8 +191,14 @@ export interface FileRoutesById {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
+  '/reports': typeof ReportsRoute
+  '/supervisor': typeof SupervisorRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
@@ -162,8 +216,14 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/inbox'
+    | '/knowledge'
+    | '/opportunities'
     | '/queues'
+    | '/reports'
+    | '/supervisor'
+    | '/admin/audit'
     | '/admin/channels'
+    | '/admin/companies'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
     | '/settings/billing'
@@ -178,8 +238,14 @@ export interface FileRouteTypes {
     | '/crm'
     | '/customers'
     | '/inbox'
+    | '/knowledge'
+    | '/opportunities'
     | '/queues'
+    | '/reports'
+    | '/supervisor'
+    | '/admin/audit'
     | '/admin/channels'
+    | '/admin/companies'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
     | '/settings/billing'
@@ -195,8 +261,14 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/inbox'
+    | '/knowledge'
+    | '/opportunities'
     | '/queues'
+    | '/reports'
+    | '/supervisor'
+    | '/admin/audit'
     | '/admin/channels'
+    | '/admin/companies'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
     | '/settings/billing'
@@ -213,8 +285,14 @@ export interface RootRouteChildren {
   CustomersRoute: typeof CustomersRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   InboxRoute: typeof InboxRoute
+  KnowledgeRoute: typeof KnowledgeRoute
+  OpportunitiesRoute: typeof OpportunitiesRoute
   QueuesRoute: typeof QueuesRoute
+  ReportsRoute: typeof ReportsRoute
+  SupervisorRoute: typeof SupervisorRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
+  AdminCompaniesRoute: typeof AdminCompaniesRoute
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsDeveloperRoute: typeof SettingsDeveloperRoute
   SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
@@ -222,11 +300,39 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/supervisor': {
+      id: '/supervisor'
+      path: '/supervisor'
+      fullPath: '/supervisor'
+      preLoaderRoute: typeof SupervisorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/queues': {
       id: '/queues'
       path: '/queues'
       fullPath: '/queues'
       preLoaderRoute: typeof QueuesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inbox': {
@@ -320,11 +426,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiStudioRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/companies': {
+      id: '/admin/companies'
+      path: '/admin/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof AdminCompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/channels': {
       id: '/admin/channels'
       path: '/admin/channels'
       fullPath: '/admin/channels'
       preLoaderRoute: typeof AdminChannelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -354,8 +474,14 @@ const rootRouteChildren: RootRouteChildren = {
   CustomersRoute: CustomersRoute,
   DashboardRoute: DashboardRouteWithChildren,
   InboxRoute: InboxRoute,
+  KnowledgeRoute: KnowledgeRoute,
+  OpportunitiesRoute: OpportunitiesRoute,
   QueuesRoute: QueuesRoute,
+  ReportsRoute: ReportsRoute,
+  SupervisorRoute: SupervisorRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminChannelsRoute: AdminChannelsRoute,
+  AdminCompaniesRoute: AdminCompaniesRoute,
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsDeveloperRoute: SettingsDeveloperRoute,
   SettingsMarketplaceRoute: SettingsMarketplaceRoute,
