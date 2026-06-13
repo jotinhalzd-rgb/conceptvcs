@@ -10,26 +10,8 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
-    // Check local storage for bypass session
-    const checkBypass = () => {
-      try {
-        const bypassSession = localStorage.getItem("onecontact_bypass_session");
-        if (bypassSession) {
-          const parsed = JSON.parse(bypassSession);
-          if (mounted) {
-            setSession(parsed);
-            setLoading(false);
-          }
-          return true;
-        }
-      } catch (e) {
-        console.error("Critical error parsing bypass session. Clearing cache.", e);
-        localStorage.removeItem("onecontact_bypass_session");
-      }
-      return false;
-    };
-
-    if (checkBypass()) return;
+    // Demo bypass removed: authentication is always validated against Supabase.
+    try { localStorage.removeItem("onecontact_bypass_session"); } catch {}
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (mounted) {
@@ -48,7 +30,6 @@ export function useAuth() {
       }
       
       if (event === 'SIGNED_OUT') {
-        localStorage.removeItem("onecontact_bypass_session");
         queryClient.clear();
       }
     });
@@ -69,22 +50,6 @@ export function useProfile() {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
-      // If bypass user, return mock profile with appropriate role
-      if (user.id.startsWith("bypass-")) {
-        const role = user.id.replace("bypass-", "").replace("-id", "");
-        return {
-          id: user.id,
-          full_name: user.user_metadata?.full_name || "Demo User",
-          role: role,
-          company_id: "00000000-0000-0000-0000-000000000000",
-          organization_id: "00000000-0000-0000-0000-000000000000",
-
-          companies: {
-            name: "ONECONTACT DEMO CORP"
-          }
-        };
-      }
 
       const { data, error } = await supabase
         .from("profiles")
