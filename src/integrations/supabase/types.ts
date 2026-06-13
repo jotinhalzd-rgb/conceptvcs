@@ -3774,6 +3774,47 @@ export type Database = {
           },
         ]
       }
+      knowledge_articles: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_articles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base: {
         Row: {
           category: string | null
