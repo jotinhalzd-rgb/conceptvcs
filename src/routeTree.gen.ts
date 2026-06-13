@@ -27,6 +27,7 @@ import { Route as SettingsDeveloperRouteImport } from './routes/settings.develop
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
 import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
+import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 
 const SupervisorRoute = SupervisorRouteImport.update({
@@ -119,6 +120,11 @@ const DashboardAiStudioRoute = DashboardAiStudioRouteImport.update({
   path: '/ai-studio',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
+  id: '/admin/companies',
+  path: '/admin/companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminChannelsRoute = AdminChannelsRouteImport.update({
   id: '/admin/channels',
   path: '/admin/channels',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
   '/admin/channels': typeof AdminChannelsRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
   '/admin/channels': typeof AdminChannelsRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
   '/admin/channels': typeof AdminChannelsRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/supervisor'
     | '/admin/channels'
+    | '/admin/companies'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
     | '/settings/billing'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/supervisor'
     | '/admin/channels'
+    | '/admin/companies'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
     | '/settings/billing'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/supervisor'
     | '/admin/channels'
+    | '/admin/companies'
     | '/dashboard/ai-studio'
     | '/dashboard/hub'
     | '/settings/billing'
@@ -267,6 +279,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SupervisorRoute: typeof SupervisorRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
+  AdminCompaniesRoute: typeof AdminCompaniesRoute
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsDeveloperRoute: typeof SettingsDeveloperRoute
   SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
@@ -400,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiStudioRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/companies': {
+      id: '/admin/companies'
+      path: '/admin/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof AdminCompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/channels': {
       id: '/admin/channels'
       path: '/admin/channels'
@@ -440,6 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SupervisorRoute: SupervisorRoute,
   AdminChannelsRoute: AdminChannelsRoute,
+  AdminCompaniesRoute: AdminCompaniesRoute,
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsDeveloperRoute: SettingsDeveloperRoute,
   SettingsMarketplaceRoute: SettingsMarketplaceRoute,
