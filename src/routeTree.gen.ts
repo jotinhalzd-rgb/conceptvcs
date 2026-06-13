@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as QueuesRouteImport } from './routes/queues'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomersRouteImport } from './routes/customers'
@@ -34,6 +35,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const QueuesRoute = QueuesRouteImport.update({
   id: '/queues',
   path: '/queues',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InboxRoute = InboxRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
+  '/knowledge': typeof KnowledgeRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
   '/inbox': typeof InboxRoute
+  '/knowledge': typeof KnowledgeRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/customers': typeof CustomersRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/inbox': typeof InboxRoute
+  '/knowledge': typeof KnowledgeRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/inbox'
+    | '/knowledge'
     | '/queues'
     | '/reports'
     | '/admin/channels'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/customers'
     | '/inbox'
+    | '/knowledge'
     | '/queues'
     | '/reports'
     | '/admin/channels'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/inbox'
+    | '/knowledge'
     | '/queues'
     | '/reports'
     | '/admin/channels'
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   CustomersRoute: typeof CustomersRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   InboxRoute: typeof InboxRoute
+  KnowledgeRoute: typeof KnowledgeRoute
   QueuesRoute: typeof QueuesRoute
   ReportsRoute: typeof ReportsRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/queues'
       fullPath: '/queues'
       preLoaderRoute: typeof QueuesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inbox': {
@@ -374,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomersRoute: CustomersRoute,
   DashboardRoute: DashboardRouteWithChildren,
   InboxRoute: InboxRoute,
+  KnowledgeRoute: KnowledgeRoute,
   QueuesRoute: QueuesRoute,
   ReportsRoute: ReportsRoute,
   AdminChannelsRoute: AdminChannelsRoute,
