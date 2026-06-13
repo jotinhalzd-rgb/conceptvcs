@@ -51,44 +51,8 @@ function AuthPage() {
     }
   };
 
-  const handleDemoAccess = async (role: 'ceo_master' | 'admin' | 'manager' | 'agent') => {
-    if (loading) return;
-    
-    const roleLabels = {
-      ceo_master: '👑 CEO MASTER',
-      admin: '🏢 EMPRESA (GESTOR)',
-      manager: '👨‍💼 GERENTE',
-      agent: '🎧 ATENDENTE'
-    };
-
-    setLoading(true);
-    
-    try {
-      const mockSession = {
-        user: {
-          id: `bypass-${role}-id`,
-          email: `${role}@onecontact.ai`,
-          user_metadata: {
-            full_name: roleLabels[role].split(' ').slice(1).join(' '),
-            role: role
-          }
-        },
-        access_token: `bypass-token-${role}`,
-        expires_at: Math.floor(Date.now() / 1000) + 3600
-      };
-
-      localStorage.setItem("onecontact_bypass_session", JSON.stringify(mockSession));
-      toast.success(`${roleLabels[role]} ativado (Demo)!`);
-      window.location.href = "/dashboard";
-    } catch (error: any) {
-      toast.error(`Falha no bypass: ${error.message}`);
-      setLoading(false);
-    }
-  };
-
   const handleGlobalExit = async () => {
     try {
-      localStorage.removeItem("onecontact_bypass_session");
       await supabase.auth.signOut();
       toast.success("Sessão encerrada.");
       window.location.href = "/";
