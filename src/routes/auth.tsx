@@ -176,37 +176,6 @@ function AuthPage() {
           </div>
         </section>
 
-        <section className="mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-px flex-1 bg-white/[0.05]" />
-            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">Acessos Rápidos (DEMO)</span>
-            <div className="h-px flex-1 bg-white/[0.05]" />
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { role: 'ceo_master', label: '👑 CEO MASTER', icon: Crown, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-              { role: 'admin', label: '🏢 EMPRESA', icon: ShieldCheck, color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
-              { role: 'manager', label: '👨‍💼 GERENTE', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-              { role: 'agent', label: '🎧 ATENDENTE', icon: LogIn, color: 'text-slate-400', bg: 'bg-slate-400/10' },
-            ].map((demo) => (
-              <button
-                key={demo.role}
-                onClick={() => handleDemoAccess(demo.role as any)}
-                disabled={loading}
-                className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:bg-white/[0.05] hover:border-indigo-500/30 transition-all group text-left"
-              >
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", demo.bg, demo.color)}>
-                  <demo.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-[11px] font-black text-white tracking-widest uppercase">{demo.label.split(' ')[1]}</h3>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
         <div className="mt-auto pt-12 pb-4">
           <button
             id="global-exit-btn"
