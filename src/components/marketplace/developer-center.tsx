@@ -17,6 +17,7 @@ import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-bo
 import { cn } from "@/lib/utils";
 import { APIKeyManager } from "./api-key-manager";
 import { WebhookManager } from "./webhook-manager";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const DeveloperCenter = () => {
   const [activeSection, setActiveSection] = useState<'api' | 'webhooks' | 'logs'>('api');
@@ -27,6 +28,7 @@ export const DeveloperCenter = () => {
         {/* Header Developer */}
         <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#030712]/40 shrink-0">
           <div className="flex items-center gap-6">
+            <SmartBackButton />
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
