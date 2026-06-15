@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Activity, Clock, AlertTriangle, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const Route = createFileRoute("/supervisor")({ component: SupervisorPage });
 
@@ -32,6 +33,7 @@ function SupervisorPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <header>
+        <SmartBackButton className="mb-4" />
         <div className="flex items-center gap-2 mb-1">
           <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">Monitoramento ao Vivo</span>

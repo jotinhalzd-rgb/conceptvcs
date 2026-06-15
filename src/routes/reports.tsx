@@ -5,6 +5,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tool
 import { format, subDays, startOfDay } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, TrendingUp, MessageSquare, Clock } from "lucide-react";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const Route = createFileRoute("/reports")({ component: ReportsPage });
 
@@ -85,6 +86,7 @@ function ReportsPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <header>
+        <SmartBackButton className="mb-4" />
         <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase italic">Relatórios BI</h1>
         <p className="text-slate-400 text-sm mt-1">Inteligência operacional em tempo real.</p>
       </header>
