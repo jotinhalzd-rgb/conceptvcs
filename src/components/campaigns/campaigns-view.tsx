@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { useCampaigns } from "@/hooks/campaigns/use-campaigns";
 import { cn } from "@/lib/utils";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const CampaignsView = () => {
   const { data: campaigns, isLoading } = useCampaigns();
@@ -31,6 +32,7 @@ export const CampaignsView = () => {
         {/* Header Growth Hub */}
         <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#030712]/40 shrink-0">
           <div className="flex items-center gap-6">
+            <SmartBackButton />
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
