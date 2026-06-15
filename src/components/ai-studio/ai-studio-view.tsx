@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const AIStudioView = () => {
   const [activeTab, setActiveTab] = useState("agents");
@@ -31,6 +32,7 @@ export const AIStudioView = () => {
     <div className="flex flex-col h-full bg-[#020617] overflow-hidden font-sans">
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#030712]/60 backdrop-blur-xl shrink-0 z-10">
         <div className="flex items-center gap-4">
+          <SmartBackButton />
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
             <Sparkles className="w-6 h-6 animate-pulse" />
           </div>

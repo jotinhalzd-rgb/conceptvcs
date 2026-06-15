@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { DealForm } from "./deal-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 type ViewMode = 'kanban' | 'list' | 'forecast';
 
@@ -70,6 +71,7 @@ export const CRMView = () => {
         {/* Header de Gestão */}
         <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#030712]/40 shrink-0">
           <div className="flex items-center gap-6">
+            <SmartBackButton />
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

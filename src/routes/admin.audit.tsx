@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Activity } from "lucide-react";
 import { format } from "date-fns";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const Route = createFileRoute("/admin/audit")({ component: AdminAuditPage });
 
@@ -25,6 +26,7 @@ function AdminAuditPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <header>
+        <SmartBackButton className="mb-4" />
         <div className="flex items-center gap-2 mb-1">
           <ShieldCheck className="w-4 h-4 text-indigo-400" />
           <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Trilha de Auditoria</span>

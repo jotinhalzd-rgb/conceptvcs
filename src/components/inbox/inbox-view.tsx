@@ -14,6 +14,7 @@ import { ChatView } from "./components/chat-view";
 import { CustomerSidePanel } from "./components/customer-panel";
 import { AISidebar } from "./ai-copilot/ai-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 
 export const InboxView = () => {
@@ -59,6 +60,7 @@ const InboxContent = () => {
     return (
       <div className="h-full w-full grid grid-cols-[360px_1fr_420px] bg-[#020817] overflow-hidden">
         <div className="border-r border-[#1E293B] bg-[#0F172A]/30 p-4 space-y-4">
+          <SmartBackButton />
           <Skeleton className="h-8 w-1/2 bg-[#1E293B]" />
           <div className="space-y-2">
             {[...Array(6)].map((_, i) => (
@@ -96,6 +98,7 @@ const InboxContent = () => {
         <div className="p-4 border-b border-[#1E293B] flex flex-col gap-3 shrink-0">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                    <SmartBackButton className="mr-1" />
                     <h1 className="text-xs font-black text-[#E2E8F0] uppercase tracking-[0.2em]">Universal Inbox</h1>
                     <Badge className="bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20 text-[9px] px-1.5 py-0">
                       {filteredConversations?.length || 0}

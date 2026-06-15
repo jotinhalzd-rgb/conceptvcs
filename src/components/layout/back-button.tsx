@@ -1,33 +1,21 @@
-import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSmartBackNavigation } from "@/hooks/use-smart-back-navigation";
 
-const ROOT_PATHS = new Set(["/", "/auth", "/dashboard", "/dashboard/"]);
-
-interface BackButtonProps {
+interface SmartBackButtonProps {
   to?: string;
   label?: string;
   className?: string;
   forceShow?: boolean;
 }
 
-export function BackButton({ to, label = "Voltar", className, forceShow }: BackButtonProps) {
-  const router = useRouter();
-  const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+export function SmartBackButton({ to, label = "Voltar", className, forceShow }: SmartBackButtonProps) {
+  const { goBack, shouldShowBackButton } = useSmartBackNavigation({ fallback: to });
 
-  if (!forceShow && ROOT_PATHS.has(pathname)) return null;
+  if (!forceShow && !shouldShowBackButton) return null;
 
   const handleClick = () => {
-    if (to) {
-      navigate({ to });
-      return;
-    }
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.history.back();
-    } else {
-      navigate({ to: "/dashboard" });
-    }
+    goBack(to);
   };
 
   return (
@@ -49,4 +37,8 @@ export function BackButton({ to, label = "Voltar", className, forceShow }: BackB
       <span>{label}</span>
     </button>
   );
+}
+
+export function BackButton(props: SmartBackButtonProps) {
+  return <SmartBackButton {...props} />;
 }

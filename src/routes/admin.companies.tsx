@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, ShieldAlert } from "lucide-react";
 import { format } from "date-fns";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const Route = createFileRoute("/admin/companies")({ component: AdminCompaniesPage });
 
@@ -29,6 +30,7 @@ function AdminCompaniesPage() {
   if (!isCEO) {
     return (
       <div className="space-y-6">
+        <SmartBackButton />
         <Card className="bg-white/[0.02] border-rose-500/20">
           <CardContent className="p-16 flex flex-col items-center gap-3 text-center">
             <ShieldAlert className="w-12 h-12 text-rose-400" />
@@ -43,6 +45,7 @@ function AdminCompaniesPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <header>
+        <SmartBackButton className="mb-4" />
         <h1 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tight">Gestão de Empresas</h1>
         <p className="text-slate-400 text-sm mt-1">{data?.length ?? 0} organizações cadastradas.</p>
       </header>
