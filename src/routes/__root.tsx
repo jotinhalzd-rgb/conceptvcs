@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -12,6 +12,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useSmartBackNavigation } from "@/hooks/use-smart-back-navigation";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -156,8 +157,42 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthSyncBridge />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+/**
+ * Sincroniza eventos de auth do Supabase com Router + Query Cache.
+ * - Ignora TOKEN_REFRESHED / INITIAL_SESSION para evitar refetch storms.
+ * - Em SIGNED_OUT limpa o cache (não invalida — evita 401 storm).
+ * - Em SIGNED_IN / USER_UPDATED invalida router + queries para refletir nova identidade.
+ */
+function AuthSyncBridge() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (
+        event !== "SIGNED_IN" &&
+        event !== "SIGNED_OUT" &&
+        event !== "USER_UPDATED"
+      ) {
+        return;
+      }
+      if (event === "SIGNED_OUT") {
+        queryClient.clear();
+        router.invalidate();
+        return;
+      }
+      router.invalidate();
+      queryClient.invalidateQueries();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, queryClient]);
+
+  return null;
 }
