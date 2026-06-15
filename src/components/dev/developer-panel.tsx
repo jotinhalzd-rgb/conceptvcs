@@ -11,6 +11,7 @@ import {
   type DevRole,
 } from "@/lib/dev-mode";
 import { useProfile } from "@/hooks/auth/use-auth";
+import { SimulatorPanel } from "./simulator-panel";
 
 export function DeveloperPanel() {
   const enabled = isDevEnvironment();
@@ -130,6 +131,8 @@ export function DeveloperPanel() {
                 Restaurar perfil real
               </button>
             </div>
+
+            <SimulatorPanel />
 
             <div className="px-4 py-2 border-t border-white/5 bg-black/20 text-[10px] text-slate-500 flex items-center justify-between">
               <span>Sessão real:</span>
