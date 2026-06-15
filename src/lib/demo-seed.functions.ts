@@ -75,7 +75,7 @@ export const ensureDemoData = createServerFn({ method: "POST" })
         if (error) throw error;
         user = created.user!;
       }
-      await supabaseAdmin
+      const { error: upsertErr } = await supabaseAdmin
         .from("profiles")
         .upsert(
           {
@@ -86,6 +86,9 @@ export const ensureDemoData = createServerFn({ method: "POST" })
           },
           { onConflict: "id" },
         );
+      if (upsertErr) {
+        throw new Error(`Falha ao gravar profile demo (${u.email}): ${upsertErr.message}`);
+      }
     }
 
     // 3) Seed demo data (idempotent)
