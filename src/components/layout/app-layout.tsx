@@ -347,11 +347,6 @@ export function AppLayout() {
               "relative z-10 h-full",
               (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "max-w-7xl mx-auto"
             )}>
-              {(isInbox || isCampaigns || isCustomers || isQueues || isCRM || isHub) && (
-                <div className="px-6 pt-4">
-                  <BackButton />
-                </div>
-              )}
               <GlobalErrorBoundary name="RouteOutlet">
                 <Outlet />
               </GlobalErrorBoundary>

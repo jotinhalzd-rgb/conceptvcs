@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatsBox } from "@/components/dashboard/widgets/stats-box";
+import { PageHeader } from "@/components/layout/page-header";
 
 const QueueCard = ({ name, color, sla, priority, volume, tmr, supervisor }: any) => (
   <Card className="bg-white/[0.02] border-white/[0.08] hover:border-white/[0.15] transition-all group shadow-xl">
@@ -72,27 +73,26 @@ export function QueuesView() {
   return (
     <GlobalErrorBoundary name="QueuesView">
       <div className="space-y-8 animate-in fade-in duration-500 pb-10">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Fluxo Operacional de Distribuição</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight uppercase italic">Gestão de Filas</h1>
-            <p className="text-slate-400 font-medium text-sm">Controle em tempo real da carga de trabalho e eficiência por departamento.</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-2xl border-white/10 text-white hover:bg-white/5 font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2">
-              <Filter className="w-4 h-4" />
-              Filtros
-            </Button>
-            <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2 shadow-lg shadow-indigo-600/20">
-              <Plus className="w-4 h-4" />
-              Criar Fila
-            </Button>
-          </div>
-        </header>
+        <PageHeader
+          eyebrow="Fluxo Operacional de Distribuição"
+          title="Gestão de Filas"
+          description="Controle em tempo real da carga de trabalho e eficiência por departamento."
+          actions={
+            <>
+              <Button
+                variant="ghost"
+                className="rounded-2xl bg-slate-900/75 border border-slate-800 text-slate-200 hover:bg-indigo-950 hover:border-indigo-500/40 hover:text-white font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Filtros
+              </Button>
+              <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2 shadow-lg shadow-indigo-600/20">
+                <Plus className="w-4 h-4" />
+                Criar Fila
+              </Button>
+            </>
+          }
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsBox icon={Activity} label="Volume Total" value="482" color="bg-indigo-500/10 text-indigo-400" />
