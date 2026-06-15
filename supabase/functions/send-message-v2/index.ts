@@ -62,12 +62,16 @@ serve(async (req) => {
 
     // INTERNAL NOTES: never touch provider. Save only to internal_notes.
     if (type === 'internal') {
+      // Determine if the conversation belongs to a demo channel — mark note accordingly.
+      const isDemoConv = conversation.is_demo === true
+        || (conversation.channels && conversation.channels.is_demo === true);
       const { data: note, error: noteError } = await supabaseAdmin
         .from("internal_notes")
         .insert({
           conversation_id: conversationId,
           author_id: user.id,
           content: body,
+          is_demo: isDemoConv,
         })
         .select()
         .single();
