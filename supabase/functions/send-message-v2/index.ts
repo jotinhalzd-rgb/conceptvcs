@@ -4,6 +4,7 @@ import { TwilioProvider } from "../_shared/providers/twilio.ts";
 import { MetaProvider } from "../_shared/providers/meta.ts";
 import { ThreeSixtyProvider } from "../_shared/providers/360dialog.ts";
 import { EvolutionProvider } from "../_shared/providers/evolution.ts";
+import { SimulatorProvider } from "../_shared/providers/simulator.ts";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -16,6 +17,7 @@ const providers: any = {
   meta: new MetaProvider(),
   "360dialog": new ThreeSixtyProvider(),
   evolution: new EvolutionProvider(),
+  development_simulator: new SimulatorProvider(),
 };
 
 serve(async (req) => {
@@ -60,12 +62,16 @@ serve(async (req) => {
 
     // INTERNAL NOTES: never touch provider. Save only to internal_notes.
     if (type === 'internal') {
+      // Determine if the conversation belongs to a demo channel — mark note accordingly.
+      const isDemoConv = conversation.is_demo === true
+        || (conversation.channels && conversation.channels.is_demo === true);
       const { data: note, error: noteError } = await supabaseAdmin
         .from("internal_notes")
         .insert({
           conversation_id: conversationId,
           author_id: user.id,
           content: body,
+          is_demo: isDemoConv,
         })
         .select()
         .single();
@@ -89,6 +95,8 @@ serve(async (req) => {
       { ...channel.credentials, identifier: channel.identifier }
     );
 
+    const isSimulated = providerKey === "development_simulator" || channel.is_demo === true;
+
     // Save to DB
     const { data: msg, error: msgError } = await supabaseAdmin
       .from("messages")
@@ -99,8 +107,9 @@ serve(async (req) => {
         type: mediaUrl ? 'media' : 'text',
         sender_profile_id: user.id,
         provider_message_id: result.sid,
-        delivery_status: 'sent',
-        metadata: { mediaUrl, provider: providerKey }
+        delivery_status: isSimulated ? 'simulated_sent' : 'sent',
+        is_demo: isSimulated,
+        metadata: { mediaUrl, provider: providerKey, simulated: isSimulated }
       })
       .select().single();
 

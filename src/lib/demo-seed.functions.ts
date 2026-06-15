@@ -93,6 +93,7 @@ export const ensureDemoData = createServerFn({ method: "POST" })
 
     // 3) Seed demo data (idempotent)
     await seedDemoData(supabaseAdmin, orgId);
+    await seedDemoOmnichannel(supabaseAdmin, orgId);
 
     return { ok: true, password: DEMO_PASSWORD };
   });
@@ -208,5 +209,146 @@ async function seedDemoData(db: any, orgId: string) {
         type: "text",
       },
     ]);
+  }
+}
+
+export const DEMO_SIM_CHANNEL_IDENTIFIER = "demo-sim-wa";
+
+const DEMO_CONVERSATIONS = [
+  { name: "Maria Oliveira",  phone: "+5511988880001", status: "open",    sla: "normal", preview: "Olá, gostaria de saber mais sobre o atendimento." },
+  { name: "João Silva",      phone: "+5511988880002", status: "pending", sla: "normal", preview: "Vocês conseguem me passar uma proposta?" },
+  { name: "Farmácia Central", phone: "+5511988880003", status: "open",   sla: "at_risk", preview: "Preciso falar com o setor comercial." },
+] as const;
+
+async function seedDemoOmnichannel(db: any, orgId: string) {
+  // 1) Simulator channel (idempotent by identifier)
+  let { data: channel } = await db
+    .from("channels")
+    .select("id")
+    .eq("identifier", DEMO_SIM_CHANNEL_IDENTIFIER)
+    .maybeSingle();
+  if (!channel) {
+    const { data: created, error } = await db
+      .from("channels")
+      .insert({
+        organization_id: orgId,
+        provider: "development_simulator",
+        name: "WhatsApp Demo — Simulado",
+        identifier: DEMO_SIM_CHANNEL_IDENTIFIER,
+        is_active: true,
+        status: "connected",
+        is_demo: true,
+        is_test: true,
+        credentials: {},
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(`Falha ao criar canal demo: ${error.message}`);
+    channel = created;
+  }
+
+  // 2) Find demo agent (sender for replies)
+  const { data: agent } = await db
+    .from("profiles")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("role", "agent")
+    .maybeSingle();
+
+  for (const spec of DEMO_CONVERSATIONS) {
+    // Contact (idempotent by org+phone)
+    let { data: contact } = await db
+      .from("contacts")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("phone", spec.phone)
+      .maybeSingle();
+    if (!contact) {
+      const { data: created, error } = await db
+        .from("contacts")
+        .insert({
+          organization_id: orgId,
+          name: spec.name,
+          phone: spec.phone,
+          is_demo: true,
+          status: "active",
+          main_channel: "whatsapp",
+        })
+        .select("id")
+        .single();
+      if (error) throw new Error(`Falha ao criar contato demo (${spec.name}): ${error.message}`);
+      contact = created;
+    }
+
+    // Conversation (idempotent by contact + demo channel)
+    let { data: conv } = await db
+      .from("conversations")
+      .select("id")
+      .eq("contact_id", contact.id)
+      .eq("channel_id", channel.id)
+      .maybeSingle();
+    if (!conv) {
+      const { data: created, error } = await db
+        .from("conversations")
+        .insert({
+          organization_id: orgId,
+          channel_id: channel.id,
+          contact_id: contact.id,
+          agent_id: agent?.id ?? null,
+          status: spec.status,
+          sla_status: spec.sla,
+          priority: "medium",
+          temperature: "warm",
+          last_message_preview: spec.preview,
+          last_message_at: new Date().toISOString(),
+          is_demo: true,
+        })
+        .select("id")
+        .single();
+      if (error) throw new Error(`Falha ao criar conversa demo: ${error.message}`);
+      conv = created;
+    }
+
+    // Seed messages (idempotent by provider_message_id)
+    const seedMsgs = [
+      { pid: `demo-${conv.id}-in-1`,  body: spec.preview, status: "received",        sender: null },
+      { pid: `demo-${conv.id}-out-1`, body: "Olá! Pode me contar um pouco mais sobre o que precisa?", status: "simulated_sent", sender: agent?.id ?? null },
+    ];
+    for (const m of seedMsgs) {
+      const { data: exists } = await db
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conv.id)
+        .eq("provider_message_id", m.pid)
+        .maybeSingle();
+      if (exists) continue;
+      await db.from("messages").insert({
+        conversation_id: conv.id,
+        organization_id: orgId,
+        body: m.body,
+        type: "text",
+        sender_profile_id: m.sender,
+        provider_message_id: m.pid,
+        delivery_status: m.status,
+        is_demo: true,
+        metadata: { simulated: true, provider: "development_simulator" },
+      });
+    }
+
+    // Internal note (idempotent by content)
+    const { data: hasNote } = await db
+      .from("internal_notes")
+      .select("id")
+      .eq("conversation_id", conv.id)
+      .ilike("content", "DEMO%")
+      .maybeSingle();
+    if (!hasNote && agent?.id) {
+      await db.from("internal_notes").insert({
+        conversation_id: conv.id,
+        author_id: agent.id,
+        content: `DEMO: contato gerado para testes — ${spec.name}.`,
+        is_demo: true,
+      });
+    }
   }
 }

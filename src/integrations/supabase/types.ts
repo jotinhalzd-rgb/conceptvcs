@@ -1456,6 +1456,8 @@ export type Database = {
           id: string
           identifier: string | null
           is_active: boolean | null
+          is_demo: boolean
+          is_test: boolean
           last_sync_at: string | null
           name: string
           organization_id: string
@@ -1471,6 +1473,8 @@ export type Database = {
           id?: string
           identifier?: string | null
           is_active?: boolean | null
+          is_demo?: boolean
+          is_test?: boolean
           last_sync_at?: string | null
           name: string
           organization_id: string
@@ -1486,6 +1490,8 @@ export type Database = {
           id?: string
           identifier?: string | null
           is_active?: boolean | null
+          is_demo?: boolean
+          is_test?: boolean
           last_sync_at?: string | null
           name?: string
           organization_id?: string
@@ -1646,6 +1652,7 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
+          is_demo: boolean
           is_lead: boolean | null
           lead_score: number | null
           lifecycle_stage: string | null
@@ -1663,6 +1670,7 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          is_demo?: boolean
           is_lead?: boolean | null
           lead_score?: number | null
           lifecycle_stage?: string | null
@@ -1680,6 +1688,7 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          is_demo?: boolean
           is_lead?: boolean | null
           lead_score?: number | null
           lifecycle_stage?: string | null
@@ -1789,6 +1798,7 @@ export type Database = {
           created_at: string | null
           first_response_at: string | null
           id: string
+          is_demo: boolean
           last_message_at: string | null
           last_message_preview: string | null
           organization_id: string
@@ -1814,6 +1824,7 @@ export type Database = {
           created_at?: string | null
           first_response_at?: string | null
           id?: string
+          is_demo?: boolean
           last_message_at?: string | null
           last_message_preview?: string | null
           organization_id: string
@@ -1839,6 +1850,7 @@ export type Database = {
           created_at?: string | null
           first_response_at?: string | null
           id?: string
+          is_demo?: boolean
           last_message_at?: string | null
           last_message_preview?: string | null
           organization_id?: string
@@ -2462,6 +2474,7 @@ export type Database = {
           created_at: string | null
           expected_close_date: string | null
           id: string
+          is_demo: boolean
           organization_id: string
           origin_conversation_id: string | null
           pipeline_id: string
@@ -2479,6 +2492,7 @@ export type Database = {
           created_at?: string | null
           expected_close_date?: string | null
           id?: string
+          is_demo?: boolean
           organization_id: string
           origin_conversation_id?: string | null
           pipeline_id: string
@@ -2496,6 +2510,7 @@ export type Database = {
           created_at?: string | null
           expected_close_date?: string | null
           id?: string
+          is_demo?: boolean
           organization_id?: string
           origin_conversation_id?: string | null
           pipeline_id?: string
@@ -3663,6 +3678,7 @@ export type Database = {
           conversation_id: string
           created_at: string | null
           id: string
+          is_demo: boolean
         }
         Insert: {
           author_id: string
@@ -3670,6 +3686,7 @@ export type Database = {
           conversation_id: string
           created_at?: string | null
           id?: string
+          is_demo?: boolean
         }
         Update: {
           author_id?: string
@@ -3677,6 +3694,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string | null
           id?: string
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -3947,6 +3965,7 @@ export type Database = {
           delivery_status: string | null
           error_message: string | null
           id: string
+          is_demo: boolean
           is_edited: boolean | null
           metadata: Json | null
           organization_id: string
@@ -3963,6 +3982,7 @@ export type Database = {
           delivery_status?: string | null
           error_message?: string | null
           id?: string
+          is_demo?: boolean
           is_edited?: boolean | null
           metadata?: Json | null
           organization_id: string
@@ -3979,6 +3999,7 @@ export type Database = {
           delivery_status?: string | null
           error_message?: string | null
           id?: string
+          is_demo?: boolean
           is_edited?: boolean | null
           metadata?: Json | null
           organization_id?: string

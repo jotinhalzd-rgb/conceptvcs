@@ -110,6 +110,11 @@ export const ChatView = ({
 
         {/* SLA / Status indicators (dados reais) */}
         <div className="hidden lg:flex items-center gap-3 mx-4">
+          {chat?.is_demo && (
+            <Badge className="bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[9px] font-black uppercase tracking-widest">
+              DEMO / SIMULADO
+            </Badge>
+          )}
           {chat?.sla_status === 'breached' && (
             <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest">
               SLA estourado
