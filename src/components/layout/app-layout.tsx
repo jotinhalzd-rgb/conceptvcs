@@ -39,7 +39,6 @@ import { SoftphoneWidget } from "@/components/voice/softphone-widget";
 import { ProfileAwareContainer } from "@/components/mobile/layout/profile-aware-container";
 import { CommandCenter } from "./command-center";
 import { DeveloperPanel } from "@/components/dev/developer-panel";
-import { BackButton } from "./back-button";
 
 export function AppLayout() {
 
@@ -292,7 +291,6 @@ export function AppLayout() {
           {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub && (
             <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020817]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
-                <BackButton />
                 <div 
                   onClick={() => setQuickLaunchOpen(true)}
                   className="relative max-w-md w-full group hidden md:block cursor-pointer"
