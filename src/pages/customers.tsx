@@ -35,6 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export function Customer360View() {
   const { contacts, isLoading, createContact, updateContact, deleteContact } = useContacts();
@@ -151,6 +152,7 @@ export function Customer360View() {
         <main className="flex-1 flex flex-col h-full relative">
           <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#020817]/50 backdrop-blur-xl shrink-0 z-10">
             <div className="flex items-center gap-4">
+              <SmartBackButton />
               <h1 className="text-xl font-black text-white tracking-tight uppercase italic">
                 {selectedContact?.name || "Customer 360"}
               </h1>
