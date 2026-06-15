@@ -5,6 +5,25 @@ const PREVIOUS_ROUTE_KEY = "previousInternalRoute";
 const CURRENT_ROUTE_KEY = "currentInternalRoute";
 const SKIP_NEXT_TRACK_KEY = "skipNextInternalRouteTrack";
 const DEFAULT_FALLBACK = "/dashboard";
+const ROUTE_FALLBACKS: Record<string, string> = {
+  "/queues": DEFAULT_FALLBACK,
+  "/inbox": DEFAULT_FALLBACK,
+  "/customers": DEFAULT_FALLBACK,
+  "/crm": DEFAULT_FALLBACK,
+  "/reports": DEFAULT_FALLBACK,
+  "/campaigns": DEFAULT_FALLBACK,
+  "/knowledge": DEFAULT_FALLBACK,
+  "/supervisor": DEFAULT_FALLBACK,
+  "/opportunities": DEFAULT_FALLBACK,
+  "/admin/companies": DEFAULT_FALLBACK,
+  "/admin/channels": DEFAULT_FALLBACK,
+  "/admin/audit": DEFAULT_FALLBACK,
+  "/settings/billing": DEFAULT_FALLBACK,
+  "/settings/developer": DEFAULT_FALLBACK,
+  "/settings/marketplace": DEFAULT_FALLBACK,
+  "/dashboard/ai-studio": DEFAULT_FALLBACK,
+  "/dashboard/hub": DEFAULT_FALLBACK,
+};
 
 const AUTH_ROUTES = ["/auth", "/login", "/register", "/reset-password"];
 const HIDDEN_BACK_ROUTES = new Set(["/", "/dashboard", "/dashboard/"]);
@@ -75,6 +94,11 @@ function getFallbackForRoute(route: string, fallback?: string) {
   if (normalizedFallback && isKnownInternalRoute(normalizedFallback) && !isAuthRoute(normalizedFallback)) {
     return normalizedFallback;
   }
+
+  const path = routePath(route);
+  if (ROUTE_FALLBACKS[path]) return ROUTE_FALLBACKS[path];
+  if (path.startsWith("/settings/")) return DEFAULT_FALLBACK;
+  if (path.startsWith("/admin/")) return DEFAULT_FALLBACK;
 
   return DEFAULT_FALLBACK;
 }
