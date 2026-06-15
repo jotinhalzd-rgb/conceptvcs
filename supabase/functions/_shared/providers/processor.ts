@@ -13,6 +13,14 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
     return { error: "Organization not found" };
   }
 
+  // Resolve channel (also used for demo flagging + idempotency scope)
+  const { data: channel } = await supabase
+    .from("channels")
+    .select("id, is_demo")
+    .eq("identifier", message.to)
+    .maybeSingle();
+  const isDemo = channel?.is_demo === true;
+
   // 2. Find or Create Contact
   let { data: contact, error: contactError } = await supabase
     .from("contacts")
@@ -27,7 +35,8 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
       .insert({
         phone: message.from,
         name: message.from,
-        organization_id: orgId
+        organization_id: orgId,
+        is_demo: isDemo,
       })
       .select("id")
       .single();
@@ -45,12 +54,6 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
     .maybeSingle();
 
   if (!conversation) {
-    const { data: channel } = await supabase
-      .from("channels")
-      .select("id")
-      .eq("identifier", message.to)
-      .single();
-
     const { data: newConv, error: createConvError } = await supabase
       .from("conversations")
       .insert({
@@ -59,7 +62,8 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
         channel_id: channel?.id,
         status: "open",
         last_message_at: message.timestamp,
-        last_message_preview: message.body || `[${message.type}]`
+        last_message_preview: message.body || `[${message.type}]`,
+        is_demo: isDemo,
       })
       .select("id")
       .single();
@@ -76,8 +80,19 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
       .eq("id", conversation.id);
   }
 
-  // 4. Save Message
-  const { error: msgError } = await supabase
+  // 4. Save Message (idempotent by (conversation_id, provider_message_id))
+  const { data: existing } = await supabase
+    .from("messages")
+    .select("id")
+    .eq("conversation_id", conversation.id)
+    .eq("provider_message_id", message.messageId)
+    .maybeSingle();
+  if (existing) {
+    console.log(JSON.stringify({ processor: providerName, deduped: true, messageId: message.messageId }));
+    return { success: true, conversationId: conversation.id, deduped: true };
+  }
+
+  const { data: inserted, error: msgError } = await supabase
     .from("messages")
     .insert({
       conversation_id: conversation.id,
@@ -86,13 +101,17 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
       type: message.type === 'text' ? 'text' : 'media',
       provider_message_id: message.messageId,
       delivery_status: 'received',
+      is_demo: isDemo,
       metadata: {
         provider: providerName,
         media: message.media,
         raw_type: message.type
       }
-    });
+    })
+    .select("id")
+    .single();
 
   if (msgError) throw msgError;
-  return { success: true, conversationId: conversation.id };
+  console.log(JSON.stringify({ processor: providerName, ok: true, conversationId: conversation.id, messageId: inserted?.id }));
+  return { success: true, conversationId: conversation.id, messageId: inserted?.id };
 }
