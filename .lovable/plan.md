@@ -1,88 +1,54 @@
-## Objetivo
-Padronizar o cabeçalho de todas as páginas internas com um componente global `PageHeader` que inclui botão "Voltar", título, descrição e ações à direita. Remover o atual `BackButton` solto e o elemento branco sem função no topo da tela `/queues`.
+# Restaurar Acessos Rápidos DEV/PREVIEW em /auth
 
-## Componente novo: `src/components/layout/page-header.tsx`
+## Causa raiz
 
-API:
-```ts
-interface PageHeaderProps {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  backTo?: string;            // override do fallback
-  showBackButton?: boolean;   // default true
-  actions?: React.ReactNode;  // botões à direita
-  className?: string;
-}
-```
+Os cards são renderizados condicionalmente por `isDevEnvironment()`, que lê `window.location.hostname`. Durante o SSR `window` é `undefined` e a função retorna `false` — o HTML inicial não traz os cards. Em alguns refreshes a hidratação não “acende” o estado a tempo (ou a rota redireciona antes via `useEffect(session → /dashboard)` quando havia sessão residual), e os cards somem visualmente. Nenhuma mudança da camada global (QueryClient/ErrorBoundary) removeu o código — só o gate de ambiente ficou frágil pós-SSR.
 
-Comportamento do "Voltar":
-- `router.history.back()` quando `window.history.length > 1`.
-- Senão usa `backTo` se fornecido, senão mapa de fallback por rota (default `/dashboard`).
-- Oculto automaticamente em `/`, `/auth`, `/dashboard`, `/dashboard/`.
+## Mudanças
 
-Mapa de fallback (interno ao componente):
-```
-/queues, /inbox, /customers, /crm, /reports, /campaigns, /knowledge,
-/supervisor, /opportunities, /admin/*, /settings/*, /dashboard/hub,
-/dashboard/ai-studio  → /dashboard
-```
+### 1. `src/lib/dev-mode.ts` — `isDevEnvironment()` mais robusto
+- Considerar (qualquer um já habilita):
+  - `import.meta.env.DEV === true`
+  - `import.meta.env.VITE_ENABLE_DEV_ACCESS === "true"`
+  - `hostname` em `localhost` / `127.0.0.1` / `.local`
+  - `hostname` termina em `.lovable.app` **e** (`startsWith("id-preview--")` | `includes("--")` | `includes("-dev.")` | `includes("preview")` | `includes("staging")`)
+- Continuar retornando `false` em produção real (custom domain) e em `*.lovable.app` sem marcadores de preview.
 
-Visual (tokens do design system, sem hex hardcoded):
-- Linha 1: `<BackButton>` à esquerda + breadcrumb opcional.
-- Linha 2 (flex justify-between): bloco título (eyebrow uppercase tracking-wider em `text-primary/80`, `h1` bold com gradiente já usado no app, `p` `text-muted-foreground`) + `actions` à direita.
-- Botão Voltar: `ghost` com `bg-slate-900/75 border border-slate-800 hover:bg-indigo-950 hover:border-indigo-500/40 text-slate-200 rounded-xl h-9 px-3 gap-2 transition-colors`, `aria-label="Voltar"`, foco visível via `focus-visible:ring-1 ring-ring`.
-- Responsivo: em `sm:` ações vão para a direita; em mobile empilham abaixo do título.
+### 2. `src/routes/auth.tsx` — render independente + sem SSR mismatch
+- Trocar `const devMode = isDevEnvironment()` por estado hidratado:
+  ```ts
+  const [devMode, setDevMode] = useState(false);
+  useEffect(() => { setDevMode(isDevEnvironment()); }, []);
+  ```
+  Garante que o gate só decide no cliente, sem mismatch de SSR.
+- Adicionar `ssr: false` na rota `/auth` (a tela de login não precisa de SSR e a UI dela depende de `window`/Supabase de qualquer modo). Isso elimina o flash de HTML sem cards.
+- Manter a seção de cards **fora** de qualquer query autenticada: ela já está. Confirmar que nenhum `Suspense`/`useSuspenseQuery` envolve a `section`.
+- Tratamento de erro por card já existe via `toast.error` + `demoLoading` por email. Adicionar mensagens claras:
+  - “Usuário demo não encontrado” quando `res.password` ausente.
+  - “Senha demo inválida” em `signInWithPassword` retorno `Invalid login credentials`.
+  - “Falha ao criar sessão” em catch genérico.
+- Garantir que o estado `demoLoading` é resetado no `finally` (já está) — sem loading infinito.
+- Verificar que não existe botão “Sair do sistema” no JSX (não existe hoje; manter assim).
 
-## Integração no layout
+### 3. Resiliência global não pode esconder /auth
+- Confirmar que `AuthSyncBridge` em `__root.tsx` apenas invalida router/queries em `SIGNED_IN/OUT/USER_UPDATED` — não dispara navegação para `/dashboard` a partir da `/auth` quando não há sessão. Sem alteração esperada.
+- `ErrorComponent` global só renderiza quando o `errorComponent` do root pega exceção do `loader/render`. `/auth` não tem loader nem query autenticada → não acionará. Sem alteração.
 
-`src/components/layout/app-layout.tsx`:
-- Remover o `<BackButton />` injetado anteriormente no header e na área principal (passos da iteração anterior).
-- Manter apenas a barra de busca/notificações no header global; o `PageHeader` por página cuidará do "Voltar" + título.
+## Arquivos tocados
 
-## Páginas a refatorar (substituir título atual por `<PageHeader>`)
+- `src/lib/dev-mode.ts` — função expandida.
+- `src/routes/auth.tsx` — `ssr: false`, gate via `useEffect`, mensagens de erro mais específicas.
 
-Inserir/substituir o cabeçalho atual nas views:
-- `src/components/queues/queues-management.tsx` — remover o quadrado branco solto ao lado de "Criar Fila"; mover "Criar Fila" para `actions`.
-- `src/components/inbox/inbox-view.tsx` (apenas se houver título de página; se for fullscreen, montar PageHeader compacto acima).
-- `src/components/customer-360/customer-view.tsx`
-- `src/components/crm/crm-view.tsx`
-- `src/components/campaigns/campaigns-view.tsx`
-- `src/components/channels/channels-view.tsx` (admin/channels)
-- `src/routes/reports.tsx`, `src/routes/knowledge.tsx`, `src/routes/supervisor.tsx`, `src/routes/opportunities.tsx`
-- `src/routes/admin.companies.tsx`, `src/routes/admin.audit.tsx`, `src/routes/admin.channels.tsx`
-- `src/routes/settings.billing.tsx`, `src/routes/settings.developer.tsx`, `src/routes/settings.marketplace.tsx`
-- `src/components/ai-studio/ai-studio-view.tsx`
-- `src/components/hub/business-hub-view.tsx`
+## Fora de escopo
 
-Cada chamada segue o padrão:
-```tsx
-<PageHeader
-  eyebrow="Fluxo Operacional de Distribuição"
-  title="Gestão de Filas"
-  description="Controle em tempo real da carga de trabalho e eficiência por departamento."
-  actions={<Button>+ Criar Fila</Button>}
-/>
-```
+- Mudar Supabase Auth, RLS, triggers, `demo-seed.functions.ts`, providers.
+- Refatorar `useAuth`, layout, ou QueryClient.
+- Tema/visual dos cards (mantém o atual).
 
-## Correções pontuais
-- `/queues`: remover o `<div className="bg-white ...">` (caixa branca sem função) identificado na captura; mover apenas o botão "Criar Fila" para `actions`.
-- Auditar cada view convertida para garantir que nenhum elemento branco solto sobre fundo escuro permaneça.
+## Validação no Preview
 
-## Acessibilidade
-- `aria-label="Voltar"`, `role="navigation"` no wrapper do header opcional.
-- Tab order: Voltar → título (não focável) → ações.
-- Suporte Enter/Espaço nativo do `<button>`.
-
-## Fora do escopo
-- Refazer rotas, criar `/_authenticated`, novos módulos ou novas funcionalidades.
-- Mudar o sidebar/topbar global além de remover o BackButton injetado.
-- Mobile shell (apenas garantir que o PageHeader empilha corretamente em telas pequenas).
-
-## Validação
-Abrir cada rota da lista de testes obrigatórios e confirmar:
-1. Botão aparece e não cobre o título.
-2. Voltar funciona (histórico ou fallback `/dashboard`).
-3. Ações à direita continuam funcionando.
-4. Sem elementos brancos soltos.
-5. Layout não quebra em mobile (DevTools 375px).
+1. Abrir `/auth` no preview Lovable → 5 cards visíveis.
+2. Clicar cada um (CEO Master → Supervisor IA) → login OK, redireciona para `/dashboard`.
+3. Logout entre cada login → cards reaparecem.
+4. Abrir `https://conceptvcs.lovable.app/auth` (custom domain produção) → cards ocultos.
+5. Erro forçado (senha inválida) → toast claro, sem loading infinito.
