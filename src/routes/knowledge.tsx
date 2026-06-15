@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Plus, BookOpen, Trash2, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const Route = createFileRoute("/knowledge")({ component: KnowledgePage });
 
@@ -96,6 +97,7 @@ function KnowledgePage() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <header className="flex flex-col md:flex-row justify-between gap-4">
         <div>
+          <SmartBackButton className="mb-4" />
           <h1 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tight">Knowledge Hub</h1>
           <p className="text-slate-400 text-sm mt-1">Base de conhecimento operacional.</p>
         </div>

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase } from "lucide-react";
 import { format } from "date-fns";
+import { SmartBackButton } from "@/components/layout/back-button";
 
 export const Route = createFileRoute("/opportunities")({ component: OpportunitiesPage });
 
@@ -23,6 +24,7 @@ function OpportunitiesPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <header>
+        <SmartBackButton className="mb-4" />
         <h1 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tight">Opportunities</h1>
         <p className="text-slate-400 text-sm mt-1">{open.length} negócios abertos · {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalValue)}</p>
       </header>
