@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { WhatsAppMessage } from "../_shared/providers/types.ts";
+import { WhatsAppMessage } from "./types.ts";
 
 export async function processWhatsAppMessage(supabase: any, message: WhatsAppMessage, providerName: string) {
   console.log(`Processing message from ${providerName}:`, message.messageId);
