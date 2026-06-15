@@ -3,6 +3,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 const PREVIOUS_ROUTE_KEY = "previousInternalRoute";
 const CURRENT_ROUTE_KEY = "currentInternalRoute";
+const SKIP_NEXT_TRACK_KEY = "skipNextInternalRouteTrack";
 const DEFAULT_FALLBACK = "/dashboard";
 
 const AUTH_ROUTES = ["/auth", "/login", "/register", "/reset-password"];
@@ -102,6 +103,14 @@ export function useSmartBackNavigation(options: { fallback?: string } = {}) {
 
     if (!isKnownInternalRoute(nextRoute)) return;
 
+    if (window.sessionStorage.getItem(SKIP_NEXT_TRACK_KEY) === "true") {
+      window.sessionStorage.removeItem(SKIP_NEXT_TRACK_KEY);
+      window.sessionStorage.removeItem(PREVIOUS_ROUTE_KEY);
+      window.sessionStorage.setItem(CURRENT_ROUTE_KEY, nextRoute);
+      window.__oneContactRouteTrackerReady = true;
+      return;
+    }
+
     const storedCurrent = readStoredRoute(CURRENT_ROUTE_KEY);
     const isFirstPageLoad = !window.__oneContactRouteTrackerReady;
 
@@ -137,6 +146,7 @@ export function useSmartBackNavigation(options: { fallback?: string } = {}) {
 
       if (typeof window !== "undefined") {
         window.sessionStorage.removeItem(PREVIOUS_ROUTE_KEY);
+        window.sessionStorage.setItem(SKIP_NEXT_TRACK_KEY, "true");
       }
 
       navigate({ to: target as any });
