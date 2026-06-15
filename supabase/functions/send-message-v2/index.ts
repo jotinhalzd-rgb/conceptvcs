@@ -58,6 +58,24 @@ serve(async (req) => {
       return new Response("Forbidden", { status: 403 });
     }
 
+    // INTERNAL NOTES: never touch provider. Save only to internal_notes.
+    if (type === 'internal') {
+      const { data: note, error: noteError } = await supabaseAdmin
+        .from("internal_notes")
+        .insert({
+          conversation_id: conversationId,
+          author_id: user.id,
+          content: body,
+        })
+        .select()
+        .single();
+      if (noteError) throw noteError;
+      return new Response(JSON.stringify(note), {
+        status: 200,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      });
+    }
+
     const channel = conversation.channels;
     const providerKey = channel.provider.toLowerCase();
     const provider = providers[providerKey];
