@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { BackButton } from "./back-button";
+import { SmartBackButton } from "./back-button";
 
 interface PageHeaderProps {
   eyebrow?: string;
@@ -25,7 +25,7 @@ export function PageHeader({
     <div className={cn("space-y-4", className)}>
       {showBackButton && (
         <div className="flex items-center">
-          <BackButton to={backTo} />
+          <SmartBackButton to={backTo} />
         </div>
       )}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
