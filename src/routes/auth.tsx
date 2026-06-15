@@ -13,6 +13,7 @@ import { ensureDemoData } from "@/lib/demo-seed.functions";
 import { isDevEnvironment } from "@/lib/dev-mode";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   component: AuthPage,
 });
 
@@ -25,7 +26,11 @@ function AuthPage() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session } = useAuth();
-  const devMode = isDevEnvironment();
+  // Hidratado no cliente para evitar mismatch SSR/CSR escondendo os cards.
+  const [devMode, setDevMode] = useState(false);
+  useEffect(() => {
+    setDevMode(isDevEnvironment());
+  }, []);
   const ensureDemoFn = useServerFn(ensureDemoData);
 
   useEffect(() => {
@@ -61,11 +66,19 @@ function AuthPage() {
     setDemoLoading(demoEmail);
     try {
       const res = await ensureDemoFn({ data: { email: demoEmail } });
+      if (!res?.password) {
+        throw new Error("Usuário demo não encontrado");
+      }
       const { error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: res.password,
       });
-      if (error) throw error;
+      if (error) {
+        if (/invalid login credentials/i.test(error.message)) {
+          throw new Error("Senha demo inválida");
+        }
+        throw new Error(`Falha ao criar sessão: ${error.message}`);
+      }
       toast.success("Entrando como perfil demo...");
       navigate({ to: "/dashboard" });
     } catch (err: any) {

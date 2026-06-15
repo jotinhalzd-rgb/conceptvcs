@@ -37,6 +37,11 @@ export const DEV_PERSONAS: DevPersona[] = [
 const STORAGE_KEY = "onecontact_dev_role";
 
 export function isDevEnvironment(): boolean {
+  // Env flags (work in SSR and CSR)
+  try {
+    if (import.meta.env?.DEV) return true;
+    if (import.meta.env?.VITE_ENABLE_DEV_ACCESS === "true") return true;
+  } catch {}
   if (typeof window === "undefined") return false;
   const host = window.location.hostname;
   if (host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")) return true;
@@ -44,7 +49,9 @@ export function isDevEnvironment(): boolean {
   if (host.endsWith(".lovable.app")) {
     if (host.startsWith("id-preview--")) return true;
     if (host.includes("-dev.")) return true;
-    if (host.includes("--")) return true; // preview subdomains
+    if (host.includes("preview")) return true;
+    if (host.includes("staging")) return true;
+    if (host.includes("--")) return true; // generic preview subdomains
   }
   return false;
 }
