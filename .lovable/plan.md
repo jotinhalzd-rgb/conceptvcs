@@ -1,106 +1,124 @@
-# Plano A2 — Automação
+# Plano A3 — Developer / Webhooks / Logs + API Keys
 
-Escopo isolado: **somente** Automação. Não tocar AI Studio (A1), núcleo omnichannel, Marketplace, Inbox, CRM, Campanhas, Relatórios, Notificações básicas. Preservar RLS.
+Escopo isolado. **Não tocar** AI Studio (A1), Automação (A2), Inbox, CRM, Campanhas, Relatórios. Endpoint inbound só recebe pequena adição de logs de falha — sem mudar o fluxo de roteamento/processor.
 
-## 1. Schema real verificado
+## 1. Schemas reais
 
-`automation_workflows` (existe): `id, organization_id, name, trigger_event, nodes jsonb, is_active, created_at, updated_at`.
-→ Sem coluna `description`, `queue_id`, `channel_id`, `responsible_id`, `status`, `conditions`. Esses campos serão armazenados **dentro de `nodes jsonb`** (`nodes.description`, `nodes.queue_id`, `nodes.channel_id`, `nodes.responsible_id`, `nodes.conditions[]`, `nodes.actions[]`). Status ativo/inativo usa `is_active`.
+- `channels` ✓ (id, organization_id, provider, identifier, credentials jsonb com `webhook_secret`, is_active, last_sync_at, status).
+- `channel_webhooks_log` ✓ (id, channel_id, provider, payload jsonb, status, error_message, processed_at). **Falta `organization_id`** e índices úteis. Inbound atual já tenta inserir `organization_id` via `as any` — não persiste hoje.
+- `api_keys` ✓ (id, organization_id, name, key_prefix, key_hash, scopes[], expires_at, last_used_at, created_at). **Sem coluna de status** — revogação = DELETE, “revogar” via expires_at no passado também aceitável.
 
-`automation_logs` (existe, mas restritivo): `id, workflow_id, node_id, action_type, contact_id NOT NULL, status, metadata jsonb, created_at`.
-→ Faltam `organization_id`, `trigger_event`, `input`, `output`, `error_message`, `created_by`, e `contact_id` é obrigatório (quebra teste manual sem contato).
+## 2. Migration mínima
 
-## 2. Migration mínima e segura
+Única migration:
 
-Uma única migration:
+- `ALTER TABLE channel_webhooks_log ADD COLUMN IF NOT EXISTS organization_id uuid REFERENCES organizations(id) ON DELETE CASCADE`;
+- `ADD COLUMN IF NOT EXISTS metadata jsonb`;
+- Backfill `organization_id` via join com `channels`;
+- Index `(organization_id, processed_at desc)` e `(channel_id, processed_at desc)`;
+- GRANT SELECT/INSERT a `authenticated`, ALL a `service_role`;
+- RLS: policies SELECT/INSERT por `organization_id = current_user_organization_id()`, não recursiva. Drop policy antiga.
+- `api_keys`: garantir `GRANT SELECT, INSERT, DELETE ON public.api_keys TO authenticated; GRANT ALL TO service_role;` + RLS por `organization_id = current_user_organization_id()` (SELECT/INSERT/DELETE/UPDATE). Drop policies antigas se conflitarem.
 
-- `ALTER TABLE automation_logs ALTER COLUMN contact_id DROP NOT NULL`;
-- `ALTER TABLE automation_logs ALTER COLUMN node_id DROP NOT NULL`;
-- `ALTER TABLE automation_logs ALTER COLUMN action_type DROP NOT NULL`;
-- `ADD COLUMN organization_id uuid REFERENCES organizations(id)`;
-- `ADD COLUMN trigger_event text`;
-- `ADD COLUMN input jsonb`;
-- `ADD COLUMN output jsonb`;
-- `ADD COLUMN error_message text`;
-- `ADD COLUMN created_by uuid`;
-- Backfill `organization_id` a partir do `workflow_id`;
-- Index `(organization_id, created_at desc)` e `(workflow_id, created_at desc)`;
-- RLS: substituir policy existente por policies não-recursivas baseadas em `current_user_organization_id()` (SELECT/INSERT escopados por `organization_id`); GRANT para `authenticated` e `service_role`.
+Nada de tabela nova.
 
-Nenhuma alteração estrutural em `automation_workflows`.
+## 3. Endpoint inbound (mínima alteração)
 
-## 3. Server functions (`src/lib/automation/`)
+Em `src/routes/api/public/channels.$channelId.inbound.ts`:
 
-Arquivos novos, todos com `requireSupabaseAuth`, leitura escopada por `context.userId` → `organization_id` via profile:
+- Função helper local `logInbound(channel_id, organization_id|null, provider, payload_masked, status, error_message?)` que faz insert em `channel_webhooks_log` com **payload mascarado** (remove `webhook_secret`, `x-webhook-token`, `Authorization`, `access_token`, `api_key`, `secret` em qualquer nível raso).
+- Chamar em falhas grandes: `channel_not_found`, `channel_inactive`, `unauthorized`, `missing_sender`, `pending_configuration` (com status=`error`/`pending`).
+- Manter log de sucesso já existente, com `organization_id` agora persistido de verdade (não mais `as any` sem efeito).
+- Nada do roteamento/processor é tocado.
 
-- `automation.functions.ts`:
-  - `listAutomations` (com filtros opcionais status/trigger);
-  - `getAutomation(id)`;
-  - `upsertAutomation(payload)` — valida nodes via Zod;
-  - `toggleAutomation(id, is_active)`;
-  - `deleteAutomation(id)`;
-  - `duplicateAutomation(id)`.
-- `automation-logs.functions.ts`:
-  - `listAutomationLogs({ workflow_id?, status?, limit })`.
-- `test-automation.functions.ts`:
-  - `testAutomation({ workflow_id, payload })` — executa **uma vez, manual**, percorre `nodes.actions[]`; para cada ação:
-    - `create_notification` → insert em `notifications` (título prefixado `[TESTE]`, user_id = caller);
-    - `assign_queue` → valida `queue_id` na org; **não** altera conversa real no teste, retorna “seria atribuída para fila X”;
-    - `create_crm_task` → cria em `crm_tasks` **somente** se `payload.contact_id` e/ou `deal_id` válidos da org; senão retorna erro útil;
-    - `log_event` → insert em `automation_logs` com `status='success'`;
-  - Sempre grava 1 log agregado em `automation_logs` com `input`, `output`, `error_message`, `trigger_event`, `organization_id`, `created_by`.
+## 4. Server functions (`src/lib/developer/`)
 
-Nenhum scheduler/worker novo — execução automática **não** é prometida.
+- `webhook-test.functions.ts` → `testInboundEndpoint({ channelId, payload })`: chama o próprio endpoint público com o secret do canal (server-side via `fetch`) e devolve `{ status, body }`. Usa `requireSupabaseAuth`, valida que o canal pertence à org do caller. Não vaza secret.
+- `webhook-secret.functions.ts` → `rotateWebhookSecret({ channelId })`: gera novo `crypto.randomUUID()` no lado servidor, faz UPDATE em `channels.credentials.webhook_secret` (carregando credentials existentes); retorna `{ secret }` UMA vez. UI exibe e some.
+- `api-keys.functions.ts` → `createApiKey({ name, scopes })`: gera prefixo `pk_live_xxxxxxxx` + 32 bytes; armazena `key_hash = sha256` e `key_prefix`; retorna `{ key }` UMA vez. `revokeApiKey({ id })` faz DELETE escopado por org. `rotateApiKey({ id })` = delete + create com mesmo name/scopes.
 
-## 4. Hooks (`src/hooks/automation/`)
+Todos via `requireSupabaseAuth` + checagem de `organization_id`.
 
-- `use-automations.ts`: queries (`automations`, `automation:{id}`), mutations (upsert/toggle/delete/duplicate), invalidação.
-- `use-automation-logs.ts`: query paginada simples.
-- `use-test-automation.ts`: mutation que chama `testAutomation`.
+## 5. Hooks (`src/hooks/developer/`)
 
-## 5. UI (`src/components/automation/`)
+- `use-webhook-logs.ts` — query em `channel_webhooks_log` com filtros: channel_id, status, período (from/to), busca por provider.
+- `use-channels-inbound.ts` — wrap leve em `useChannels` que só expõe `id, name, provider, identifier, is_active, status, last_sync_at, organization_id, has_webhook_secret` (booleano derivado de credentials).
+- `use-api-keys-actions.ts` — mutations create/rotate/revoke (chamam server fns) + invalidate cache.
+- `use-webhook-test.ts` — mutation que chama `testInboundEndpoint`.
 
-Novos / ajustados:
+## 6. UI
 
-- `automation-list.tsx`: tabela com nome, descrição (de nodes), trigger_event (badge), status switch, nº de ações, última execução (join leve via logs query), ações (editar / testar / duplicar / excluir via `AlertDialog`). Filtros por status e trigger. Empty state com CTA real.
-- `automation-editor-drawer.tsx`: Drawer com formulário (nome, descrição, trigger_event Select, is_active Switch, queue_id Select opcional, channel_id Select opcional, responsible_id Select opcional, lista editável de **condições** e **ações** com selects+inputs, JSON preview read-only). Validação Zod. Salvar via `upsertAutomation`.
-- `automation-test-dialog.tsx`: Dialog com textarea de payload JSON (com template por trigger), botão “Executar teste”, resultado por ação (✓/✗ + mensagem), aviso claro: *“Execução manual única. Não dispara worker automático.”*
-- `automation-logs-panel.tsx`: lista últimos 50 logs com badge status, trigger_event, data, drawer de detalhe (input/output/error). Filtro por workflow e status.
-- `automation-delete-dialog.tsx`: `AlertDialog` de confirmação.
-- Pequeno banner honesto na topo da listagem: *“Gatilhos conectados automaticamente: novo conversation_created via trigger DB existente. Demais gatilhos disponíveis apenas para teste manual nesta versão.”* (texto baseado no que existir de fato — confirmar antes de afirmar).
+Renomear seção `logs` para “Webhook Logs”. Layout em 3 abas mantido: API Keys / Webhooks / Logs.
 
-`workflow-builder.tsx` existente: manter como está se não estiver referenciado pelo fluxo principal; se for legado quebrado, esconder do menu e marcar TODO interno (não exibir “Em breve”).
+- `src/components/marketplace/api-key-manager.tsx` — reescrita:
+  - listagem com `name`, `key_prefix••••` mascarado, scopes, criada em, último uso (real);
+  - botão “Nova chave” → Dialog com nome + scopes (multi-select simples) → mostra **uma única vez** a chave gerada, botão copiar com feedback, aviso “anote agora”;
+  - menu por linha: rotacionar (AlertDialog “gera nova chave, invalida atual” → mostra nova uma vez), revogar (AlertDialog), copiar prefixo.
+  - empty state real.
 
-## 6. Gatilhos e ações suportados
+- `src/components/marketplace/webhook-manager.tsx` — reescrita para focar em **inbound de canais** (não webhook_subscriptions mockado). Lista cada canal com:
+  - URL real `${origin}/api/public/channels/{id}/inbound` (origin via `window.location.origin`);
+  - badge de status (`pending_configuration` se `!webhook_secret`);
+  - botões: copiar URL, copiar curl, **Testar endpoint** (chama server fn, mostra resposta), **Gerar/Rotacionar secret** (AlertDialog → exibe secret uma vez);
+  - mostra provider, última atividade (`last_sync_at` ou maior `processed_at` do log), feedback toast em cada cópia.
+  - exemplo curl com header `x-webhook-token: <COLE_AQUI>` (nunca renderizar o secret).
 
-Triggers no Select: `conversation_created`, `conversation_routed`, `conversation_no_reply`, `deal_created`, `campaign_created`, `sla_risk`.
-Ações: `create_notification`, `assign_queue`, `create_crm_task`, `log_event`.
+- `src/components/marketplace/webhook-logs-panel.tsx` (novo):
+  - filtros: canal (select), status (select success/error/pending), período (date range simples — 24h/7d/30d/custom), busca por provider;
+  - tabela: data, canal (nome), provider, status badge, snippet de erro;
+  - clique → Sheet com payload JSON formatado, error_message, metadata; **payload renderizado já vem mascarado do backend** + sanitização adicional no client por garantia (remove campos sensíveis).
+  - empty state real.
 
-## 7. Linguagem honesta
+- `src/components/marketplace/developer-center.tsx` — substitui placeholder “Nenhum log de API disponível” por `<WebhookLogsPanel />`; reaproveita layout existente; remove métricas hardcoded (“1.2M / mês”, “98.5% Success Rate”) — substitui por contagem real simples ou esconde.
 
-Sem “Em breve”, sem toasts genéricos. Mensagens permitidas:
-- “Execução automática não conectada para este gatilho — disponível para teste manual.”
-- “Automação salva.”
-- “Teste executado com sucesso / erro: …”
+- `src/lib/developer/mask.ts` — utilitário compartilhado `maskSensitive(obj)` (lista de chaves proibidas, ofusca recursivamente até 2 níveis com `***`).
 
-## 8. Validação
+## 7. Não duplicar com Canais
 
-- `bunx tsc --noEmit`;
-- `rg -n "Em breve|coming soon|não implementado|próxima sprint" src/`;
-- `rg -n "onClick=\{\(\) => \{\}\}|onClick=\{\(\) => null\}" src/`;
-- `rg -n "TODO" src/components/automation src/hooks/automation src/lib/automation`;
-- Smoke manual: criar → editar → ativar/desativar → duplicar → testar (com cada ação) → ver log → excluir.
-- Regressão: AI Studio abre, Inbox lista conversas, Marketplace conecta canal, sino notifica.
+- O botão “Testar endpoint” chama a mesma server fn `testInboundEndpoint`. Se já houver um equivalente em `ChannelConfigDrawer`, manter intocado e apenas reaproveitar o hook.
+- Rotação de webhook_secret também fica disponível só aqui; `ChannelConfigDrawer` não é alterado.
 
-## 9. Riscos conhecidos
+## 8. Segurança
 
-- `automation_logs` antes só aceitava contact_id obrigatório — a migration relaxa isso; verificar se algum código legado insere logs com schema antigo (busca já planejada).
-- `nodes` jsonb sem schema forte no banco — Zod no servidor garante forma.
-- Execução automática real (worker / pg triggers para cada `trigger_event`) **fica fora do A2** e será comunicada na UI.
+- Nenhuma server fn nova é pública: todas com `requireSupabaseAuth` + check de org.
+- `rotateWebhookSecret` / `createApiKey` / `rotateApiKey` retornam segredo **uma única vez**.
+- Logs sempre mascarados antes do insert.
+- UI nunca renderiza `webhook_secret`/`key_hash`/`api_key`; só `key_prefix`.
+- Listagens de api_keys nunca incluem `key_hash` no select.
 
-## 10. Arquivos previstos
+## 9. Validação
 
-Novos: migration, `src/lib/automation/automation.functions.ts`, `automation-logs.functions.ts`, `test-automation.functions.ts`, `src/hooks/automation/use-automations.ts`, `use-automation-logs.ts`, `use-test-automation.ts`, `src/components/automation/automation-list.tsx`, `automation-editor-drawer.tsx`, `automation-test-dialog.tsx`, `automation-logs-panel.tsx`, `automation-delete-dialog.tsx`.
-Ajustes: view de Automação (rota existente) para montar list + logs panel.
+- `bunx tsc --noEmit`.
+- Buscas globais: `Em breve`, `coming soon`, `não implementado`, `próxima sprint`, `TODO`, `onClick={() => {}}`, `console.log` (em arquivos novos).
+- Busca por exposição: `rg -n "key_hash" src/components`, `webhook_secret` renderizado em JSX, qualquer `toast.success` mostrando segredo.
+- QA manual: criar API key → vê segredo uma vez → recarrega lista → só prefixo. Rotacionar secret de canal → testar endpoint → ver log com status processed. Forçar erro (URL com channelId inválido) → ver log error.
+- Regressão: AI Studio, Automação, Inbox, Marketplace canais, fluxo inbound real (POST com secret válido).
 
-Após aprovação: rodo migration → implemento server fns + hooks + UI → valido → entrego relatório A2 e aguardo OK antes de A3.
+## 10. Riscos
+
+- Endpoint inbound passa a logar falhas extras: aumenta linhas em `channel_webhooks_log`. Mitigado por índice + paginação no painel.
+- `api_keys` sem coluna `is_active`: revogação é DELETE — perde histórico de quem teve qual chave. Documentar no relatório.
+- Server fn de teste do endpoint precisa saber o host público; usar `getRequest()`/`x-forwarded-host` no servidor para montar URL absoluta, fallback `process.env.SITE_URL` se existir, último recurso `http://localhost:8080`.
+
+## 11. Arquivos previstos
+
+Novos:
+- migration única;
+- `src/lib/developer/mask.ts`;
+- `src/lib/developer/webhook-test.functions.ts`;
+- `src/lib/developer/webhook-secret.functions.ts`;
+- `src/lib/developer/api-keys.functions.ts`;
+- `src/hooks/developer/use-webhook-logs.ts`;
+- `src/hooks/developer/use-webhook-test.ts`;
+- `src/hooks/developer/use-api-keys-actions.ts`;
+- `src/components/marketplace/webhook-logs-panel.tsx`;
+- `src/components/marketplace/api-key-create-dialog.tsx`;
+- `src/components/marketplace/webhook-secret-rotate-dialog.tsx`.
+
+Alterados:
+- `src/components/marketplace/developer-center.tsx` (substituir aba Logs por painel real, remover métricas fake);
+- `src/components/marketplace/webhook-manager.tsx` (reescrita focada em canais);
+- `src/components/marketplace/api-key-manager.tsx` (reescrita com create/rotate/revoke);
+- `src/routes/api/public/channels.$channelId.inbound.ts` (logs de erro mascarados, sem mexer no fluxo).
+
+Após aprovação: migration → server fns → hooks → UI → validação → relatório A3 e aguardo OK antes de A4.
