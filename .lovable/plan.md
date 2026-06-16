@@ -1,88 +1,95 @@
-# Onda B — Plano de Execução
+# Onda C — Voice + Billing + White Label + Validação Final Prompt 2/3
 
-Escopo aprovado: B1 Business Hub real, B2 OIL/Advisor/CEO Intelligence com queries reais, B3 higiene leve de console.log. Sem tocar no núcleo omnichannel (A1–A4, Inbox, CRM, Campanhas, Canais, Filas, Marketplace, inbound, RLS).
+Escopo aprovado: C1 Voice real, C2 Billing real, C3 White Label real, C4 validação final. Sem tocar no núcleo omnichannel (A1–A4, Inbox, CRM, Campanhas, Canais, Filas, Marketplace, inbound, RLS, Business Hub Onda B). Sem iniciar Prompt 3/3.
 
-## B1 — Business Hub
+## C1 — Voice
 
-**Arquivo:** `src/components/hub/business-hub-view.tsx` (reescrita completa para painel operacional real).
+**Hook `src/hooks/voice/use-voice.ts` (reescrever):**
+- `useVoiceExtensions` (já existe) — manter, escopar por `organization_id`.
+- Adicionar: `useCreateExtension`, `useUpdateExtension`, `useDeleteExtension`, `useToggleExtensionStatus`.
+- `useIvrFlows`, `useCreateIvrFlow`, `useUpdateIvrFlow`, `useDeleteIvrFlow`, `useToggleIvrFlow`.
+- `useCallLogs` (já existe) — adicionar filtros (período, status, número).
+- `useVoiceProviderStatus` — deriva pending_configuration de `channels` tipo `voice` ou da própria extensão (sem credencial → pending).
 
-**Novo hook:** `src/hooks/hub/use-hub-status.ts` — agrega contagens reais via Supabase, escopadas por `organization_id` do `useProfile()`:
-- `channels`: total, `status='connected'`, `pending_configuration`, `disconnected`, `error`, sem `default_queue_id`.
-- `queues`: total, sem membros (left join `queue_members`), `queue_routing_rules` ativas.
-- `campaigns`: ativas, `scheduled`, `pending_configuration`, `error`.
-- `ai_agents`: ativos, `pending_configuration`.
-- `automation_workflows_v2`: ativos/inativos.
-- `deals`: abertos, sem responsável, parados > 14 dias.
-- `conversations`: abertas, pendentes, sem `agent_id`, SLA vencido (`sla_due_at < now()`), SLA em risco (próximas 30 min).
+**`src/components/voice/pbx-management.tsx` (reescrever):**
+- Lista real de `voice_extensions` da org.
+- Drawer/Dialog de criar/editar: `extension_number`, `user_id` (select dos profiles da org), `provider` (`twilio` | `manual`), `identifier` (DID/número), `default_queue_id` (select de `queues`), `status`.
+- Toggle ativar/desativar, excluir com `AlertDialog`.
+- Badge de status real. Se provider exige credencial e não há → badge `pending_configuration` + tooltip "Configure credencial Twilio em Marketplace/Canais".
+- Empty state honesto.
 
-**Novo hook:** `src/hooks/hub/use-onboarding-checklist.ts` — derivado do status; cada item: `{ id, label, done, route }`.
-1. Configurar canal → `/admin/channels`
-2. Criar fila → `/queues`
-3. Adicionar membro à fila → `/queues`
-4. Criar regra de roteamento → `/queues`
-5. Testar inbound → `/settings/developer`
-6. Responder conversa → `/inbox`
-7. Criar oportunidade → `/crm`
-8. Criar campanha → `/campaigns`
-9. Abrir relatório → `/reports`
-10. Configurar agente IA → `/dashboard/ai-studio`
+**`src/components/voice/ivr-builder.tsx` (reescrever):**
+- Lista real de `ivr_flows` da org.
+- Editor simples: `name`, `description`, `channel_id`, `queue_id`, `is_active`, `flow_config` (textarea JSON com preview validado via `JSON.parse` antes de salvar).
+- Criar/editar/duplicar/excluir com confirmação. Sem builder visual complexo.
 
-**Componentes auxiliares (mesmo arquivo ou pasta `src/components/hub/`):**
-- `HubStatusCards` — grid responsivo de cards (Canais, Filas, Campanhas, IA, Automação, CRM, Conversas) com badges de status reais.
-- `OnboardingChecklist` — lista com check/pendente + `Link` TanStack para a rota.
-- `QuickShortcuts` — atalhos para `/inbox`, `/customers`, `/crm`, `/campaigns`, `/reports`, `/dashboard/ai-studio`, `/dashboard/automation`, `/settings/developer`, `/dashboard/notifications`.
+**`src/components/voice/call-log-list.tsx` (reescrever):**
+- Tabela real de `call_logs` filtrada por org via join em `contacts`/`profiles`.
+- Filtros: período (date range), `status` (select), busca por número.
+- Empty state honesto. Sem chamada fake.
 
-**Estados:** loading (skeletons), erro (mensagem + retry via `refetch`), empty honesto ("0"), responsividade preservada, scroll-area mantida. Remove os blocos decorativos `publicProfiles/assets/connections` que não são produção.
+**`src/components/voice/softphone-widget.tsx` (reescrever):**
+- Ler `useVoiceProviderStatus`. Se sem provider/extensão própria do usuário → mostrar estado `pending_configuration` com link para `/admin/channels` ou PBX. Sem dialer ativo.
+- Se configurado: dialer manual valida formato E.164; botão "Testar configuração" chama serverFn que apenas valida credencial/formato (não disca). Mantém UI atual mas remove o `setIsCalling(true)` fake e o avatar "Roberto Almeida".
 
-## B2 — OIL / Advisor / CEO Intelligence
+**ServerFn:** `src/lib/voice/voice-test.functions.ts` — `validateVoiceConfig({ extensionId })`: valida presença de credencial/identifier, retorna `{ ok, missing[] }`. Sem chamada externa real.
 
-**Arquivos:**
-- `src/components/dashboard/ceo/oil-command-center.tsx` (criar/reescrever para alertas reais).
-- `src/components/dashboard/ceo/ceo-advisor-view.tsx` (criar/reescrever para recomendações reais).
-- Inspecionar `src/components/dashboard/ceo/business-ai/*` (ai-analyst-chat, revenue-intelligence) e substituir métricas inventadas pelas reais.
+## C2 — Billing
 
-**Novo hook:** `src/hooks/dashboard/use-real-alerts.ts` — devolve `{ alerts: Alert[], recommendations: Recommendation[] }` derivados de queries existentes:
+**Hook `src/hooks/billing/use-billing.ts` (estender):**
+- `usePlans`, `useCurrentSubscription`, `useUsageMeters`, `useInvoices` (já existem) — manter.
+- Adicionar: `usePaymentGatewayStatus` — lê `connected_integrations`/secret presence via serverFn → retorna `{ configured: boolean, provider?: string, missing: string[] }`.
+- `useUpdateSubscriptionPlanRequest` — apenas marca request em `billing_subscriptions_v2` (status `pending_configuration`) sem cobrar.
 
-Alertas:
-- SLA vencido / em risco / sem agente (queries em `conversations`).
-- Filas sem membros, filas com maior volume aberto.
-- `channels` em `pending_configuration`, `disconnected`, `error`, sem fila padrão.
-- `campaigns` em `pending_configuration`, `scheduled`, `error`.
-- `deals` sem responsável, parados há > 14 dias.
-- `ai_agents` inativos/pending; `automation_workflows_v2` inativos; últimos `automation_logs` com erro.
+**`src/components/billing/billing-view.tsx` (revisar):**
+- Remover banner "Restam 4 dias" e qualquer métrica hardcoded.
+- Se sem gateway: banner "Gateway de pagamento não configurado" + botão abrindo modal real (salva pending_configuration em `connected_integrations`).
+- Empty state honesto para sem assinatura.
 
-Cada alerta: `{ id, severity, title, description, count, action: { label, route } }`.
+**`src/components/billing/plans-grid.tsx`:** marcar plano atual real; CTA "Fazer Upgrade" → abre modal que salva intenção `pending_configuration` (não cobra). Não fingir assinatura.
 
-Recomendações: derivadas em texto curto a partir dos alertas (sem IA, sem fake). Empty state: "Sem alertas críticos com os dados atuais."
+**`src/components/billing/invoice-list.tsx` (revisar):** apenas faturas reais; empty honesto; download só se `pdf_url` real.
 
-**Ações:** cada card usa `<Link to=...>` TanStack para a rota correspondente (Inbox, Queues, Reports, Channels, Campaigns, CRM, AI Studio, Automation). Sem botão morto.
+**`src/components/billing/usage-meter.tsx` (revisar):** apenas `billing_usage_meters` reais; "sem dados de uso ainda" se vazio.
 
-**business-ai:** trocar arrays mockados por `useExecutiveInsights` / `useBusinessHealth` (já existem em `src/hooks/core/use-business-ai.ts`) e pelo novo `use-real-alerts`. Se um sub-componente não puder ser alimentado por dado real, ele exibe empty state honesto em vez de número fake.
+**ServerFn:** `src/lib/billing/gateway.functions.ts` — `getGatewayStatus()` e `saveGatewayConfigRequest({ provider })` (apenas grava intenção; não chama Stripe/Paddle).
 
-## B3 — Higiene de console.log
+## C3 — White Label
 
-- `rg -n "console\.log" src/` para inventariar.
-- Manter `console.error`.
-- Em arquivos críticos (auth, app-layout, services, integrations/supabase/*): apenas envelopar em `if (import.meta.env.DEV)` sem alterar lógica.
-- Remover `console.log` claramente vestigiais (debug temporário) em componentes/hooks.
-- Não criar logger. Não tocar em `lovable-error-reporting.ts` nem `error-capture.ts`.
+**Hook novo `src/hooks/settings/use-white-label.ts`:**
+- `useWhiteLabelConfig` — `white_label_configs_v2` por org (maybeSingle).
+- `useUpsertWhiteLabelConfig` — upsert real.
+- `useUploadLogo` — upload em `message-attachments` bucket sob path `white-label/{org_id}/logo-{ts}.{ext}`; retorna URL.
+- `useVerifyDomain` — serverFn que apenas grava status `pending_configuration` e devolve instruções DNS (A/CNAME). Sem fingir ativo.
 
-## Validação
+**Componente novo `src/components/settings/white-label-view.tsx`:**
+- Form: `product_name`, `logo_url` (upload + preview + remover), `accent_color` (color picker), `theme` (light/dark/auto), `custom_domain` (input + status badge + instruções DNS).
+- Preview ao vivo do header com accent/logo aplicados localmente (sem mexer no tema global).
+- Botão "Resetar" com confirmação.
+- RLS: já existe; garantir filter por `organization_id`. Sem vazamento.
+
+**Rota:** `src/routes/settings.white-label.tsx` (lazy import) + item no sidebar de settings.
+
+**Migration (se necessário):** garantir colunas `product_name`, `logo_url`, `accent_color`, `theme`, `custom_domain`, `domain_status` em `white_label_configs_v2`. Se já existem, sem migration. RLS por `organization_id` confirmada/adicionada.
+
+## C4 — Validação final Prompt 2/3
 
 ```
 bunx tsc --noEmit
 rg -n "Em breve|coming soon|não implementado|próxima sprint" src/
 rg -n "TODO" src/
 rg -n "onClick=\{\(\) => \{\}\}|onClick=\{\(\) => null\}" src/
-rg -n "console\.log" src/   # confirmar protegidos/justificados
+rg -n "console\.log" src/
 ```
 
-QA regressão: clicar em Sidebar → AI Studio, Automação, Developer, Notificações, Inbox, CRM, Campanhas, Relatórios, Marketplace, Hub; abrir sino; confirmar inbound intocado.
+QA regressão (clicar e confirmar não-quebra): AI Studio, Automação + logs, Developer (API Keys, webhook logs, rotação secret), Notificações (sino, lista, preferências), Business Hub, OIL/Advisor, Voice (PBX, IVR, logs, softphone pending), Billing (plano, uso, faturas, gateway pending), White Label (logo upload, domínio pending), Inbox (anexo/áudio/emoji), CRM, Campanhas, Relatórios, CSV export, login/logout demo, sidebar, Marketplace ↔ Canais, endpoint inbound, fluxo "falar com financeiro", filas/regras, Customer 360, RLS.
+
+QA multi-perfil: CEO Master, Empresa Demo, Gerente Demo, Atendente Demo, Supervisor IA — navegação básica sem tela branca.
+
+## Fora de escopo
+
+Prompt 3/3, refactor de núcleo omnichannel, novos módulos, cobrança real, discagem real, ativação real de domínio.
 
 ## Entregáveis do relatório final
 
-Arquivos alterados, hooks novos, dados reais usados, checklist implementado, rotas dos atalhos, alertas/recomendações implementados, console.log removidos/protegidos, confirmação sem métrica fake, resultado tsc/build/buscas, riscos remanescentes. Pedir validação antes de iniciar Onda C.
-
-## Fora de escopo (não tocar)
-
-Voice, Billing, White Label, Onda C, núcleo omnichannel, RLS, migrations (nenhuma migração nesta onda).
+Arquivos alterados, migrations (se houver), hooks/componentes novos, como testar cada bloco, o que ficou pending_configuration, confirmação sem dado fake, núcleo intocado, resultado tsc/build/buscas, riscos remanescentes. Pedir validação antes de Prompt 3/3.

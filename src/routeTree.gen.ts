@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as SupervisorRouteImport } from './routes/supervisor'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -24,6 +25,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as SettingsWhiteLabelRouteImport } from './routes/settings.white-label'
 import { Route as SettingsProfileRouteImport } from './routes/settings.profile'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings.notifications'
 import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
@@ -38,6 +40,11 @@ import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as ApiPublicChannelsChannelIdInboundRouteImport } from './routes/api/public/channels.$channelId.inbound'
 
+const VoiceRoute = VoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupervisorRoute = SupervisorRouteImport.update({
   id: '/supervisor',
   path: '/supervisor',
@@ -112,6 +119,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const SettingsWhiteLabelRoute = SettingsWhiteLabelRouteImport.update({
+  id: '/white-label',
+  path: '/white-label',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsProfileRoute = SettingsProfileRouteImport.update({
   id: '/profile',
@@ -194,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
+  '/voice': typeof VoiceRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
@@ -206,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/settings/white-label': typeof SettingsWhiteLabelRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
@@ -222,6 +236,7 @@ export interface FileRoutesByTo {
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
+  '/voice': typeof VoiceRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
@@ -234,6 +249,7 @@ export interface FileRoutesByTo {
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/settings/white-label': typeof SettingsWhiteLabelRoute
   '/dashboard': typeof DashboardIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
@@ -253,6 +269,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
+  '/voice': typeof VoiceRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
@@ -265,6 +282,7 @@ export interface FileRoutesById {
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/settings/white-label': typeof SettingsWhiteLabelRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
@@ -285,6 +303,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/supervisor'
+    | '/voice'
     | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
@@ -297,6 +316,7 @@ export interface FileRouteTypes {
     | '/settings/marketplace'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/white-label'
     | '/dashboard/'
     | '/settings/'
     | '/api/public/channels/$channelId/inbound'
@@ -313,6 +333,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/reports'
     | '/supervisor'
+    | '/voice'
     | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
@@ -325,6 +346,7 @@ export interface FileRouteTypes {
     | '/settings/marketplace'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/white-label'
     | '/dashboard'
     | '/settings'
     | '/api/public/channels/$channelId/inbound'
@@ -343,6 +365,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/supervisor'
+    | '/voice'
     | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
@@ -355,6 +378,7 @@ export interface FileRouteTypes {
     | '/settings/marketplace'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/white-label'
     | '/dashboard/'
     | '/settings/'
     | '/api/public/channels/$channelId/inbound'
@@ -374,6 +398,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   SupervisorRoute: typeof SupervisorRoute
+  VoiceRoute: typeof VoiceRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCompaniesRoute: typeof AdminCompaniesRoute
@@ -382,6 +407,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/voice': {
+      id: '/voice'
+      path: '/voice'
+      fullPath: '/voice'
+      preLoaderRoute: typeof VoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/supervisor': {
       id: '/supervisor'
       path: '/supervisor'
@@ -486,6 +518,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/settings/white-label': {
+      id: '/settings/white-label'
+      path: '/white-label'
+      fullPath: '/settings/white-label'
+      preLoaderRoute: typeof SettingsWhiteLabelRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/settings/profile': {
       id: '/settings/profile'
@@ -607,6 +646,7 @@ interface SettingsRouteChildren {
   SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
   SettingsNotificationsRoute: typeof SettingsNotificationsRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
+  SettingsWhiteLabelRoute: typeof SettingsWhiteLabelRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
@@ -616,6 +656,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsMarketplaceRoute: SettingsMarketplaceRoute,
   SettingsNotificationsRoute: SettingsNotificationsRoute,
   SettingsProfileRoute: SettingsProfileRoute,
+  SettingsWhiteLabelRoute: SettingsWhiteLabelRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }
 
@@ -637,6 +678,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRouteWithChildren,
   SupervisorRoute: SupervisorRoute,
+  VoiceRoute: VoiceRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCompaniesRoute: AdminCompaniesRoute,
@@ -646,13 +688,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

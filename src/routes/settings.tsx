@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Settings as SettingsIcon, User, BellRing } from "lucide-react";
+import { Settings as SettingsIcon, User, BellRing, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 
@@ -11,6 +11,7 @@ const TABS = [
   { to: "/settings/profile", label: "Perfil", icon: User },
   { to: "/settings/notifications", label: "Notificações", icon: BellRing },
   { to: "/settings/billing", label: "Cobrança", icon: SettingsIcon },
+  { to: "/settings/white-label", label: "White Label", icon: Palette },
 ];
 
 function SettingsLayout() {
