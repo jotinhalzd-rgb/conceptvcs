@@ -2,6 +2,7 @@ import React from 'react';
 import { useBusinessHealth } from "@/hooks/core/use-business-ai";
 import { Activity, ShieldCheck, Heart, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DemoBadge } from "@/lib/demo-badge";
 
 export const HealthScoreWidget = () => {
   const { data: health, isLoading } = useBusinessHealth();
@@ -36,6 +37,7 @@ export const HealthScoreWidget = () => {
           <div className="flex items-center gap-2">
             <Heart className={cn("w-4 h-4", getStatusColor(status))} />
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Business Health Score</span>
+            <DemoBadge />
           </div>
           <div className="px-2 py-0.5 rounded-full bg-black/20 border border-white/5 flex items-center gap-1.5">
             <Activity className="w-3 h-3 text-white/40" />
