@@ -20,6 +20,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as CrmRouteImport } from './routes/crm'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
+import { Route as AutomationRouteImport } from './routes/automation'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
@@ -89,6 +90,11 @@ const CrmRoute = CrmRouteImport.update({
 const CampaignsRoute = CampaignsRouteImport.update({
   id: '/campaigns',
   path: '/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomationRoute = AutomationRouteImport.update({
+  id: '/automation',
+  path: '/automation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -171,6 +177,7 @@ const ApiPublicChannelsChannelIdInboundRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/automation': typeof AutomationRoute
   '/campaigns': typeof CampaignsRoute
   '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/automation': typeof AutomationRoute
   '/campaigns': typeof CampaignsRoute
   '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/automation': typeof AutomationRoute
   '/campaigns': typeof CampaignsRoute
   '/crm': typeof CrmRoute
   '/customers': typeof CustomersRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/automation'
     | '/campaigns'
     | '/crm'
     | '/customers'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/automation'
     | '/campaigns'
     | '/crm'
     | '/customers'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/automation'
     | '/campaigns'
     | '/crm'
     | '/customers'
@@ -339,6 +351,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  AutomationRoute: typeof AutomationRoute
   CampaignsRoute: typeof CampaignsRoute
   CrmRoute: typeof CrmRoute
   CustomersRoute: typeof CustomersRoute
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns'
       fullPath: '/campaigns'
       preLoaderRoute: typeof CampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automation': {
+      id: '/automation'
+      path: '/automation'
+      fullPath: '/automation'
+      preLoaderRoute: typeof AutomationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -584,6 +604,7 @@ const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  AutomationRoute: AutomationRoute,
   CampaignsRoute: CampaignsRoute,
   CrmRoute: CrmRoute,
   CustomersRoute: CustomersRoute,
