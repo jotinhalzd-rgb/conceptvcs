@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useChannels } from "@/hooks/channels/use-channels";
 import { ChannelCard } from "./channel-card";
 import { 
@@ -6,21 +6,45 @@ import {
   Search, 
   Filter, 
   Activity, 
-  ShieldCheck,
   Zap,
-  Globe,
   Loader2,
   ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { ConnectModal } from "./connect-modal";
+import { ChannelPickerModal } from "./channel-picker-modal";
+import { ChannelConfigDrawer } from "./channel-config-drawer";
 import { SmartBackButton } from "@/components/layout/back-button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { normalizeStatus, type ChannelStatus } from "@/lib/channels/status";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const ChannelsView = () => {
-  const { data: channels, isLoading, refetch } = useChannels();
-  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const { data: channels, isLoading } = useChannels();
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [editingChannel, setEditingChannel] = useState<any | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ChannelStatus | "all">("all");
+
+  const filtered = useMemo(() => {
+    const list = channels ?? [];
+    return list.filter((c: any) => {
+      const status = normalizeStatus(c.status);
+      const matchesSearch =
+        !search.trim() ||
+        c.name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.provider?.toLowerCase().includes(search.toLowerCase()) ||
+        c.identifier?.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === "all" || status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [channels, search, statusFilter]);
 
   return (
     <GlobalErrorBoundary name="Channels">
@@ -67,7 +91,7 @@ export const ChannelsView = () => {
 
           <div className="flex items-center gap-3">
             <Button 
-              onClick={() => setIsConnectModalOpen(true)}
+              onClick={() => setIsPickerOpen(true)}
               className="h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl px-6 gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
             >
               <Plus className="w-4 h-4" />
@@ -83,18 +107,33 @@ export const ChannelsView = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
               <input 
                 placeholder="Filtrar canais..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="bg-transparent border-none text-[11px] font-medium text-slate-300 placeholder:text-slate-600 focus:outline-none pl-9 w-64"
               />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black text-slate-500 gap-2">
-              <Filter className="w-3.5 h-3.5" />
-              Status: Todos
-            </Button>
+            <Filter className="w-3.5 h-3.5 text-slate-500" />
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as ChannelStatus | "all")}
+            >
+              <SelectTrigger className="h-8 bg-transparent border-white/5 text-[10px] font-bold text-slate-300 w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
+                <SelectItem value="all">Todos os status</SelectItem>
+                <SelectItem value="connected">Conectado</SelectItem>
+                <SelectItem value="configured">Configurado</SelectItem>
+                <SelectItem value="pending_configuration">Aguardando configuração</SelectItem>
+                <SelectItem value="error">Erro</SelectItem>
+                <SelectItem value="disconnected">Desconectado</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="w-px h-4 bg-white/5 mx-2" />
             <span className="text-[10px] font-bold text-slate-600">
-              {channels?.length || 0} canais configurados
+              {filtered.length} de {channels?.length || 0}
             </span>
           </div>
         </div>
@@ -112,21 +151,34 @@ export const ChannelsView = () => {
               description="Conecte WhatsApp, e-mail ou outro canal para começar a receber conversas."
               action={{
                 label: "Conectar canal",
-                onClick: () => setIsConnectModalOpen(true),
+                onClick: () => setIsPickerOpen(true),
+              }}
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="Nenhum canal corresponde ao filtro"
+              description="Ajuste a busca ou o filtro de status para ver outros canais."
+              action={{
+                label: "Limpar filtros",
+                onClick: () => {
+                  setSearch("");
+                  setStatusFilter("all");
+                },
               }}
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-              {channels?.map((channel) => (
+              {filtered.map((channel: any) => (
                 <ChannelCard 
                   key={channel.id} 
                   channel={channel} 
-                  onRefresh={refetch} 
+                  onConfigure={() => setEditingChannel(channel)}
                 />
               ))}
 
               <button 
-                onClick={() => setIsConnectModalOpen(true)}
+                onClick={() => setIsPickerOpen(true)}
                 className="h-[280px] border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-indigo-500/20 hover:bg-white/[0.01] transition-all group"
               >
                 <div className="w-12 h-12 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -137,7 +189,12 @@ export const ChannelsView = () => {
             </div>
           )}
         </div>
-        <ConnectModal isOpen={isConnectModalOpen} onOpenChange={setIsConnectModalOpen} />
+        <ChannelPickerModal open={isPickerOpen} onOpenChange={setIsPickerOpen} />
+        <ChannelConfigDrawer
+          open={!!editingChannel}
+          onOpenChange={(o) => { if (!o) setEditingChannel(null); }}
+          channel={editingChannel}
+        />
       </div>
     </GlobalErrorBoundary>
   );
