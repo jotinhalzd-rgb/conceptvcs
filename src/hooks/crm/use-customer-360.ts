@@ -210,19 +210,17 @@ export function useCreateOpportunityForContact(contactId?: string) {
       const { data: profile } = await supabase
         .from("profiles").select("organization_id").eq("id", userData.user.id).single();
       if (!profile?.organization_id) throw new Error("Organização não encontrada");
-      const { data, error } = await supabase
-        .from("deals")
-        .insert({
-          organization_id: profile.organization_id,
-          contact_id: contactId,
-          title: input.title,
-          value: input.value ?? 0,
-          probability: input.probability ?? 50,
-          status: "open",
-          pipeline_id: input.pipeline_id ?? null,
-          stage_id: input.stage_id ?? null,
-        })
-        .select().single();
+      const payload: any = {
+        organization_id: profile.organization_id,
+        contact_id: contactId,
+        title: input.title,
+        value: input.value ?? 0,
+        probability: input.probability ?? 50,
+        status: "open",
+      };
+      if (input.pipeline_id) payload.pipeline_id = input.pipeline_id;
+      if (input.stage_id) payload.stage_id = input.stage_id;
+      const { data, error } = await supabase.from("deals").insert(payload).select().single();
       if (error) throw error;
       return data;
     },
