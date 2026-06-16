@@ -1805,6 +1805,7 @@ export type Database = {
           priority: string | null
           queue_id: string | null
           routing_reason: string | null
+          sla_due_at: string | null
           sla_status: string | null
           status: string | null
           temperature: string | null
@@ -1832,6 +1833,7 @@ export type Database = {
           priority?: string | null
           queue_id?: string | null
           routing_reason?: string | null
+          sla_due_at?: string | null
           sla_status?: string | null
           status?: string | null
           temperature?: string | null
@@ -1859,6 +1861,7 @@ export type Database = {
           priority?: string | null
           queue_id?: string | null
           routing_reason?: string | null
+          sla_due_at?: string | null
           sla_status?: string | null
           status?: string | null
           temperature?: string | null
@@ -4212,6 +4215,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          organization_id: string | null
+          payload: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          organization_id?: string | null
+          payload?: Json | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          organization_id?: string | null
+          payload?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       oil_alerts_v2: {
         Row: {
           created_at: string | null
@@ -4846,6 +4885,7 @@ export type Database = {
           name: string
           organization_id: string | null
           priority_level: number | null
+          sla_minutes: number | null
           sla_threshold: string | null
           supervisor_id: string | null
           updated_at: string | null
@@ -4865,6 +4905,7 @@ export type Database = {
           name: string
           organization_id?: string | null
           priority_level?: number | null
+          sla_minutes?: number | null
           sla_threshold?: string | null
           supervisor_id?: string | null
           updated_at?: string | null
@@ -4884,6 +4925,7 @@ export type Database = {
           name?: string
           organization_id?: string | null
           priority_level?: number | null
+          sla_minutes?: number | null
           sla_threshold?: string | null
           supervisor_id?: string | null
           updated_at?: string | null
