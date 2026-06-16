@@ -1804,6 +1804,7 @@ export type Database = {
           organization_id: string
           priority: string | null
           queue_id: string | null
+          routing_reason: string | null
           sla_status: string | null
           status: string | null
           temperature: string | null
@@ -1830,6 +1831,7 @@ export type Database = {
           organization_id: string
           priority?: string | null
           queue_id?: string | null
+          routing_reason?: string | null
           sla_status?: string | null
           status?: string | null
           temperature?: string | null
@@ -1856,6 +1858,7 @@ export type Database = {
           organization_id?: string
           priority?: string | null
           queue_id?: string | null
+          routing_reason?: string | null
           sla_status?: string | null
           status?: string | null
           temperature?: string | null
@@ -4783,13 +4786,61 @@ export type Database = {
         }
         Relationships: []
       }
+      queue_members: {
+        Row: {
+          capacity: number
+          created_at: string
+          id: string
+          is_active: boolean
+          organization_id: string
+          priority: number
+          queue_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          priority?: number
+          queue_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          priority?: number
+          queue_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_members_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       queues: {
         Row: {
+          assignment_mode: string
           color: string | null
           created_at: string | null
           department: string | null
           description: string | null
           id: string
+          is_active: boolean
+          is_default: boolean
+          is_demo: boolean
           max_capacity: number | null
           metadata: Json | null
           name: string
@@ -4800,11 +4851,15 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assignment_mode?: string
           color?: string | null
           created_at?: string | null
           department?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_demo?: boolean
           max_capacity?: number | null
           metadata?: Json | null
           name: string
@@ -4815,11 +4870,15 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assignment_mode?: string
           color?: string | null
           created_at?: string | null
           department?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_demo?: boolean
           max_capacity?: number | null
           metadata?: Json | null
           name?: string
