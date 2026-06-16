@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHubAssets, useHubInstalls } from "@/hooks/marketplace/use-marketplace";
+import { InstallModal } from "./install-modal";
 import { AppCard } from "./app-card";
 import { 
   Grid3X3, 
@@ -25,6 +26,15 @@ export const MarketplaceView = () => {
   const { data: assets, isLoading: loadingApps } = useHubAssets();
   const { data: installs, isLoading: loadingConnected } = useHubInstalls();
   const [activeCategory, setActiveTab] = useState('all');
+  const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openInstall = (assetId: string) => {
+    const asset = assets?.find((a: any) => a.id === assetId);
+    if (!asset) return;
+    setSelectedAsset(asset);
+    setModalOpen(true);
+  };
 
   const categories = ['all', 'crm', 'marketing', 'support', 'finance', 'telecom'];
 
@@ -135,7 +145,7 @@ export const MarketplaceView = () => {
                   key={asset.id} 
                   app={asset} 
                   isConnected={installs?.some((c: any) => c.asset_id === asset.id) || false} 
-                  onConnect={(id) => console.log("Connect to", id)}
+                  onConnect={openInstall}
                 />
               ))}
 
@@ -152,6 +162,16 @@ export const MarketplaceView = () => {
             </div>
           )}
         </div>
+        <InstallModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          asset={selectedAsset}
+          install={
+            selectedAsset
+              ? installs?.find((c: any) => c.asset_id === selectedAsset.id) ?? null
+              : null
+          }
+        />
       </div>
     </GlobalErrorBoundary>
   );
