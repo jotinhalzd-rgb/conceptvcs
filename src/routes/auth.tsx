@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/auth/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ function AuthPage() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
   // Hidratado no cliente para evitar mismatch SSR/CSR escondendo os cards.
   const [devMode, setDevMode] = useState(false);
   useEffect(() => {
@@ -65,11 +67,18 @@ function AuthPage() {
   const handleDemoLogin = async (demoEmail: string) => {
     setDemoLoading(demoEmail);
     try {
+      // Limpa sessão e cache do usuário demo anterior para evitar
+      // exibição de nome/role do perfil antigo durante a transição.
+      try { localStorage.removeItem("onecontact_dev_role"); } catch {}
+      await supabase.auth.signOut();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+
       const res = await ensureDemoFn({ data: { email: demoEmail } });
       if (!res?.password) {
         throw new Error("Usuário demo não encontrado");
       }
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: res.password,
       });
@@ -79,6 +88,11 @@ function AuthPage() {
         }
         throw new Error(`Falha ao criar sessão: ${error.message}`);
       }
+      if (signInData.user?.email !== demoEmail) {
+        await supabase.auth.signOut();
+        throw new Error("Perfil demo carregado não corresponde ao acesso selecionado.");
+      }
+      await queryClient.invalidateQueries();
       toast.success("Entrando como perfil demo...");
       navigate({ to: "/dashboard" });
     } catch (err: any) {

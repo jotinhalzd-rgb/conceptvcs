@@ -38,7 +38,7 @@ export const SoftphoneWidget = () => {
 
   return (
     <div className={cn(
-      "fixed bottom-6 left-6 z-50 transition-all duration-500",
+      "fixed bottom-6 right-6 z-50 transition-all duration-500",
       isMinimized ? "w-14 h-14" : "w-72 h-[420px]"
     )}>
       <AnimatePresence mode="wait">

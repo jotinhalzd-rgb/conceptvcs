@@ -57,7 +57,19 @@ export function AppLayout() {
   const isHub = pathname.startsWith("/dashboard/hub");
 
 
-  const isCEOMaster = profile?.role === 'ceo_master' || profile?.role === 'ceo';
+  const isCEOMaster = profile?.role === 'ceo_master';
+
+  const roleLabel = (role?: string) => {
+    switch (role) {
+      case 'ceo_master': return 'CEO MASTER';
+      case 'ceo': return 'CEO / EMPRESA';
+      case 'admin': return 'ADMIN';
+      case 'manager': return 'GERENTE';
+      case 'supervisor': return 'SUPERVISOR IA';
+      case 'agent': return 'ATENDENTE';
+      default: return role ? role.toUpperCase() : 'CARREGANDO...';
+    }
+  };
 
 
   const navItems = [
@@ -209,9 +221,11 @@ export function AppLayout() {
                     exit={{ opacity: 0, x: -10 }}
                     className="flex-1 min-w-0"
                   >
-                    <p className="text-sm font-bold text-white truncate leading-none mb-1">{profile?.full_name || "CEO DEMO"}</p>
+                    <p className="text-sm font-bold text-white truncate leading-none mb-1">
+                      {profile?.full_name || user?.email || "Carregando..."}
+                    </p>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">
-                      {profile?.role === 'ceo_master' ? 'CEO MASTER' : (profile?.role === 'admin' ? 'GESTOR MASTER' : (profile?.role === 'manager' ? 'GERENTE' : 'ATENDENTE'))}
+                      {roleLabel(profile?.role)}
                     </p>
                   </motion.div>
                 )}
