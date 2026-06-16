@@ -111,7 +111,7 @@ export function AppLayout() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      console.log("Nenhum usuário detectado, redirecionando para /auth");
+      if (import.meta.env.DEV) console.log("Nenhum usuário detectado, redirecionando para /auth");
       navigate({ to: "/auth" });
     }
   }, [user, authLoading, navigate]);

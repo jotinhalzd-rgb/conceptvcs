@@ -8,7 +8,7 @@ export class WhatsAppAdapter extends BaseChannelAdapter implements IChannelAdapt
     try {
       if (!to || !content) throw new Error("Dados de envio incompletos.");
       
-      console.log(`WhatsApp Service: Enviando mensagem para ${to}...`, content);
+      if (import.meta.env.DEV) console.log(`WhatsApp Service: Enviando mensagem para ${to}...`, content);
       // Integração futura com API (Twilio, Meta, etc)
       return true;
     } catch (error: any) {
@@ -40,7 +40,7 @@ export class EmailAdapter extends BaseChannelAdapter implements IChannelAdapter 
     try {
       if (!to || !content) throw new Error("Dados de envio de e-mail incompletos.");
       
-      console.log(`Email Service: Enviando e-mail para ${to}...`, content);
+      if (import.meta.env.DEV) console.log(`Email Service: Enviando e-mail para ${to}...`, content);
       return true;
     } catch (error: any) {
       console.error("Email Send Error:", error);
