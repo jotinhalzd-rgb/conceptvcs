@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getWebRequest } from "@tanstack/react-start/server";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -27,7 +27,7 @@ export const testInboundEndpoint = createServerFn({ method: "POST" })
       return { status: 0, ok: false, body: { error: "pending_configuration", detail: "Gere o webhook_secret antes de testar." } };
     }
 
-    const req = getWebRequest();
+    const req = getRequest();
     const url = new URL(req.url);
     const base = `${url.protocol}//${url.host}`;
     const endpoint = `${base}/api/public/channels/${channel.id}/inbound`;
