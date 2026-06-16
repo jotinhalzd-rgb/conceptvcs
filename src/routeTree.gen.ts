@@ -29,6 +29,7 @@ import { Route as SettingsNotificationsRouteImport } from './routes/settings.not
 import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
 import { Route as SettingsDeveloperRouteImport } from './routes/settings.developer'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
+import { Route as DashboardNotificationsRouteImport } from './routes/dashboard.notifications'
 import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
 import { Route as DashboardAutomationRouteImport } from './routes/dashboard.automation'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
@@ -137,6 +138,11 @@ const SettingsBillingRoute = SettingsBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => SettingsRoute,
 } as any)
+const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardHubRoute = DashboardHubRouteImport.update({
   id: '/hub',
   path: '/hub',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/automation': typeof DashboardAutomationRoute
   '/dashboard/hub': typeof DashboardHubRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/automation': typeof DashboardAutomationRoute
   '/dashboard/hub': typeof DashboardHubRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
   '/dashboard/automation': typeof DashboardAutomationRoute
   '/dashboard/hub': typeof DashboardHubRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/dashboard/ai-studio'
     | '/dashboard/automation'
     | '/dashboard/hub'
+    | '/dashboard/notifications'
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/dashboard/ai-studio'
     | '/dashboard/automation'
     | '/dashboard/hub'
+    | '/dashboard/notifications'
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/dashboard/ai-studio'
     | '/dashboard/automation'
     | '/dashboard/hub'
+    | '/dashboard/notifications'
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
@@ -510,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsBillingRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/dashboard/notifications': {
+      id: '/dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof DashboardNotificationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/hub': {
       id: '/dashboard/hub'
       path: '/hub'
@@ -566,6 +585,7 @@ interface DashboardRouteChildren {
   DashboardAiStudioRoute: typeof DashboardAiStudioRoute
   DashboardAutomationRoute: typeof DashboardAutomationRoute
   DashboardHubRoute: typeof DashboardHubRoute
+  DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -573,6 +593,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAiStudioRoute: DashboardAiStudioRoute,
   DashboardAutomationRoute: DashboardAutomationRoute,
   DashboardHubRoute: DashboardHubRoute,
+  DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -625,13 +646,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

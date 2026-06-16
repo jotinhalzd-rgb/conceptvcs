@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications } from "@/hooks/notifications/use-notifications";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
+import { resolveNotificationLink } from "@/lib/notifications/resolve-link";
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -70,7 +71,7 @@ export function NotificationsBell() {
             <ul className="divide-y divide-white/5">
               {items.map((n) => {
                 const unread = !n.read_at;
-                const convId = n.payload?.conversation_id;
+                const link = resolveNotificationLink(n);
                 return (
                   <li
                     key={n.id}
@@ -80,7 +81,7 @@ export function NotificationsBell() {
                     )}
                     onClick={() => {
                       if (unread) markRead.mutate(n.id);
-                      if (convId) navigate({ to: "/inbox" });
+                      if (link) navigate({ to: link.to });
                     }}
                   >
                     <div className={cn(
@@ -111,6 +112,15 @@ export function NotificationsBell() {
             </ul>
           </ScrollArea>
         )}
+        <div className="border-t border-white/5 px-3 py-2 flex items-center justify-between">
+          <button
+            onClick={() => navigate({ to: "/dashboard/notifications" })}
+            className="text-[10px] font-bold uppercase tracking-wider text-indigo-300 hover:text-indigo-200"
+          >
+            Ver todas
+          </button>
+          <span className="text-[10px] text-slate-600">Central de notificações</span>
+        </div>
       </PopoverContent>
     </Popover>
   );

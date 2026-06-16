@@ -1,124 +1,111 @@
-# Plano A3 — Developer / Webhooks / Logs + API Keys
+## Plano A4 — Notificações avançadas
 
-Escopo isolado. **Não tocar** AI Studio (A1), Automação (A2), Inbox, CRM, Campanhas, Relatórios. Endpoint inbound só recebe pequena adição de logs de falha — sem mudar o fluxo de roteamento/processor.
+Escopo isolado. Não toca AI Studio (A1), Automação (A2), Developer/Webhooks (A3), Inbox, CRM, Campanhas, Marketplace, endpoint inbound, processor, queue_routing_rules, filas, núcleo omnichannel. Apenas leitura/integração mínima necessária.
 
-## 1. Schemas reais
+### 1. Schemas reais (já existem)
 
-- `channels` ✓ (id, organization_id, provider, identifier, credentials jsonb com `webhook_secret`, is_active, last_sync_at, status).
-- `channel_webhooks_log` ✓ (id, channel_id, provider, payload jsonb, status, error_message, processed_at). **Falta `organization_id`** e índices úteis. Inbound atual já tenta inserir `organization_id` via `as any` — não persiste hoje.
-- `api_keys` ✓ (id, organization_id, name, key_prefix, key_hash, scopes[], expires_at, last_used_at, created_at). **Sem coluna de status** — revogação = DELETE, “revogar” via expires_at no passado também aceitável.
+- `notifications`: id, organization_id, user_id, type, title, message, payload jsonb, read_at, created_at. RLS por `user_id = auth.uid()`. Realtime já ligado. **Sem `archived_at`** — arquivar exige migration mínima.
+- `user_notification_preferences`: id, user_id (UNIQUE), `inbox_messages`, `sla_alerts`, `crm_deals`, `business_ai_insights`, `system_alerts`, `marketing_campaigns`, `quiet_hours_start/end`, updated_at. RLS `auth.uid() = user_id`.
 
-## 2. Migration mínima
+### 2. Migration mínima (única)
 
-Única migration:
+- `ALTER TABLE notifications ADD COLUMN IF NOT EXISTS archived_at timestamptz`;
+- Index `(user_id, archived_at) WHERE archived_at IS NULL`;
+- GRANT já existe; manter políticas atuais (delete/update/select por user_id) — arquivar = UPDATE archived_at, coberto pela policy update_own.
+- `user_notification_preferences`: garantir `GRANT SELECT, INSERT, UPDATE ON ... TO authenticated; GRANT ALL TO service_role;` e policies separadas (SELECT/INSERT/UPDATE escopadas por `auth.uid() = user_id`). Se já existir policy ALL, manter; só adicionar GRANT se faltar.
 
-- `ALTER TABLE channel_webhooks_log ADD COLUMN IF NOT EXISTS organization_id uuid REFERENCES organizations(id) ON DELETE CASCADE`;
-- `ADD COLUMN IF NOT EXISTS metadata jsonb`;
-- Backfill `organization_id` via join com `channels`;
-- Index `(organization_id, processed_at desc)` e `(channel_id, processed_at desc)`;
-- GRANT SELECT/INSERT a `authenticated`, ALL a `service_role`;
-- RLS: policies SELECT/INSERT por `organization_id = current_user_organization_id()`, não recursiva. Drop policy antiga.
-- `api_keys`: garantir `GRANT SELECT, INSERT, DELETE ON public.api_keys TO authenticated; GRANT ALL TO service_role;` + RLS por `organization_id = current_user_organization_id()` (SELECT/INSERT/DELETE/UPDATE). Drop policies antigas se conflitarem.
+Sem tabela nova.
 
-Nada de tabela nova.
+### 3. Rota e página
 
-## 3. Endpoint inbound (mínima alteração)
+- `src/routes/notifications.tsx` (autenticada via layout pai existente? Hoje `_authenticated` não existe — rotas usam `dashboard.*`. Criar `src/routes/dashboard.notifications.tsx` para reaproveitar AppLayout e auth atual).
+- Sidebar (`app-layout.tsx`): adicionar item "Notificações" apontando para `/dashboard/notifications`.
 
-Em `src/routes/api/public/channels.$channelId.inbound.ts`:
+### 4. Componentes (`src/components/notifications/`)
 
-- Função helper local `logInbound(channel_id, organization_id|null, provider, payload_masked, status, error_message?)` que faz insert em `channel_webhooks_log` com **payload mascarado** (remove `webhook_secret`, `x-webhook-token`, `Authorization`, `access_token`, `api_key`, `secret` em qualquer nível raso).
-- Chamar em falhas grandes: `channel_not_found`, `channel_inactive`, `unauthorized`, `missing_sender`, `pending_configuration` (com status=`error`/`pending`).
-- Manter log de sucesso já existente, com `organization_id` agora persistido de verdade (não mais `as any` sem efeito).
-- Nada do roteamento/processor é tocado.
+- `notifications-center.tsx` — layout 2 colunas: lista + painel de preferências em tab/sheet.
+- `notification-item.tsx` — card: badge tipo, título, mensagem, timeAgo, ações (marcar lida, arquivar, abrir entidade).
+- `notification-filters.tsx` — filtros: tipo (select), status (all/unread/read/archived), período (24h/7d/30d/all), limpar.
+- `notification-preferences-panel.tsx` — switches por categoria (mapeando tipos para flags existentes), quiet hours opcional (time inputs), salvar com toast.
+- Empty/loading/error states reais.
 
-## 4. Server functions (`src/lib/developer/`)
+### 5. Hooks (`src/hooks/notifications/`)
 
-- `webhook-test.functions.ts` → `testInboundEndpoint({ channelId, payload })`: chama o próprio endpoint público com o secret do canal (server-side via `fetch`) e devolve `{ status, body }`. Usa `requireSupabaseAuth`, valida que o canal pertence à org do caller. Não vaza secret.
-- `webhook-secret.functions.ts` → `rotateWebhookSecret({ channelId })`: gera novo `crypto.randomUUID()` no lado servidor, faz UPDATE em `channels.credentials.webhook_secret` (carregando credentials existentes); retorna `{ secret }` UMA vez. UI exibe e some.
-- `api-keys.functions.ts` → `createApiKey({ name, scopes })`: gera prefixo `pk_live_xxxxxxxx` + 32 bytes; armazena `key_hash = sha256` e `key_prefix`; retorna `{ key }` UMA vez. `revokeApiKey({ id })` faz DELETE escopado por org. `rotateApiKey({ id })` = delete + create com mesmo name/scopes.
+Expandir `use-notifications.ts` (preservar API atual usada pelo sino):
+- adicionar `useNotificationsList({ type, status, fromIso, archived })` com filtros server-side;
+- `useArchiveNotification`, `useUnarchiveNotification`, `useDeleteNotification`;
+- manter `useNotifications()` (sino) intacto na assinatura — só excluir archived da lista do sino.
+- novo `use-notification-preferences.ts` — `useNotificationPreferences()` (select/upsert), `useUpdatePreferences()` mutation com optimistic toast.
 
-Todos via `requireSupabaseAuth` + checagem de `organization_id`.
+### 6. Mapeamento tipo → preferência
 
-## 5. Hooks (`src/hooks/developer/`)
+Helper `src/lib/notifications/type-map.ts`:
+- `new_conversation`, `conversation_assigned`, `conversation_transferred` → `inbox_messages`
+- `sla_risk`, `sla_breach` → `sla_alerts`
+- `deal_created`, `deal_won`, `deal_lost` → `crm_deals`
+- `campaign_status`, `campaign_completed` → `marketing_campaigns`
+- `channel_error`, `system_alert` → `system_alerts`
+- `ai_insight`, `ein_suggestion` → `business_ai_insights`
+- fallback → `system_alerts`
 
-- `use-webhook-logs.ts` — query em `channel_webhooks_log` com filtros: channel_id, status, período (from/to), busca por provider.
-- `use-channels-inbound.ts` — wrap leve em `useChannels` que só expõe `id, name, provider, identifier, is_active, status, last_sync_at, organization_id, has_webhook_secret` (booleano derivado de credentials).
-- `use-api-keys-actions.ts` — mutations create/rotate/revoke (chamam server fns) + invalidate cache.
-- `use-webhook-test.ts` — mutation que chama `testInboundEndpoint`.
+UI de preferências usa esse mapa para mostrar labels claros. Documentar no relatório: leitura/escrita de preferências está pronta, mas a função `notify_conversation_event` no DB ainda não consulta preferências — esse gating será integração futura (não mexer no trigger nesta onda).
 
-## 6. UI
+### 7. Navegação por payload
 
-Renomear seção `logs` para “Webhook Logs”. Layout em 3 abas mantido: API Keys / Webhooks / Logs.
+Função `resolveNotificationLink(n)`:
+- `payload.conversation_id` → `/inbox` (rota atual; query string `?conversation=` se o inbox aceitar — verificar; senão só `/inbox`)
+- `payload.contact_id` → `/customers`
+- `payload.deal_id` → `/crm`
+- `payload.campaign_id` → `/campaigns`
+- `payload.channel_id` → `/admin/channels`
+- `payload.queue_id` → `/queues`
+- fallback: nenhum (não navegar).
 
-- `src/components/marketplace/api-key-manager.tsx` — reescrita:
-  - listagem com `name`, `key_prefix••••` mascarado, scopes, criada em, último uso (real);
-  - botão “Nova chave” → Dialog com nome + scopes (multi-select simples) → mostra **uma única vez** a chave gerada, botão copiar com feedback, aviso “anote agora”;
-  - menu por linha: rotacionar (AlertDialog “gera nova chave, invalida atual” → mostra nova uma vez), revogar (AlertDialog), copiar prefixo.
-  - empty state real.
+Não criar query params novos no inbox/crm se quebrarem — só navegar para a rota base nesses casos e deixar TODO documentado no relatório (sem string "TODO" no código; comentário interno apenas se necessário, ou nota no relatório).
 
-- `src/components/marketplace/webhook-manager.tsx` — reescrita para focar em **inbound de canais** (não webhook_subscriptions mockado). Lista cada canal com:
-  - URL real `${origin}/api/public/channels/{id}/inbound` (origin via `window.location.origin`);
-  - badge de status (`pending_configuration` se `!webhook_secret`);
-  - botões: copiar URL, copiar curl, **Testar endpoint** (chama server fn, mostra resposta), **Gerar/Rotacionar secret** (AlertDialog → exibe secret uma vez);
-  - mostra provider, última atividade (`last_sync_at` ou maior `processed_at` do log), feedback toast em cada cópia.
-  - exemplo curl com header `x-webhook-token: <COLE_AQUI>` (nunca renderizar o secret).
+### 8. Sino existente
 
-- `src/components/marketplace/webhook-logs-panel.tsx` (novo):
-  - filtros: canal (select), status (select success/error/pending), período (date range simples — 24h/7d/30d/custom), busca por provider;
-  - tabela: data, canal (nome), provider, status badge, snippet de erro;
-  - clique → Sheet com payload JSON formatado, error_message, metadata; **payload renderizado já vem mascarado do backend** + sanitização adicional no client por garantia (remove campos sensíveis).
-  - empty state real.
+`notifications-bell.tsx`: preservar shape. Pequenos ajustes seguros:
+- usar `resolveNotificationLink` para navegação correta por tipo (hoje só vai a `/inbox`);
+- footer com "Ver todas" → `/dashboard/notifications`;
+- não alterar contador / dropdown / layout.
 
-- `src/components/marketplace/developer-center.tsx` — substitui placeholder “Nenhum log de API disponível” por `<WebhookLogsPanel />`; reaproveita layout existente; remove métricas hardcoded (“1.2M / mês”, “98.5% Success Rate”) — substitui por contagem real simples ou esconde.
+### 9. Segurança/RLS
 
-- `src/lib/developer/mask.ts` — utilitário compartilhado `maskSensitive(obj)` (lista de chaves proibidas, ofusca recursivamente até 2 níveis com `***`).
+- Toda query passa pelo client browser com RLS já escopada por `user_id`.
+- `organization_id` lido só para exibição; nunca como filtro de bypass.
+- Payload sanitizado no render: reusar `maskSensitive` de `src/lib/developer/mask.ts` antes de exibir JSON cru em qualquer detalhe.
+- Preferências: upsert escopado por `user_id = auth.uid()`.
 
-## 7. Não duplicar com Canais
+### 10. Validação
 
-- O botão “Testar endpoint” chama a mesma server fn `testInboundEndpoint`. Se já houver um equivalente em `ChannelConfigDrawer`, manter intocado e apenas reaproveitar o hook.
-- Rotação de webhook_secret também fica disponível só aqui; `ChannelConfigDrawer` não é alterado.
+- `bunx tsc --noEmit`;
+- buscas globais: `Em breve`, `coming soon`, `não implementado`, `próxima sprint`, `TODO`, `onClick={() => {}}`, console.log;
+- QA: abrir `/dashboard/notifications`, marcar 1 lida, marcar todas, arquivar, filtrar por tipo/status/período, abrir preferências, alterar e recarregar persistência, clicar notificação com `conversation_id` → vai pra Inbox, sino continua funcionando e levando para central via "Ver todas".
 
-## 8. Segurança
+### 11. Riscos
 
-- Nenhuma server fn nova é pública: todas com `requireSupabaseAuth` + check de org.
-- `rotateWebhookSecret` / `createApiKey` / `rotateApiKey` retornam segredo **uma única vez**.
-- Logs sempre mascarados antes do insert.
-- UI nunca renderiza `webhook_secret`/`key_hash`/`api_key`; só `key_prefix`.
-- Listagens de api_keys nunca incluem `key_hash` no select.
+- `archived_at` novo: trigger/criadores existentes não setam, ok (default null).
+- Preferências ainda não bloqueiam criação no trigger DB — documentado.
+- Rotas alvo (inbox/crm) não aceitam query param de seleção hoje; navegação cai na rota base nesses casos.
 
-## 9. Validação
-
-- `bunx tsc --noEmit`.
-- Buscas globais: `Em breve`, `coming soon`, `não implementado`, `próxima sprint`, `TODO`, `onClick={() => {}}`, `console.log` (em arquivos novos).
-- Busca por exposição: `rg -n "key_hash" src/components`, `webhook_secret` renderizado em JSX, qualquer `toast.success` mostrando segredo.
-- QA manual: criar API key → vê segredo uma vez → recarrega lista → só prefixo. Rotacionar secret de canal → testar endpoint → ver log com status processed. Forçar erro (URL com channelId inválido) → ver log error.
-- Regressão: AI Studio, Automação, Inbox, Marketplace canais, fluxo inbound real (POST com secret válido).
-
-## 10. Riscos
-
-- Endpoint inbound passa a logar falhas extras: aumenta linhas em `channel_webhooks_log`. Mitigado por índice + paginação no painel.
-- `api_keys` sem coluna `is_active`: revogação é DELETE — perde histórico de quem teve qual chave. Documentar no relatório.
-- Server fn de teste do endpoint precisa saber o host público; usar `getRequest()`/`x-forwarded-host` no servidor para montar URL absoluta, fallback `process.env.SITE_URL` se existir, último recurso `http://localhost:8080`.
-
-## 11. Arquivos previstos
+### 12. Arquivos previstos
 
 Novos:
 - migration única;
-- `src/lib/developer/mask.ts`;
-- `src/lib/developer/webhook-test.functions.ts`;
-- `src/lib/developer/webhook-secret.functions.ts`;
-- `src/lib/developer/api-keys.functions.ts`;
-- `src/hooks/developer/use-webhook-logs.ts`;
-- `src/hooks/developer/use-webhook-test.ts`;
-- `src/hooks/developer/use-api-keys-actions.ts`;
-- `src/components/marketplace/webhook-logs-panel.tsx`;
-- `src/components/marketplace/api-key-create-dialog.tsx`;
-- `src/components/marketplace/webhook-secret-rotate-dialog.tsx`.
+- `src/routes/dashboard.notifications.tsx`;
+- `src/components/notifications/notifications-center.tsx`;
+- `src/components/notifications/notification-item.tsx`;
+- `src/components/notifications/notification-filters.tsx`;
+- `src/components/notifications/notification-preferences-panel.tsx`;
+- `src/hooks/notifications/use-notification-preferences.ts`;
+- `src/lib/notifications/type-map.ts`;
+- `src/lib/notifications/resolve-link.ts`.
 
 Alterados:
-- `src/components/marketplace/developer-center.tsx` (substituir aba Logs por painel real, remover métricas fake);
-- `src/components/marketplace/webhook-manager.tsx` (reescrita focada em canais);
-- `src/components/marketplace/api-key-manager.tsx` (reescrita com create/rotate/revoke);
-- `src/routes/api/public/channels.$channelId.inbound.ts` (logs de erro mascarados, sem mexer no fluxo).
+- `src/hooks/notifications/use-notifications.ts` (novos hooks, API atual preservada);
+- `src/components/notifications/notifications-bell.tsx` (link "Ver todas" + resolveLink);
+- `src/components/layout/app-layout.tsx` (item de menu);
+- `src/integrations/supabase/types.ts` (regenerado após migration).
 
-Após aprovação: migration → server fns → hooks → UI → validação → relatório A3 e aguardo OK antes de A4.
+Após aprovação: migration → hooks → componentes → rota → sidebar → ajuste sino → validação → relatório A4 e aguardo OK antes da Onda B.

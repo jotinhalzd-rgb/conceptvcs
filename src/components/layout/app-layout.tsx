@@ -84,6 +84,7 @@ export function AppLayout() {
     { icon: Briefcase, label: "CRM", href: "/crm", group: "Principal" },
     { icon: Globe, label: "Canais", href: "/admin/channels", group: "Principal" },
     { icon: BarChart3, label: "Relatórios", href: "/reports", group: "Principal" },
+    { icon: Bell, label: "Notificações", href: "/dashboard/notifications", group: "Principal" },
 
     // OPERAÇÃO
     { icon: LifeBuoy, label: "Filas", href: "/queues", group: "Operação" },
