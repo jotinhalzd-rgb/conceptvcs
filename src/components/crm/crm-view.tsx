@@ -57,6 +57,7 @@ export const CRMView = () => {
   const [isPipelineOpen, setIsPipelineOpen] = useState(false);
   const [newPipelineName, setNewPipelineName] = useState("");
   const [prefillStageId, setPrefillStageId] = useState<string | undefined>();
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [responsibleFilter, setResponsibleFilter] = useState<string>("all");
   const [fromDate, setFromDate] = useState<string>("");
@@ -81,7 +82,6 @@ export const CRMView = () => {
   const activeForecast = forecast?.[0];
 
   const pipelineTitle = (activePipeline as any)?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
-  const [searchTerm, setSearchTerm] = useState("");
 
   const filteredDealsCount = deals?.length ?? 0;
 
