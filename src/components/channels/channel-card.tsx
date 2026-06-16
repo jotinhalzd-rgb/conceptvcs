@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DemoBadge, isDemoRecord } from "@/lib/demo-badge";
 
 interface ChannelCardProps {
   channel: any;
@@ -22,6 +23,15 @@ interface ChannelCardProps {
 }
 
 export const ChannelCard = ({ channel, onRefresh }: ChannelCardProps) => {
+  const isDemo =
+    channel?.provider === "development_simulator" ||
+    channel?.is_demo ||
+    channel?.is_test ||
+    isDemoRecord({
+      metadata: channel?.metadata,
+      is_demo: channel?.is_demo,
+    });
+
   const getIcon = (provider: string) => {
     switch (provider) {
       case 'whatsapp': return <MessageSquare className="w-5 h-5 text-emerald-400" />;
@@ -48,7 +58,10 @@ export const ChannelCard = ({ channel, onRefresh }: ChannelCardProps) => {
             {getIcon(channel.provider)}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{channel.name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{channel.name}</h3>
+              {isDemo && <DemoBadge variant="simulated" />}
+            </div>
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{channel.provider}</p>
           </div>
         </div>
@@ -61,6 +74,12 @@ export const ChannelCard = ({ channel, onRefresh }: ChannelCardProps) => {
             </Button>
         </div>
       </div>
+
+      {isDemo && (
+        <p className="text-[10px] text-amber-300/80 leading-relaxed mb-4">
+          Canal de teste para demonstração. Não envia mensagens reais.
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white/[0.02] border border-white/5 p-3 rounded-xl">

@@ -15,8 +15,9 @@ interface QuickAction {
 
 export function QuickActionsBar() {
   const navigate = useNavigate();
+  const isDevOrPreview = import.meta.env.DEV || import.meta.env.MODE === "preview";
 
-  const actions: QuickAction[] = [
+  const allActions: (QuickAction & { devOnly?: boolean })[] = [
     {
       id: "open-inbox",
       title: "Abrir Inbox",
@@ -35,6 +36,7 @@ export function QuickActionsBar() {
         navigate({ to: "/inbox" });
       },
       accent: "from-emerald-500/15 to-emerald-500/0 border-emerald-500/20 text-emerald-300",
+      devOnly: true,
     },
     {
       id: "new-customer",
@@ -69,6 +71,8 @@ export function QuickActionsBar() {
       accent: "from-rose-500/15 to-rose-500/0 border-rose-500/20 text-rose-300",
     },
   ];
+
+  const actions = allActions.filter((a) => !a.devOnly || isDevOrPreview);
 
   return (
     <section className="mb-8">
