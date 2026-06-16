@@ -16,7 +16,7 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
   // Resolve channel (also used for demo flagging + idempotency scope)
   const { data: channel } = await supabase
     .from("channels")
-    .select("id, is_demo")
+    .select("id, is_demo, settings")
     .eq("identifier", message.to)
     .maybeSingle();
   const isDemo = channel?.is_demo === true;
@@ -66,6 +66,34 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
     let routingReason: string | null = null;
 
     if (normalized.length > 0) {
+      // 1) New org-scoped table queue_routing_rules (keywords text[])
+      const { data: newRules } = await supabase
+        .from("queue_routing_rules")
+        .select("id, name, keywords, queue_id, channel_id, priority, is_fallback, is_active")
+        .eq("organization_id", orgId)
+        .eq("is_active", true)
+        .order("priority", { ascending: false });
+      for (const r of (newRules ?? []) as any[]) {
+        if (r.channel_id && channel?.id && r.channel_id !== channel.id) continue;
+        const kws: string[] = Array.isArray(r.keywords) ? r.keywords : [];
+        const matched = kws.some((k) => {
+          const kw = String(k ?? "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+          return kw && normalized.includes(kw);
+        });
+        if (matched) {
+          routedQueueId = r.queue_id;
+          routingReason = `rule:${r.name}`;
+          break;
+        }
+      }
+    }
+
+    // 2) Legacy routing_rules (company-scoped) as fallback for older data
+    if (!routedQueueId && normalized.length > 0) {
       const { data: rules } = await supabase
         .from("routing_rules")
         .select("keyword, target_queue_id, priority_bonus, is_active, queues!inner(organization_id)")
@@ -80,12 +108,39 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
           .trim();
         if (kw && normalized.includes(kw)) {
           routedQueueId = r.target_queue_id;
-          routingReason = `rule:${kw}`;
+          routingReason = `legacy:${kw}`;
           break;
         }
       }
     }
 
+    // 3) Channel default queue (channels.settings.default_queue_id)
+    if (!routedQueueId) {
+      const def = (channel?.settings as any)?.default_queue_id;
+      if (def) {
+        routedQueueId = def;
+        routingReason = "channel_default";
+      }
+    }
+
+    // 4) Fallback rule (is_fallback)
+    if (!routedQueueId) {
+      const { data: fb } = await supabase
+        .from("queue_routing_rules")
+        .select("queue_id, name")
+        .eq("organization_id", orgId)
+        .eq("is_active", true)
+        .eq("is_fallback", true)
+        .order("priority", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (fb?.queue_id) {
+        routedQueueId = fb.queue_id;
+        routingReason = `fallback:${fb.name}`;
+      }
+    }
+
+    // 5) Org default queue
     if (!routedQueueId) {
       const { data: def } = await supabase
         .from("queues")
@@ -96,7 +151,7 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
         .maybeSingle();
       if (def?.id) {
         routedQueueId = def.id;
-        routingReason = "default";
+        routingReason = "org_default";
       }
     }
 
