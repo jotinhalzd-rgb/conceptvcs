@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCommandEngine } from "../engine/command-engine";
 import { useProfile } from "@/hooks/auth/use-auth";
 import { cn } from "@/lib/utils";
+import { QuickActionsBar } from "@/components/dashboard/widgets/quick-actions-bar";
+import { OnboardingChecklist } from "@/components/dashboard/widgets/onboarding-checklist";
 
 const RankingItem = ({ pos, name, value, color }: any) => (
   <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/[0.05] group">
@@ -27,6 +29,8 @@ export function ManagerDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <QuickActionsBar />
+      <OnboardingChecklist />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsBox icon={Clock} label="TMR Médio" value="1m 42s" color="bg-indigo-500/10 text-indigo-400" trend={{ value: "-12%", positive: true }} />
         <StatsBox icon={Timer} label="TMA Médio" value="14m 20s" color="bg-emerald-500/10 text-emerald-400" trend={{ value: "+5%", positive: true }} />

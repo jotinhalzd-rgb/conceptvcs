@@ -4,6 +4,8 @@ import { StatsBox } from "../widgets/stats-box";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCommandEngine } from "../engine/command-engine";
 import { useProfile } from "@/hooks/auth/use-auth";
+import { QuickActionsBar } from "@/components/dashboard/widgets/quick-actions-bar";
+import { OnboardingChecklist } from "@/components/dashboard/widgets/onboarding-checklist";
 
 export function CompanyDashboard() {
   const { data: profile } = useProfile();
@@ -11,6 +13,8 @@ export function CompanyDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <QuickActionsBar />
+      <OnboardingChecklist />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatsBox icon={MessageSquare} label="Conversas Abertas" value="142" color="bg-indigo-500/10 text-indigo-400" />
         <StatsBox icon={Clock} label="Aguardando Resposta" value="12" color="bg-amber-500/10 text-amber-400" />
