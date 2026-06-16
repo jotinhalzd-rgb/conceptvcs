@@ -1,54 +1,56 @@
-# Restaurar Acessos Rápidos DEV/PREVIEW em /auth
+# Plano — Correção Sidebar + Acesso Demo
 
-## Causa raiz
+## Causas identificadas
 
-Os cards são renderizados condicionalmente por `isDevEnvironment()`, que lê `window.location.hostname`. Durante o SSR `window` é `undefined` e a função retorna `false` — o HTML inicial não traz os cards. Em alguns refreshes a hidratação não “acende” o estado a tempo (ou a rota redireciona antes via `useEffect(session → /dashboard)` quando havia sessão residual), e os cards somem visualmente. Nenhuma mudança da camada global (QueryClient/ErrorBoundary) removeu o código — só o gate de ambiente ficou frágil pós-SSR.
+**1. Botão telefone sobrepondo sidebar**
+`src/components/voice/softphone-widget.tsx:41` — posicionado em `fixed bottom-6 left-6 z-50`, exatamente sobre o rodapé da sidebar (avatar, nome, role, sair, recolher).
 
-## Mudanças
+**2. Atendente Demo aparece como "CEO DEMO"**
+- `src/components/layout/app-layout.tsx:212` tem fallback **hardcoded** `"CEO DEMO"` quando `profile.full_name` ainda não carregou.
+- Mapeamento de role na linha 214 não cobre `ceo`, `agent`, `supervisor` — só `ceo_master`, `admin`, `manager`, e cai em "ATENDENTE" como default (errado para CEO/supervisor).
+- `isCEOMaster` (linha 60) trata `role === 'ceo'` como master, expondo menus de governança ao Empresa Demo.
+- Login demo não limpa cache do React Query nem sessão anterior, então o `useProfile()` do usuário antigo permanece visível por alguns ms após o `signIn`.
 
-### 1. `src/lib/dev-mode.ts` — `isDevEnvironment()` mais robusto
-- Considerar (qualquer um já habilita):
-  - `import.meta.env.DEV === true`
-  - `import.meta.env.VITE_ENABLE_DEV_ACCESS === "true"`
-  - `hostname` em `localhost` / `127.0.0.1` / `.local`
-  - `hostname` termina em `.lovable.app` **e** (`startsWith("id-preview--")` | `includes("--")` | `includes("-dev.")` | `includes("preview")` | `includes("staging")`)
-- Continuar retornando `false` em produção real (custom domain) e em `*.lovable.app` sem marcadores de preview.
+## Correções
 
-### 2. `src/routes/auth.tsx` — render independente + sem SSR mismatch
-- Trocar `const devMode = isDevEnvironment()` por estado hidratado:
-  ```ts
-  const [devMode, setDevMode] = useState(false);
-  useEffect(() => { setDevMode(isDevEnvironment()); }, []);
-  ```
-  Garante que o gate só decide no cliente, sem mismatch de SSR.
-- Adicionar `ssr: false` na rota `/auth` (a tela de login não precisa de SSR e a UI dela depende de `window`/Supabase de qualquer modo). Isso elimina o flash de HTML sem cards.
-- Manter a seção de cards **fora** de qualquer query autenticada: ela já está. Confirmar que nenhum `Suspense`/`useSuspenseQuery` envolve a `section`.
-- Tratamento de erro por card já existe via `toast.error` + `demoLoading` por email. Adicionar mensagens claras:
-  - “Usuário demo não encontrado” quando `res.password` ausente.
-  - “Senha demo inválida” em `signInWithPassword` retorno `Invalid login credentials`.
-  - “Falha ao criar sessão” em catch genérico.
-- Garantir que o estado `demoLoading` é resetado no `finally` (já está) — sem loading infinito.
-- Verificar que não existe botão “Sair do sistema” no JSX (não existe hoje; manter assim).
+### A. Softphone (Opção A — FAB inferior direito)
+`src/components/voice/softphone-widget.tsx`
+- Trocar `bottom-6 left-6` → `bottom-6 right-6`.
+- Manter `z-50`, garantir que não conflita com o botão Lovable (que fica no canto também) movendo para `bottom-24 right-6` em telas pequenas se necessário.
+- Em DEV/preview, manter visível mas com tooltip "Discador em desenvolvimento" se ainda sem função real (não alterar lógica do widget agora — só posição).
 
-### 3. Resiliência global não pode esconder /auth
-- Confirmar que `AuthSyncBridge` em `__root.tsx` apenas invalida router/queries em `SIGNED_IN/OUT/USER_UPDATED` — não dispara navegação para `/dashboard` a partir da `/auth` quando não há sessão. Sem alteração esperada.
-- `ErrorComponent` global só renderiza quando o `errorComponent` do root pega exceção do `loader/render`. `/auth` não tem loader nem query autenticada → não acionará. Sem alteração.
+### B. Sidebar — remover hardcode e ampliar mapeamento de role
+`src/components/layout/app-layout.tsx`
+- Linha 212: remover fallback `"CEO DEMO"` → usar `profile?.full_name ?? user?.email ?? "Carregando..."`.
+- Linha 214: criar helper `roleLabel(role)` cobrindo todos os papéis:
+  - `ceo_master` → "CEO MASTER"
+  - `ceo` → "CEO / EMPRESA"
+  - `admin` → "ADMIN"
+  - `manager` → "GERENTE"
+  - `supervisor` → "SUPERVISOR IA"
+  - `agent` → "ATENDENTE"
+  - default → role.toUpperCase()
+- Linha 60: `isCEOMaster` só para `ceo_master` (separar de `ceo`); criar `isCompanyAdmin` para `ceo`/`admin` se o menu precisar.
 
-## Arquivos tocados
+### C. Limpar cache entre logins demo
+`src/routes/auth.tsx` (`handleDemoLogin`)
+- Antes do `signInWithPassword`: `await supabase.auth.signOut()` + `queryClient.clear()` (importar `useQueryClient`).
+- Após sign-in: `await queryClient.invalidateQueries()` para forçar refetch do profile novo.
+- Limpar override dev: `localStorage.removeItem("onecontact_dev_role")` para não persistir papel anterior.
 
-- `src/lib/dev-mode.ts` — função expandida.
-- `src/routes/auth.tsx` — `ssr: false`, gate via `useEffect`, mensagens de erro mais específicas.
+### D. Validação pós-login (defensiva)
+Após o sign-in, ler `supabase.auth.getUser()` e conferir que `user.email === demoEmail`. Se não bater, signOut + erro "Perfil demo não corresponde".
+
+## Arquivos alterados
+1. `src/components/voice/softphone-widget.tsx` — reposicionar FAB.
+2. `src/components/layout/app-layout.tsx` — remover hardcode, helper `roleLabel`, separar `isCEOMaster` de `ceo`.
+3. `src/routes/auth.tsx` — limpar cache/sessão antes de cada login demo + validação.
 
 ## Fora de escopo
+Sem mudanças em RLS, Supabase Auth, schema, ou criação de módulos novos.
 
-- Mudar Supabase Auth, RLS, triggers, `demo-seed.functions.ts`, providers.
-- Refatorar `useAuth`, layout, ou QueryClient.
-- Tema/visual dos cards (mantém o atual).
-
-## Validação no Preview
-
-1. Abrir `/auth` no preview Lovable → 5 cards visíveis.
-2. Clicar cada um (CEO Master → Supervisor IA) → login OK, redireciona para `/dashboard`.
-3. Logout entre cada login → cards reaparecem.
-4. Abrir `https://conceptvcs.lovable.app/auth` (custom domain produção) → cards ocultos.
-5. Erro forçado (senha inválida) → toast claro, sem loading infinito.
+## Testes (preview)
+Roteiro de cliques: CEO Master → Empresa Demo → Gerente Demo → Atendente Demo → Supervisor IA. Em cada um, verificar via Playwright:
+- nome correto no rodapé da sidebar
+- label de role correto
+- softphone no canto inferior **direito** sem cobrir nada
