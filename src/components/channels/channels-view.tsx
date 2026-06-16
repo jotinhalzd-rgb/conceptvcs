@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { ConnectModal } from "./connect-modal";
 import { SmartBackButton } from "@/components/layout/back-button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const ChannelsView = () => {
   const { data: channels, isLoading, refetch } = useChannels();
@@ -37,6 +38,7 @@ export const ChannelsView = () => {
                 <h1 className="text-xl font-black text-white tracking-tight uppercase italic">Central de Canais</h1>
                 <ChevronDown className="w-4 h-4 text-slate-600" />
               </div>
+              <p className="text-[11px] text-slate-500 mt-1">Como conecto meu WhatsApp ou outro canal?</p>
             </div>
 
             <div className="h-10 w-px bg-white/5 mx-2" />
@@ -103,6 +105,16 @@ export const ChannelsView = () => {
             <div className="h-full flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
             </div>
+          ) : !channels || channels.length === 0 ? (
+            <EmptyState
+              icon={Plus}
+              title="Nenhum canal configurado"
+              description="Conecte WhatsApp, e-mail ou outro canal para começar a receber conversas."
+              action={{
+                label: "Conectar canal",
+                onClick: () => setIsConnectModalOpen(true),
+              }}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {channels?.map((channel) => (
