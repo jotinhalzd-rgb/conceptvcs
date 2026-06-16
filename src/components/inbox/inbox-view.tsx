@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { useConversations } from "@/hooks/inbox/use-conversations";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChatList } from "./components/chat-list";
 import { ChatView } from "./components/chat-view";
 import { CustomerSidePanel } from "./components/customer-panel";
@@ -32,6 +34,25 @@ const InboxContent = () => {
   const [showAICopilot, setShowAICopilot] = useState(true);
   const [appliedReply, setAppliedReply] = useState<string | null>(null);
   const { data: conversations, isLoading } = useConversations();
+  const qc = useQueryClient();
+
+  // Realtime: refresh on conversation/message changes
+  useEffect(() => {
+    const ch = supabase
+      .channel("inbox-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => {
+        qc.invalidateQueries({ queryKey: ["conversations"] });
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload: any) => {
+        const convId = payload?.new?.conversation_id;
+        if (convId) qc.invalidateQueries({ queryKey: ["messages", convId] });
+        qc.invalidateQueries({ queryKey: ["conversations"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [qc]);
 
   const filteredConversations = conversations?.filter(c => 
     (c.contacts as any)?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
