@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
+import { DemoBadge } from "@/lib/demo-badge";
 
 export const OILCommandCenter = () => {
   const { recommendations, healthHistory, latestScore, alerts, isLoading } = useOIL();
@@ -31,7 +32,10 @@ export const OILCommandCenter = () => {
             <BrainCircuit className="w-8 h-8 animate-pulse" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic">OIL Command Center</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic">OIL Command Center</h1>
+              <DemoBadge />
+            </div>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">OneContact Intelligence Layer • Executive View</p>
           </div>
         </div>
