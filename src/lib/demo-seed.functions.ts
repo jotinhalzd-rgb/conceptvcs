@@ -97,6 +97,7 @@ export const ensureDemoData = createServerFn({ method: "POST" })
     // 3) Seed demo data (idempotent)
     await seedDemoData(supabaseAdmin, orgId);
     await seedDemoOmnichannel(supabaseAdmin, orgId);
+    await seedDemoQueuesAndRouting(supabaseAdmin, orgId);
 
       return { ok: true as const, password: DEMO_PASSWORD };
     } catch (err: any) {
