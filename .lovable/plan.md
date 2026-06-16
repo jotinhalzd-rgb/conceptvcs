@@ -1,97 +1,36 @@
-# Bloco 3.1 — Fechamento de Inbound + Filas Completas
+## Bloco 3.1 — Status atual
 
-Objetivo: fechar o coração omnichannel — endpoint inbound real + CRUD completo de filas (membros, assignment_mode, default) — sem tocar Campanhas/Relatórios.
+A maior parte do Bloco 3.1 **já foi entregue** no turno anterior. Este plano fecha o que falta validar/ajustar e produz o relatório final exigido antes de qualquer avanço para Campanhas/Relatórios.
 
-## 1. Migration (idempotente)
+### Já implementado (preservar, não refazer)
 
-Arquivo: `supabase/migrations/<ts>_bloco_3_1_inbound_queues.sql`
+- **Migration** `20260616141346_*`: trigger `enforce_single_default_queue`, índice único `queue_members_queue_user_uniq`, realtime em `queues`/`queue_members`/`queue_routing_rules`.
+- **Endpoint inbound real**: `src/routes/api/public/channels.$channelId.inbound.ts` (POST + OPTIONS/CORS), validação de canal, `x-webhook-token`, upsert de contato, dedup de mensagem, roteamento 4-tier (rules → channel default → fallback → org default), auto-assign por menor carga, log em `channel_webhooks_log`.
+- **CRUD de filas**: `useUpdateQueue`, `useDeleteQueue`, `useQueueMembers`, `useAddQueueMember`, `useRemoveQueueMember` em `use-queues.ts`; `QueueEditDialog` com SLA, prioridade, `assignment_mode`, `is_default`, `is_active`, descrição, capacidade; aba de membros com `useOrgUsers`.
+- **ChannelConfigDrawer**: aba Avançado com URL inbound, geração/rotação de `webhook_secret`, botão "Testar endpoint" enviando "quero falar com o financeiro".
+- **Processor + routing_reason + notificações + realtime** do Bloco 3 mantidos.
 
-- `channels`: garantir `webhook_secret text` em `credentials` (jsonb já existe) — apenas validação no código.
-- `queues`: garantir `assignment_mode text default 'manual' check in ('manual','auto')`, `is_default boolean default false`, `sla_minutes int`, `description text`, `is_active boolean default true` (se faltar).
-- Trigger `enforce_single_default_queue`: ao inserir/atualizar `is_default=true`, zera as demais defaults da mesma `organization_id`.
-- `queue_members`: garantir índice único `(queue_id, user_id)` para evitar duplicidade.
-- Realtime: `queues`, `queue_members`, `queue_routing_rules` no `supabase_realtime` se faltar.
-- GRANTs já existentes preservados; nenhum novo `public.*` criado.
+### Pendências reais do Bloco 3.1
 
-## 2. Endpoint inbound público
+1. **Verificação executável** — rodar e reportar:
+   - `bunx tsc --noEmit` (esperado: 0 erros).
+   - Buscas proibidas: `rg -n "Em breve|coming soon|não implementado|próxima sprint|TODO" src/`.
+   - Buscas no-op: `rg -n "onClick=\{\(\) => \{\}\}|console\.log\(" src/components src/hooks`.
+2. **Teste end-to-end via curl** ao endpoint real usando o `webhook_secret` da Drawer, confirmando JSON `{ conversation_id, queue_id, routing_reason, assigned_agent_id }`.
+3. **Smoke UI**: abrir `/queues` → criar/editar/excluir, alternar `is_default` (confirmar que zera os outros), adicionar/remover membro, alternar manual↔auto e repetir o teste inbound.
+4. **Relatório final** (entregue na resposta, não em arquivo) cobrindo todos os itens exigidos: arquivos alterados, migrations, payload, resposta esperada, comando curl, comportamento de manual vs auto, resultado de typecheck/buscas, riscos remanescentes.
 
-Arquivo: `src/routes/api/public/channels.$channelId.inbound.ts` (TSS server route).
+### Riscos conhecidos a declarar no relatório
 
-Payload aceito (POST JSON):
-```
-{
-  sender_id?, phone?, email?, external_id?,
-  sender_name?, text?, body?,
-  media_url?, media_kind?,
-  provider?, timestamp?, metadata?,
-  verify_token?    // opcional, também aceito via header x-webhook-token
-}
-```
+- Endpoint inbound é **técnico**: não faz handshake real com Meta/Twilio/360dialog/Evolution — providers externos continuam dependendo de credenciais e webhooks específicos.
+- Auto-assign usa "menor carga" simples (sem skills/horário/capacidade por agente).
+- `queue_members.organization_id` é exigido no insert; UI já passa `profile.organization_id`, mas RLS pode rejeitar se o membro pertencer a outra org — comportamento esperado.
+- `channel_webhooks_log` é append-only; não há UI de inspeção ainda (fora do escopo deste bloco).
 
-Fluxo:
-1. Carrega `channels` pelo `channelId` (admin client, dentro do handler).
-2. Se não existir / `is_active=false` → 404/410 JSON `{error}`.
-3. Se `credentials.webhook_secret` existir → exigir match com header `x-webhook-token` ou `verify_token` no body; senão 401.
-4. Se não houver `webhook_secret` e canal não estiver `is_demo` → retorna 202 com `status:'pending_configuration'` (não vaza nada).
-5. Monta `WhatsAppMessage` (`from = phone||sender_id||external_id`, `to = channel.identifier`, `body = text||body`, type text/media).
-6. Chama `processWhatsAppMessage(supabaseAdmin, msg, provider||'inbound_api')` — reusa todo roteamento já validado no Bloco 3.
-7. Loga em `channel_webhooks_log` (payload sanitizado, resultado).
-8. Resposta JSON: `{ ok:true, conversation_id, queue_id, routing_reason, assigned_agent_id, message_id }`.
+### Ordem de execução
 
-CORS: `OPTIONS` 204 + `Access-Control-Allow-*` no POST.
+1. Rodar typecheck + buscas em paralelo.
+2. Smoke do endpoint via `curl` no preview (usar token gerado na Drawer).
+3. Compilar relatório final com evidências e entregar — **sem iniciar Bloco 4**.
 
-## 3. UI — Aba Avançado do canal
-
-`src/components/channels/channel-config-drawer.tsx`:
-- Nova seção "Endpoint Inbound":
-  - URL: `${window.location.origin}/api/public/channels/${channel.id}/inbound` + botão Copiar.
-  - Token: input para gerar/editar `credentials.webhook_secret` (gera via `crypto.randomUUID()`); botão Copiar; mascarado por default com toggle olho.
-  - Status pill: "Endpoint técnico ativo" / "Aguardando token" / "Aguardando credenciais do provider".
-  - Texto curto: "Provider externo ainda exige credenciais reais."
-- Botão "Testar endpoint" → abre painel com curl pronto + dispara fetch local para o próprio endpoint com payload `"quero falar com o financeiro"` e mostra a resposta JSON.
-
-## 4. CRUD completo de filas
-
-`src/hooks/queues/use-queues.ts` — adicionar `useUpdateQueue`, `useDeleteQueue`, `useSetDefaultQueue`, `useToggleQueueActive`. Todos invalidam `queues-with-stats`.
-
-`src/components/queues/queue-edit-dialog.tsx` (novo): nome, descrição, departamento, prioridade (1-5), `sla_minutes`, `assignment_mode` (Select manual/auto), `is_default` (Switch), `is_active` (Switch), `max_capacity`. Submit → upsert.
-
-`src/components/queues/queue-members-tab.tsx` (novo, dentro do edit dialog em tabs):
-- Lista membros via join `queue_members` + `profiles` da org (usa `useOrgUsers`).
-- Adicionar (Select de profiles que ainda não são membros) → `queue_members.insert`.
-- Remover com confirm.
-- Empty state útil.
-
-`src/components/queues/queues-management.tsx`:
-- `QueueCard`: badge `assignment_mode` (Manual/Auto) e badge `Padrão` quando `is_default`; click no Settings2 abre `QueueEditDialog`.
-- Manter tabs Filas/Regras existentes.
-
-## 5. Inbox/Customer 360/CRM
-
-Sem alterações estruturais — já consomem `agent_id`, `queue_id`, `routing_reason`, notificações. Apenas verificar que `chat-list` exibe `routing_reason` quando presente (já implementado no Bloco 3).
-
-## 6. QA
-
-- `bunx tsc --noEmit`.
-- `rg -n "Em breve|coming soon|não implementado|próxima sprint|TODO" src/` esperado vazio nos arquivos tocados.
-- `rg -n "onClick=\{\(\) => \{\}\}|console\.log\(" src/components/queues src/components/channels src/routes/api/public` esperado vazio.
-- Teste manual com curl no endpoint:
-```
-curl -X POST $URL/api/public/channels/$ID/inbound \
-  -H 'content-type: application/json' \
-  -H 'x-webhook-token: $TOKEN' \
-  -d '{"phone":"+5511999999999","sender_name":"Teste","text":"quero falar com o financeiro"}'
-```
-- Resposta esperada: `queue_id` = Financeiro, `routing_reason` começa com `rule:`.
-
-## 7. Ordem de execução
-
-1. Migration (aprovação necessária).
-2. Endpoint + CORS.
-3. Hooks de fila (update/delete/setDefault/toggle).
-4. UI: QueueEditDialog + QueueMembersTab + badges no card.
-5. ChannelConfigDrawer aba Avançado (URL, token, testador).
-6. QA (typecheck + greps + teste manual via curl/UI).
-7. Relatório final.
-
-Pergunta antes de executar: aprovar a migration (passo 1)?
+Nenhuma alteração de código nova é necessária a menos que o typecheck/buscas revelem regressão; nesse caso, corrigir pontualmente antes do relatório.
