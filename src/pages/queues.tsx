@@ -104,11 +104,17 @@ export function QueuesView() {
           }
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsBox icon={Activity} label="Volume Total" value="482" color="bg-indigo-500/10 text-indigo-400" />
-          <StatsBox icon={Clock} label="Tempo Espera" value="2m 14s" color="bg-amber-500/10 text-amber-400" />
-          <StatsBox icon={Timer} label="Conversões" value="18%" color="bg-emerald-500/10 text-emerald-400" />
-          <StatsBox icon={Users} label="Agentes Online" value="42 / 50" color="bg-purple-500/10 text-purple-400" />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Indicadores</span>
+            <DemoBadge />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsBox icon={Activity} label="Volume Total" value="482" color="bg-indigo-500/10 text-indigo-400" />
+            <StatsBox icon={Clock} label="Tempo Espera" value="2m 14s" color="bg-amber-500/10 text-amber-400" />
+            <StatsBox icon={Timer} label="Conversões" value="18%" color="bg-emerald-500/10 text-emerald-400" />
+            <StatsBox icon={Users} label="Agentes Online" value="42 / 50" color="bg-purple-500/10 text-purple-400" />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
