@@ -90,7 +90,7 @@ export function QuickActionsBar() {
             )}
           >
             <div className="w-9 h-9 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center">
-              <a.icon className="w-4.5 h-4.5" />
+              <a.icon className="w-4 h-4" />
             </div>
             <div className="min-w-0 w-full">
               <div className="text-sm font-bold text-white truncate">{a.title}</div>
