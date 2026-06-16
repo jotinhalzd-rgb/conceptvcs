@@ -23,7 +23,8 @@ import {
   Ticket,
   Rocket,
   CreditCard,
-  Sparkles
+  Sparkles,
+  Phone
 } from "lucide-react";
 
 
