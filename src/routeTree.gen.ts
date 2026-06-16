@@ -30,6 +30,7 @@ import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marke
 import { Route as SettingsDeveloperRouteImport } from './routes/settings.developer'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
 import { Route as DashboardHubRouteImport } from './routes/dashboard.hub'
+import { Route as DashboardAutomationRouteImport } from './routes/dashboard.automation'
 import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-studio'
 import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
@@ -141,6 +142,11 @@ const DashboardHubRoute = DashboardHubRouteImport.update({
   path: '/hub',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAutomationRoute = DashboardAutomationRouteImport.update({
+  id: '/automation',
+  path: '/automation',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAiStudioRoute = DashboardAiStudioRouteImport.update({
   id: '/ai-studio',
   path: '/ai-studio',
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/dashboard/automation': typeof DashboardAutomationRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/dashboard/automation': typeof DashboardAutomationRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/dashboard/ai-studio': typeof DashboardAiStudioRoute
+  '/dashboard/automation': typeof DashboardAutomationRoute
   '/dashboard/hub': typeof DashboardHubRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/channels'
     | '/admin/companies'
     | '/dashboard/ai-studio'
+    | '/dashboard/automation'
     | '/dashboard/hub'
     | '/settings/billing'
     | '/settings/developer'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/channels'
     | '/admin/companies'
     | '/dashboard/ai-studio'
+    | '/dashboard/automation'
     | '/dashboard/hub'
     | '/settings/billing'
     | '/settings/developer'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin/channels'
     | '/admin/companies'
     | '/dashboard/ai-studio'
+    | '/dashboard/automation'
     | '/dashboard/hub'
     | '/settings/billing'
     | '/settings/developer'
@@ -505,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHubRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/automation': {
+      id: '/dashboard/automation'
+      path: '/automation'
+      fullPath: '/dashboard/automation'
+      preLoaderRoute: typeof DashboardAutomationRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/ai-studio': {
       id: '/dashboard/ai-studio'
       path: '/ai-studio'
@@ -545,12 +564,14 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteChildren {
   DashboardAiStudioRoute: typeof DashboardAiStudioRoute
+  DashboardAutomationRoute: typeof DashboardAutomationRoute
   DashboardHubRoute: typeof DashboardHubRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAiStudioRoute: DashboardAiStudioRoute,
+  DashboardAutomationRoute: DashboardAutomationRoute,
   DashboardHubRoute: DashboardHubRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }

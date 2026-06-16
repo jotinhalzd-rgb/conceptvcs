@@ -100,6 +100,7 @@ export function AppLayout() {
 
     // AVANÇADO / LABS
     { icon: Sparkles, label: "Insights IA", href: "/dashboard/ai-studio", group: "Avançado" },
+    { icon: Zap, label: "Automações", href: "/dashboard/automation", group: "Avançado" },
     { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Avançado" },
     { icon: Globe, label: "Marketplace", href: "/dashboard/hub", group: "Avançado" },
     ...(devEnv ? [

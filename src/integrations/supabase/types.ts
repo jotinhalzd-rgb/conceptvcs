@@ -534,33 +534,51 @@ export type Database = {
       }
       automation_logs: {
         Row: {
-          action_type: string
-          contact_id: string
+          action_type: string | null
+          contact_id: string | null
           created_at: string | null
+          created_by: string | null
+          error_message: string | null
           id: string
+          input: Json | null
           metadata: Json | null
-          node_id: string
+          node_id: string | null
+          organization_id: string | null
+          output: Json | null
           status: string | null
+          trigger_event: string | null
           workflow_id: string
         }
         Insert: {
-          action_type: string
-          contact_id: string
+          action_type?: string | null
+          contact_id?: string | null
           created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
           id?: string
+          input?: Json | null
           metadata?: Json | null
-          node_id: string
+          node_id?: string | null
+          organization_id?: string | null
+          output?: Json | null
           status?: string | null
+          trigger_event?: string | null
           workflow_id: string
         }
         Update: {
-          action_type?: string
-          contact_id?: string
+          action_type?: string | null
+          contact_id?: string | null
           created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
           id?: string
+          input?: Json | null
           metadata?: Json | null
-          node_id?: string
+          node_id?: string | null
+          organization_id?: string | null
+          output?: Json | null
           status?: string | null
+          trigger_event?: string | null
           workflow_id?: string
         }
         Relationships: [
@@ -569,6 +587,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
