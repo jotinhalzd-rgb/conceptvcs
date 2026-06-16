@@ -213,6 +213,11 @@ async function seedDemoData(db: any, orgId: string) {
 }
 
 export const DEMO_SIM_CHANNEL_IDENTIFIER = "demo-sim-wa";
+const VALID_DEMO_SLA_STATUSES = new Set(["normal", "warning", "breached"]);
+
+function normalizeDemoSlaStatus(status: string): "normal" | "warning" | "breached" {
+  return VALID_DEMO_SLA_STATUSES.has(status) ? (status as "normal" | "warning" | "breached") : "normal";
+}
 
 const DEMO_CONVERSATIONS = [
   { name: "Maria Oliveira",  phone: "+5511988880001", status: "new",              sla: "normal",  preview: "Olá, gostaria de saber mais sobre o atendimento." },
@@ -296,7 +301,7 @@ async function seedDemoOmnichannel(db: any, orgId: string) {
           contact_id: contact.id,
           agent_id: agent?.id ?? null,
           status: spec.status,
-          sla_status: spec.sla,
+          sla_status: normalizeDemoSlaStatus(spec.sla),
           priority: "medium",
           temperature: "warm",
           last_message_preview: spec.preview,
