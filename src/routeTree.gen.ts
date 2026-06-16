@@ -24,6 +24,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as SettingsWhiteLabelRouteImport } from './routes/settings.white-label'
 import { Route as SettingsProfileRouteImport } from './routes/settings.profile'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings.notifications'
 import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
@@ -112,6 +113,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const SettingsWhiteLabelRoute = SettingsWhiteLabelRouteImport.update({
+  id: '/white-label',
+  path: '/white-label',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsProfileRoute = SettingsProfileRouteImport.update({
   id: '/profile',
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/settings/white-label': typeof SettingsWhiteLabelRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/settings/white-label': typeof SettingsWhiteLabelRoute
   '/dashboard': typeof DashboardIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/settings/white-label': typeof SettingsWhiteLabelRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/settings/marketplace'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/white-label'
     | '/dashboard/'
     | '/settings/'
     | '/api/public/channels/$channelId/inbound'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/settings/marketplace'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/white-label'
     | '/dashboard'
     | '/settings'
     | '/api/public/channels/$channelId/inbound'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/settings/marketplace'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/settings/white-label'
     | '/dashboard/'
     | '/settings/'
     | '/api/public/channels/$channelId/inbound'
@@ -487,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/settings/white-label': {
+      id: '/settings/white-label'
+      path: '/white-label'
+      fullPath: '/settings/white-label'
+      preLoaderRoute: typeof SettingsWhiteLabelRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/settings/profile': {
       id: '/settings/profile'
       path: '/profile'
@@ -607,6 +626,7 @@ interface SettingsRouteChildren {
   SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
   SettingsNotificationsRoute: typeof SettingsNotificationsRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
+  SettingsWhiteLabelRoute: typeof SettingsWhiteLabelRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
@@ -616,6 +636,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsMarketplaceRoute: SettingsMarketplaceRoute,
   SettingsNotificationsRoute: SettingsNotificationsRoute,
   SettingsProfileRoute: SettingsProfileRoute,
+  SettingsWhiteLabelRoute: SettingsWhiteLabelRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }
 
