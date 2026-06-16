@@ -19,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RoutingRulesTab } from "./routing-rules-tab";
 
 function formatDuration(seconds: number) {
   if (!seconds) return "—";
@@ -111,18 +113,25 @@ export function QueuesManagement() {
             {queues?.length || 0} filas · {totalOpen} conversas abertas · espera média {formatDuration(avgWait)}
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => setOpen(true)}
-            className="h-10 bg-white text-[#020617] hover:bg-slate-200 rounded-xl text-xs font-black uppercase tracking-widest gap-2"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Criar Fila
-          </Button>
-        </div>
       </header>
 
-      {isLoading ? (
+      <Tabs defaultValue="filas" className="space-y-6">
+        <TabsList className="bg-white/[0.03] border border-white/[0.08]">
+          <TabsTrigger value="filas">Filas</TabsTrigger>
+          <TabsTrigger value="rotas">Regras de Roteamento</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="filas" className="space-y-6">
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setOpen(true)}
+              className="h-10 bg-white text-[#020617] hover:bg-slate-200 rounded-xl text-xs font-black uppercase tracking-widest gap-2"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Criar Fila
+            </Button>
+          </div>
+          {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
         </div>
@@ -139,6 +148,12 @@ export function QueuesManagement() {
           {queues!.map((q) => <QueueCard key={q.id} q={q} />)}
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="rotas">
+          <RoutingRulesTab />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-[#020817] border-white/10 text-white max-w-md">
