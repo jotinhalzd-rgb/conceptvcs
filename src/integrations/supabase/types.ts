@@ -179,6 +179,7 @@ export type Database = {
       ai_agents: {
         Row: {
           autonomy_level: string | null
+          channel_id: string | null
           created_at: string | null
           description: string | null
           id: string
@@ -186,13 +187,16 @@ export type Database = {
           metadata: Json | null
           name: string
           organization_id: string
+          queue_id: string | null
           role_type: string
+          status: string
           system_prompt: string | null
           tone_of_voice: string | null
           updated_at: string | null
         }
         Insert: {
           autonomy_level?: string | null
+          channel_id?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -200,13 +204,16 @@ export type Database = {
           metadata?: Json | null
           name: string
           organization_id: string
+          queue_id?: string | null
           role_type: string
+          status?: string
           system_prompt?: string | null
           tone_of_voice?: string | null
           updated_at?: string | null
         }
         Update: {
           autonomy_level?: string | null
+          channel_id?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -214,17 +221,33 @@ export type Database = {
           metadata?: Json | null
           name?: string
           organization_id?: string
+          queue_id?: string | null
           role_type?: string
+          status?: string
           system_prompt?: string | null
           tone_of_voice?: string | null
           updated_at?: string | null
         }
         Relationships: [
           {
+            foreignKeyName: "ai_agents_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ai_agents_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agents_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
             referencedColumns: ["id"]
           },
         ]
