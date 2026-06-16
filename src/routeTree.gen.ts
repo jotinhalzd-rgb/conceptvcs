@@ -22,6 +22,7 @@ import { Route as CrmRouteImport } from './routes/crm'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
 import { Route as SettingsDeveloperRouteImport } from './routes/settings.developer'
@@ -97,6 +98,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -178,7 +185,6 @@ export interface FileRoutesByTo {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
-  '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -189,6 +195,7 @@ export interface FileRoutesByTo {
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -214,6 +221,7 @@ export interface FileRoutesById {
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,6 +248,7 @@ export interface FileRouteTypes {
     | '/settings/developer'
     | '/settings/marketplace'
     | '/dashboard/'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -252,7 +261,6 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
-    | '/settings'
     | '/supervisor'
     | '/admin/audit'
     | '/admin/channels'
@@ -263,6 +271,7 @@ export interface FileRouteTypes {
     | '/settings/developer'
     | '/settings/marketplace'
     | '/dashboard'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/settings/developer'
     | '/settings/marketplace'
     | '/dashboard/'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -401,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
@@ -487,12 +504,14 @@ interface SettingsRouteChildren {
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsDeveloperRoute: typeof SettingsDeveloperRoute
   SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsDeveloperRoute: SettingsDeveloperRoute,
   SettingsMarketplaceRoute: SettingsMarketplaceRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
 }
 
 const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
