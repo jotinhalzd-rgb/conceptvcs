@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Instagram, Facebook, Mail, Globe, Phone, ChevronRight } from "lucide-react";
+import { MessageSquare, Camera, MessageCircle, Mail, Globe, Phone, ChevronRight } from "lucide-react";
 import {
   CHANNEL_TYPE_LABEL,
   PROVIDERS,
@@ -24,8 +24,8 @@ interface ChannelPickerModalProps {
 
 const TYPE_ICON: Record<ChannelType, React.ComponentType<{ className?: string }>> = {
   whatsapp: MessageSquare,
-  instagram: Instagram,
-  facebook: Facebook,
+  instagram: Camera,
+  facebook: MessageCircle,
   email: Mail,
   webchat: Globe,
   voice: Phone,
