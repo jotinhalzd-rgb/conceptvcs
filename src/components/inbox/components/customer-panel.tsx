@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { DemoBadge, isDemoRecord } from "@/lib/demo-badge";
 
 interface CustomerSidePanelProps {
   chat: any;
@@ -27,6 +28,13 @@ interface CustomerSidePanelProps {
 }
 
 export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => {
+  const contact = chat?.contacts;
+  const showDemo = chat?.is_demo || chat?.is_test || isDemoRecord({
+    email: contact?.email,
+    metadata: contact?.metadata,
+    is_demo: contact?.is_demo,
+  });
+  const leadScore = contact?.lead_score as number | null | undefined;
   return (
     <motion.div 
       initial={{ x: 420 }}
@@ -58,75 +66,33 @@ export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => 
               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1.5">
                 {chat?.contacts?.email || "Cliente Enterprise"}
               </p>
+              {showDemo && (
+                <div className="mt-3"><DemoBadge variant={chat?.is_test ? "simulated" : "demo"} /></div>
+              )}
           </div>
 
-          {/* Score Grid */}
-          <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl text-center transition-all hover:bg-white/[0.04]">
-                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">Health Score</p>
-                  <p className="text-xl font-black text-emerald-400 tabular-nums">88<span className="text-[10px] text-slate-600 ml-0.5">/100</span></p>
+          {/* Lead score (real data only) */}
+          {typeof leadScore === "number" && (
+            <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lead Score</p>
+                <span className="text-emerald-400 font-black text-sm tabular-nums">{leadScore}</span>
               </div>
-              <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl text-center transition-all hover:bg-white/[0.04]">
-                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">NPS Médio</p>
-                  <p className="text-xl font-black text-white tabular-nums">9.2</p>
+              <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, leadScore)}%` }} />
               </div>
-          </div>
+            </div>
+          )}
 
-          {/* AI Insights & Voice Summary */}
-          <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Predictive Insights</h4>
-                  <Zap className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
-              </div>
-              <div className="space-y-3">
-                  <div className="bg-indigo-600/5 border border-indigo-500/10 p-4 rounded-2xl">
-                      <div className="flex items-start gap-3">
-                          <TrendingUp className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-slate-300 leading-relaxed">
-                              <span className="text-white font-bold">Oportunidade detectada:</span> Upgrade para o plano Enterprise elevaria o MRR em 40%.
-                          </p>
-                      </div>
-                  </div>
-                  <div className="bg-amber-500/5 border border-amber-500/10 p-4 rounded-2xl">
-                      <div className="flex items-start gap-3">
-                          <FileText className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-slate-300 leading-relaxed">
-                              <span className="text-white font-bold">Resumo da última Call:</span> Cliente demonstrou interesse claro em precificação mas pediu follow-up amanhã.
-                          </p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-
-          {/* Unified Timeline */}
-          <div className="space-y-6 pb-10">
-              <div className="flex items-center justify-between">
-                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Timeline Unificada</h4>
-                  <History className="w-3.5 h-3.5 text-slate-600" />
-              </div>
-              
-              <div className="space-y-6 relative ml-4 border-l border-white/5 pl-6 py-2">
-                  {[
-                      { icon: ShoppingBag, text: "Pedido #8429 realizado (Shopify)", time: "15:45", color: "bg-indigo-500/10 text-indigo-400" },
-                      { icon: CreditCard, text: "Pagamento R$ 450,00 (Stripe)", time: "15:46", color: "bg-emerald-500/10 text-emerald-400" },
-                      { icon: Phone, text: "Chamada finalizada (2:05)", time: "14:15", color: "bg-emerald-500/10 text-emerald-400" },
-                      { icon: MessageSquare, text: "Atendimento iniciado", time: "12:30", color: "bg-indigo-500/10 text-indigo-400" },
-                      { icon: Target, text: "Lead qualificado por IA", time: "11:45", color: "bg-emerald-500/10 text-emerald-400" },
-                  ].map((item, i) => (
-
-
-                      <div key={i} className="relative">
-                          <div className={cn("absolute -left-[36px] top-0 w-8 h-8 rounded-xl flex items-center justify-center border-4 border-[#030712]", item.color)}>
-                              <item.icon className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                              <p className="text-xs font-bold text-slate-200">{item.text}</p>
-                              <p className="text-[10px] text-slate-600 font-bold uppercase mt-1 tabular-nums">{item.time}</p>
-                          </div>
-                      </div>
-                  ))}
-              </div>
+          {/* Empty state — histórico em construção */}
+          <div className="pb-10">
+            <div className="bg-white/[0.02] border border-white/[0.05] rounded-3xl p-8 text-center">
+              <History className="w-8 h-8 text-slate-600 mx-auto mb-3 opacity-60" />
+              <h4 className="text-sm font-bold text-white mb-1">Histórico ainda em construção</h4>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Este cliente ainda não possui interações suficientes para gerar insights confiáveis.
+              </p>
+            </div>
           </div>
       </div>
     </motion.div>

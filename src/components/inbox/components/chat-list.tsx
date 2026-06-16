@@ -2,7 +2,10 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, MessageCircle, Mail, Globe } from "lucide-react";
+import { MessageSquare, MessageCircle, Mail, Globe, Inbox as InboxIcon } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { DemoBadge, isDemoRecord } from "@/lib/demo-badge";
+import { useNavigate } from "@tanstack/react-router";
 
 interface ChatListProps {
   conversations: any[];
@@ -12,6 +15,28 @@ interface ChatListProps {
 
 
 export const ChatList = ({ conversations, selectedId, onSelect }: ChatListProps) => {
+  const navigate = useNavigate();
+
+  if (!conversations || conversations.length === 0) {
+    return (
+      <div className="flex-1 p-4">
+        <EmptyState
+          icon={InboxIcon}
+          title="Nenhuma conversa ainda"
+          description="Conecte um canal ou use o simulador para receber sua primeira mensagem."
+          action={{
+            label: "Configurar canal",
+            onClick: () => navigate({ to: "/admin/channels" }),
+          }}
+          secondaryAction={{
+            label: "Simular mensagem",
+            onClick: () => navigate({ to: "/admin/channels" }),
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth p-2 space-y-1 bg-[#020817]">
       {conversations?.map((chat) => (
@@ -66,6 +91,11 @@ export const ChatList = ({ conversations, selectedId, onSelect }: ChatListProps)
                 {chat.sla_status === 'breached' && (
                   <Badge className="bg-rose-500/10 text-rose-400 border-none text-[8px] font-bold px-1 py-0">SLA Estourado</Badge>
                 )}
+                {(chat.is_demo || chat.is_test || isDemoRecord({
+                  email: chat?.contacts?.email,
+                  metadata: chat?.metadata,
+                  is_demo: chat?.is_demo,
+                })) && <DemoBadge variant={chat.is_test ? "simulated" : "demo"} />}
                 {chat.temperature === 'hot' && (
                   <div className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1" title="Temperatura: Quente" />
                 )}

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useStages, useDeals, useUpdateDealStage } from "@/hooks/crm/use-deals";
 import { KanbanColumn } from "./kanban-column";
-import { Loader2 } from "lucide-react";
+import { Loader2, Target } from "lucide-react";
 import { DealDetailDialog } from "../deal-detail-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { toast } from "sonner";
 
 interface KanbanBoardProps {
   pipelineId?: string;
@@ -18,6 +20,22 @@ export const KanbanBoard = ({ pipelineId }: KanbanBoardProps) => {
     return (
       <div className="flex-1 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!deals || deals.length === 0) {
+    return (
+      <div className="p-8">
+        <EmptyState
+          icon={Target}
+          title="Nenhuma oportunidade criada ainda"
+          description="Crie sua primeira oportunidade para acompanhar negociações no Kanban."
+          action={{
+            label: "Criar oportunidade",
+            onClick: () => toast.info("Use o botão Novo Negócio acima para criar uma oportunidade."),
+          }}
+        />
       </div>
     );
   }

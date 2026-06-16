@@ -1,140 +1,58 @@
-## UX Omnichannel First — Simplificação para Piloto
+# UX Omnichannel First — Parte 2
 
-Escopo: somente reorganização visual, copy e empty states. Sem novos módulos, sem refactor profundo, sem mexer em segurança/RLS.
+Aplicar os componentes já criados (`EmptyState`, `DemoBadge`, `QuickActionsBar`, `OnboardingChecklist`) nas telas do fluxo principal. Sem novos módulos, sem refatoração profunda.
 
-Mensagem central: "Centralize seus canais, atenda melhor seus clientes e transforme conversas em vendas."
+## Escopo por tela
 
-Fluxo prioritário: **Canal → Inbox → Customer 360 → CRM → Relatórios**.
+### 1. Inbox
+**Arquivos:** `src/components/inbox/chat-list.tsx`, `chat-view.tsx`, `inbox-layout.tsx` (ou equivalente em `src/pages/inbox.tsx`).
+- Lista vazia → `EmptyState` ("Nenhuma conversa ainda", ações: Simular mensagem / Configurar canal).
+- Nenhuma conversa selecionada → `EmptyState` ("Selecione uma conversa").
+- Mini-stats reais (abertas / aguardando / SLA risco / não atribuídas); zeros se sem dados.
+- Cada item da lista: nome, canal, última msg, status, responsável, horário, SLA, `DemoBadge` quando `is_demo`/`is_test`.
+- Chat header: nome, canal, status, responsável, `DemoBadge`.
+- Diferenciar visualmente nota interna vs resposta pública.
 
----
+### 2. Customer 360
+**Arquivos:** `src/components/customers/customer-panel.tsx`, `customer-view.tsx`.
+- Renderização condicional: ocultar Health Score, NPS, timeline fake, eventos Shopify/Stripe, insights IA, recomendações quando não houver dado real.
+- Ordem: nome → telefone → canal → tags → conversas → negócios → tarefas → observações → histórico.
+- Sem histórico → `EmptyState` ("Histórico ainda em construção").
+- Bloco Negócios vazio → `EmptyState` pequeno "Nenhuma oportunidade vinculada" + ação Criar oportunidade.
+- Bloco Conversas vazio → `EmptyState` "Nenhuma conversa registrada" + ação Abrir Inbox.
+- `DemoBadge` quando cliente demo.
 
-### 1. Sidebar reorganizada (`src/components/layout/app-layout.tsx`)
-Manter todas as rotas. Reagrupar visualmente:
+### 3. Canais
+**Arquivo:** `src/pages/channels.tsx` (ou `channels-view.tsx`).
+- Tagline: "Como conecto meu WhatsApp?".
+- Card padronizado: status, provider, última sync, botões Configurar / Testar, `DemoBadge` quando simulado.
+- Canal demo: descrição "Canal de teste... Não envia mensagens reais."
+- Sem canais → `EmptyState` "Configurar canal".
 
-- **PRINCIPAL**: Início, Inbox, Clientes, CRM, Canais, Relatórios
-- **OPERAÇÃO**: Filas, Tarefas, Campanhas
-- **ADMINISTRAÇÃO**: Usuários, Empresas, Billing, Configurações
-- **AVANÇADO / LABS**: IA Studio, Knowledge Hub, OIL (renomear "Insights IA"), EIN ("Inteligência Executiva"), Business Hub ("Marketplace"), Developer
+### 4. CRM
+**Arquivo:** `src/pages/crm.tsx` ou `src/components/crm/...`.
+- `DemoBadge` em negócios/pipelines/tarefas/contatos demo.
+- Kanban vazio → `EmptyState` "Nenhuma oportunidade criada ainda" + ação Criar oportunidade.
 
-CEO Master mantém Governança Global em PRINCIPAL. Filtragem por role já existe.
+### 5. Filas
+**Arquivo:** `src/pages/queues.tsx`.
+- Lista vazia → `EmptyState` "Nenhuma fila configurada" + ação Criar fila (toast info por ora).
 
-### 2. Home / Dashboard objetivo
-Cada dashboard ganha um "QuickActionsBar" no topo com 6 cards:
-Abrir Inbox · Simular mensagem · Criar cliente · Criar oportunidade · Conectar canal · Ver CRM.
+### 6. Relatórios
+**Arquivo:** `src/pages/reports.tsx` / `src/components/reports/...`.
+- Sem dados → `EmptyState` "Sem dados suficientes ainda" com ações Inbox / Configurar canal / Criar oportunidade.
+- Marcar dados demo com `DemoBadge`.
 
-Componente novo: `src/components/dashboard/widgets/quick-actions-bar.tsx`. Reutilizado em CEO/Company/Manager/Agent dashboards.
+### 7. Validações
+- `QuickActionsBar`: cada ação aponta a rota existente; ocultar/desabilitar por perfil.
+- `OnboardingChecklist`: persistência localStorage funcionando; recolhe ao completar; não invasivo em mobile.
+- Responsividade: sidebar, QuickActions, Inbox, Customer 360, CRM Kanban em desktop e mobile.
 
-### 3. Home por perfil
-Ajustar conteúdo de cada dashboard existente:
-- **AgentDashboard**: minhas conversas, aguardando, tarefas hoje, SLA em risco, botão Abrir Inbox.
-- **ManagerDashboard**: filas, equipe, SLA, conversas abertas, oportunidades, tarefas.
-- **CompanyDashboard**: conversas, clientes, oportunidades, receita prevista, canais conectados, relatórios.
-- **CEODashboard**: empresas, operação global, organizações, auditoria, saúde plataforma.
+## Helper de detecção demo
+Reusar `isDemoRecord` de `src/lib/demo-badge.tsx` em todos os pontos.
 
-### 4. Checklist de primeiro uso
-Novo componente `src/components/dashboard/widgets/onboarding-checklist.tsx`:
-- 7 itens (config empresa, conectar canal, criar fila, criar cliente, simular msg, criar oportunidade, convidar equipe).
-- Estado persistido em `localStorage` (`onecontact_onboarding`).
-- Renderizado em CompanyDashboard e ManagerDashboard. Recolhe quando 100%.
+## Fora de escopo
+Novos módulos, novos dashboards, mudanças de auth/schema/RLS, telefonia/IA real.
 
-### 5–6. Inbox como centro + empty states
-Em `src/components/inbox/components/chat-view.tsx`:
-- Empty state elegante quando sem seleção: título "Selecione uma conversa", subtítulo orientativo, mini-stats (abertas, aguardando, SLA risco, não atribuídas).
-- Garantir header da conversa exibe: canal, cliente, status, responsável, SLA, badge DEMO quando aplicável.
-
-### 7. Badge DEMO / SIMULADO
-Adicionar utilitário `src/lib/demo-badge.tsx` (componente Badge reutilizável). Marcar em:
-- `chat-list.tsx` (item da lista)
-- `chat-view.tsx` (header)
-- `customer-panel.tsx` (Customer 360)
-
-Heurística: conversa demo quando contato/canal pertence a `onecontact-demo-corp` ou flag em metadata.
-
-### 8. Customer 360 limpo (`src/components/customer-360/customer-view.tsx`)
-Ordem fixa: nome, telefone, canal principal, tags, últimas conversas, negócios, tarefas, observações, histórico.
-Remover/condicionar: Health Score, NPS, timeline Shopify/Stripe e insights IA — só renderizar se houver dado real; senão empty state "Este cliente ainda não possui histórico suficiente."
-
-### 9. CRM mais objetivo (`src/components/crm/crm-view.tsx`)
-- Tagline no header: "Transforme conversas em oportunidades."
-- Botão "Novo Negócio" em destaque.
-- Remover métricas avançadas sem dado real.
-- Badge DEMO no card kanban quando aplicável.
-
-### 10. Canais (`src/components/channels/channels-view.tsx`)
-Tagline: "Como conecto meu WhatsApp ou outro canal?"
-Card padronizado: nome, provider, status, última sincronização, botões Conectar/Testar, logs básicos, badge DEMO/SIMULADO no simulador.
-
-### 11. Filas
-Já corrigido em sprint anterior. Adicionar tagline "Distribua atendimentos entre equipes." e wire `Gerenciar` para drawer informativo (toast info se sem ação).
-
-### 12. Relatórios (`src/routes/reports.tsx` / `src/components/reports/...`)
-Se sem dados: empty state "Sem dados suficientes ainda. Conecte um canal e comece a atender para gerar métricas."
-Remover números fake hardcoded — usar hook real com fallback empty.
-
-### 13. Quick Launch enxuto (`src/hooks/core/use-quick-launch.ts`)
-Manter apenas: Abrir Inbox, Buscar cliente, Novo cliente, Nova oportunidade, Simular mensagem, Conectar canal, Criar tarefa, Ir para CRM, Ir para Filas, Ir para Configurações.
-Remover comandos sem implementação real.
-
-### 14. Linguagem
-Renomear labels visíveis na sidebar e nav:
-- OIL → "Insights IA" (em Avançado)
-- EIN → "Inteligência Executiva" (em Avançado)
-- Business Hub → "Marketplace" (em Avançado)
-- Developer → escondido fora de DEV
-
-### 15. Cabeçalhos padronizados
-`PageHeader` (já existe) — auditar todas as rotas internas (queues, inbox, customers, crm, reports, campaigns, knowledge, supervisor, admin/*, settings/*) para garantir: Voltar + título + descrição curta + ação principal evidente.
-
-### 16. Empty states padronizados
-Novo componente `src/components/ui/empty-state.tsx` (título, descrição, ícone, ação CTA). Aplicar em Inbox, Clientes, CRM, Canais, Relatórios.
-
-### 17. Design system
-Sem mudanças nos tokens. Auditar consistência: botão primário (`bg-indigo-600`), secundário (`ghost`), destrutivo (`rose`), cards (`bg-white/[0.02] border-white/[0.05]`), badges, loading/skeleton. Documentar em `docs/architecture/DESIGN-TOKENS.md` (opcional).
-
-### 19. Validação Playwright
-Script único cobrindo os três perfis (Atendente, Empresa, CEO Master) e o fluxo de 12 passos do Atendente. Screenshots em `/tmp/browser/ux-piloto/`.
-
----
-
-### Arquivos a alterar
-- `src/components/layout/app-layout.tsx` (sidebar reagrupada + labels)
-- `src/components/dashboard/widgets/quick-actions-bar.tsx` (novo)
-- `src/components/dashboard/widgets/onboarding-checklist.tsx` (novo)
-- `src/components/dashboard/{agent,manager,company,ceo}/*.tsx`
-- `src/components/inbox/components/{chat-view,chat-list,customer-panel}.tsx`
-- `src/components/customer-360/customer-view.tsx`
-- `src/components/crm/crm-view.tsx`
-- `src/components/channels/channels-view.tsx`
-- `src/components/reports/...` ou `src/routes/reports.tsx`
-- `src/components/ui/empty-state.tsx` (novo)
-- `src/lib/demo-badge.tsx` (novo)
-- `src/hooks/core/use-quick-launch.ts`
-- `src/pages/queues.tsx`
-
-### Fora de escopo
-- Novos módulos / dashboards
-- Refactor de arquitetura
-- Mudanças em RLS, schema, auth
-- Telefonia real, IA real, integrações externas
-- Marketplace, Global, White Label no fluxo principal
-
-### Ordem de execução
-1. Sidebar reagrupada + labels (#1, #14) — impacto visual imediato.
-2. Empty state component + Quick Actions Bar (#16, #2) — bases reutilizáveis.
-3. Dashboards por perfil (#3, #4) — entrega de valor.
-4. Inbox + badge DEMO (#5, #6, #7).
-5. Customer 360 limpo (#8).
-6. CRM + Canais + Relatórios (#9, #10, #12).
-7. Quick Launch + Filas polish (#13, #11).
-8. Validação Playwright (#19).
-
-### Critérios de aceite
-- Sidebar tem 4 grupos claros, Developer só em DEV.
-- Cada dashboard mostra Quick Actions Bar funcional.
-- Checklist visível para CEO/Admin/Gerente, persistente.
-- Inbox sem seleção mostra empty state com mini-stats.
-- Conversas/canais demo têm badge visível.
-- Customer 360 sem dado fake — empty state quando vazio.
-- Relatórios sem dado mostram CTA "Conectar canal".
-- Quick Launch sem comandos mortos.
-- Nomes amigáveis (Insights IA, Inteligência Executiva, Marketplace) substituem siglas no fluxo principal.
+## Validação final
+Playwright cobrindo 3 perfis (Atendente, Empresa, CEO Master) executando o fluxo Inbox → Customer 360 → CRM, verificando empty states e badges.

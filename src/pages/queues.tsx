@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatsBox } from "@/components/dashboard/widgets/stats-box";
 import { PageHeader } from "@/components/layout/page-header";
+import { DemoBadge } from "@/lib/demo-badge";
 
 const QueueCard = ({ name, color, sla, priority, volume, tmr, supervisor }: any) => (
   <Card className="bg-white/[0.02] border-white/[0.08] hover:border-white/[0.15] transition-all group shadow-xl">
@@ -25,7 +26,10 @@ const QueueCard = ({ name, color, sla, priority, volume, tmr, supervisor }: any)
         <div className="flex items-center gap-3">
           <div className={cn("w-3 h-10 rounded-full", color)} />
           <div>
-            <h3 className="text-lg font-black text-white uppercase italic tracking-tight">{name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-black text-white uppercase italic tracking-tight">{name}</h3>
+              <DemoBadge />
+            </div>
             <div className="flex items-center gap-2 mt-0.5">
               <Badge className="bg-white/[0.05] text-slate-400 border-none font-black text-[9px] uppercase tracking-widest">{priority}</Badge>
               <Badge className="bg-indigo-600/10 text-indigo-400 border-none font-black text-[9px] uppercase tracking-widest">SLA {sla}</Badge>
