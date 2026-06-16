@@ -1,36 +1,90 @@
-## Bloco 3.1 — Status atual
+## BLOCO 4 — Campanhas CRUD Real
 
-A maior parte do Bloco 3.1 **já foi entregue** no turno anterior. Este plano fecha o que falta validar/ajustar e produz o relatório final exigido antes de qualquer avanço para Campanhas/Relatórios.
+Objetivo: completar Campanhas com CRUD real, segmentação real, status persistente e integração segura com Canais. Sem fake, sem botão morto, sem esconder funcionalidade.
 
-### Já implementado (preservar, não refazer)
+### 1. Banco de dados (migration única)
 
-- **Migration** `20260616141346_*`: trigger `enforce_single_default_queue`, índice único `queue_members_queue_user_uniq`, realtime em `queues`/`queue_members`/`queue_routing_rules`.
-- **Endpoint inbound real**: `src/routes/api/public/channels.$channelId.inbound.ts` (POST + OPTIONS/CORS), validação de canal, `x-webhook-token`, upsert de contato, dedup de mensagem, roteamento 4-tier (rules → channel default → fallback → org default), auto-assign por menor carga, log em `channel_webhooks_log`.
-- **CRUD de filas**: `useUpdateQueue`, `useDeleteQueue`, `useQueueMembers`, `useAddQueueMember`, `useRemoveQueueMember` em `use-queues.ts`; `QueueEditDialog` com SLA, prioridade, `assignment_mode`, `is_default`, `is_active`, descrição, capacidade; aba de membros com `useOrgUsers`.
-- **ChannelConfigDrawer**: aba Avançado com URL inbound, geração/rotação de `webhook_secret`, botão "Testar endpoint" enviando "quero falar com o financeiro".
-- **Processor + routing_reason + notificações + realtime** do Bloco 3 mantidos.
+Estender `public.campaigns` com colunas faltantes (idempotentes):
+- `organization_id uuid` (preencher via trigger/profile), `created_by uuid`, `assigned_to uuid`
+- `channel_id uuid references channels(id)`, `description text`, `message_content text`, `variables jsonb`, `segment_filters jsonb`, `estimated_recipients int`, `scheduled_at timestamptz`, `archived_at timestamptz`, `error_message text`
+- Ampliar CHECK de `status` para: `draft|scheduled|pending_configuration|ready|paused|completed|archived|error`
+- Substituir policy permissiva por RLS org-scoped via `current_user_organization_id()` (sem recursão)
+- GRANTs já existem; reforçar `GRANT SELECT,INSERT,UPDATE,DELETE` para authenticated
 
-### Pendências reais do Bloco 3.1
+Novas tabelas (com GRANTs + RLS org-scoped):
+- `campaign_recipients (id, campaign_id, contact_id, organization_id, status, error, sent_at, created_at)`
+- `campaign_events (id, campaign_id, organization_id, event_type, payload jsonb, created_at)` (para futuro Relatórios)
 
-1. **Verificação executável** — rodar e reportar:
-   - `bunx tsc --noEmit` (esperado: 0 erros).
-   - Buscas proibidas: `rg -n "Em breve|coming soon|não implementado|próxima sprint|TODO" src/`.
-   - Buscas no-op: `rg -n "onClick=\{\(\) => \{\}\}|console\.log\(" src/components src/hooks`.
-2. **Teste end-to-end via curl** ao endpoint real usando o `webhook_secret` da Drawer, confirmando JSON `{ conversation_id, queue_id, routing_reason, assigned_agent_id }`.
-3. **Smoke UI**: abrir `/queues` → criar/editar/excluir, alternar `is_default` (confirmar que zera os outros), adicionar/remover membro, alternar manual↔auto e repetir o teste inbound.
-4. **Relatório final** (entregue na resposta, não em arquivo) cobrindo todos os itens exigidos: arquivos alterados, migrations, payload, resposta esperada, comando curl, comportamento de manual vs auto, resultado de typecheck/buscas, riscos remanescentes.
+Triggers: `updated_at`, set `organization_id` default = `current_user_organization_id()`.
 
-### Riscos conhecidos a declarar no relatório
+`campaign_analytics` já existe — preservar.
 
-- Endpoint inbound é **técnico**: não faz handshake real com Meta/Twilio/360dialog/Evolution — providers externos continuam dependendo de credenciais e webhooks específicos.
-- Auto-assign usa "menor carga" simples (sem skills/horário/capacidade por agente).
-- `queue_members.organization_id` é exigido no insert; UI já passa `profile.organization_id`, mas RLS pode rejeitar se o membro pertencer a outra org — comportamento esperado.
-- `channel_webhooks_log` é append-only; não há UI de inspeção ainda (fora do escopo deste bloco).
+### 2. Hooks (`src/hooks/campaigns/`)
+
+Expandir `use-campaigns.ts`:
+- `useCampaigns(filters)` — lista com filtros: search, status, channel_id, assigned_to, período
+- `useCampaign(id)` — detalhe
+- `useCreateCampaign`, `useUpdateCampaign`, `useDuplicateCampaign`, `useArchiveCampaign`, `useDeleteCampaign`
+- `useChangeCampaignStatus` — valida transições
+- `useEstimateRecipients(filters)` — conta `contacts` reais por filtros (tag, channel origin, status, owner, created_at, busca)
+- `useCampaignStats()` — agregados por status
+
+Todos invalidam queries corretamente.
+
+### 3. Componentes (`src/components/campaigns/`)
+
+Reescrever `campaigns-view.tsx` para usar hooks reais + estado de filtros (URL search params):
+- Barra de filtros real (status, canal, responsável, período, busca, limpar)
+- Cards com status badges reais, estimativa de recipients, canal, última atualização
+- Métricas no topo: total por status (real, via `useCampaignStats`)
+- EmptyState: sem campanhas → "Criar"; sem resultados de filtro → "Limpar"
+- Menu por card: Editar / Duplicar / Pausar / Retomar / Arquivar / Excluir (AlertDialog)
+
+Novo `campaign-editor-drawer.tsx`:
+- Tabs: Conteúdo | Público | Canal | Agendamento
+- Conteúdo: nome, descrição, mensagem (textarea), variáveis (`{{nome}}`), preview, validação vazio
+- Público: filtros reais (tags, status, responsável, busca) + contagem ao vivo via `useEstimateRecipients`; se 0 contatos → CTA "Abrir Contatos" (link para `/customers`)
+- Canal: select de `channels` com status; bloqueia disparo se `disconnected`; se `pending_configuration` salva como `pending_configuration` com aviso útil; se `connected`/`configured` permite `ready`/`scheduled`
+- Agendamento: datetime opcional; botões "Salvar rascunho" / "Agendar" / "Marcar como pronta"
+- Validações antes de mudar status: canal + segmento + conteúdo
+- Sem disparo externo real nesta fase: status reflete preparação; registra tentativa em `campaign_events`
+
+Remover `campaign-manager.tsx` legado se não usado, ou apontá-lo para os novos hooks (preservar rota se houver).
+
+### 4. Integração com Canais
+
+Reaproveita `useChannels` existente. Helper `canChannelDispatch(channel)`:
+- `disconnected` → bloqueia (`error_message` explicativo)
+- `pending_configuration` → permite salvar mas força status `pending_configuration`
+- `connected`/`configured` → libera `ready`/`scheduled`
+
+### 5. Métricas
+
+- Recipients estimados: `count(contacts)` por filtros — real
+- Aberturas/cliques/respostas: ficam 0 com tooltip "Disponível quando provider externo estiver conectado" — sem fake
+
+### 6. Validação
+
+- `bunx tsc --noEmit`
+- `rg "Em breve|coming soon|não implementado|próxima sprint|TODO" src/components/campaigns src/hooks/campaigns`
+- `rg "onClick={\(\) => {}}" src/components/campaigns`
+- Teste manual roteiro de 15 passos do brief
+
+### Arquivos a criar/editar
+
+- **Migration**: `supabase/migrations/<ts>_campaigns_bloco4.sql`
+- **Criar**: `src/components/campaigns/campaign-editor-drawer.tsx`, `src/components/campaigns/campaign-filters.tsx`, `src/components/campaigns/campaign-card.tsx`, `src/hooks/campaigns/use-campaign-mutations.ts`, `src/hooks/campaigns/use-campaign-recipients.ts`, `src/hooks/campaigns/use-campaign-stats.ts`
+- **Editar**: `src/hooks/campaigns/use-campaigns.ts`, `src/components/campaigns/campaigns-view.tsx`, `src/services/campaigns/campaign-service.ts` (alinhar à nova schema ou marcar como legacy interno)
+
+### Preservação (não tocar)
+
+Marketplace↔Canais, Canais E1, endpoint inbound, Filas/Routing/Processor, Inbox, Customer 360, CRM, notificações, SLA, simulador, login demo, RLS multiempresa.
 
 ### Ordem de execução
 
-1. Rodar typecheck + buscas em paralelo.
-2. Smoke do endpoint via `curl` no preview (usar token gerado na Drawer).
-3. Compilar relatório final com evidências e entregar — **sem iniciar Bloco 4**.
-
-Nenhuma alteração de código nova é necessária a menos que o typecheck/buscas revelem regressão; nesse caso, corrigir pontualmente antes do relatório.
+1. Migration (aprovação) → regen types
+2. Hooks + helpers
+3. Drawer + filters + card
+4. Reescrita do view + rota preservada
+5. Typecheck + buscas proibidas
+6. Relatório final + pedido de validação (sem iniciar Relatórios)
