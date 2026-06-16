@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SupervisorRouteImport } from './routes/supervisor'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as QueuesRouteImport } from './routes/queues'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
@@ -34,6 +35,11 @@ import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 const SupervisorRoute = SupervisorRouteImport.update({
   id: '/supervisor',
   path: '/supervisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -97,19 +103,19 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   getParentRoute: () => DashboardRoute,
 } as any)
 const SettingsMarketplaceRoute = SettingsMarketplaceRouteImport.update({
-  id: '/settings/marketplace',
-  path: '/settings/marketplace',
-  getParentRoute: () => rootRouteImport,
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsDeveloperRoute = SettingsDeveloperRouteImport.update({
-  id: '/settings/developer',
-  path: '/settings/developer',
-  getParentRoute: () => rootRouteImport,
+  id: '/developer',
+  path: '/developer',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsBillingRoute = SettingsBillingRouteImport.update({
-  id: '/settings/billing',
-  path: '/settings/billing',
-  getParentRoute: () => rootRouteImport,
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const DashboardHubRoute = DashboardHubRouteImport.update({
   id: '/hub',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/opportunities': typeof OpportunitiesRoute
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
+    | '/settings'
     | '/supervisor'
     | '/admin/audit'
     | '/admin/channels'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
+    | '/settings'
     | '/supervisor'
     | '/admin/audit'
     | '/admin/channels'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/queues'
     | '/reports'
+    | '/settings'
     | '/supervisor'
     | '/admin/audit'
     | '/admin/channels'
@@ -289,13 +301,11 @@ export interface RootRouteChildren {
   OpportunitiesRoute: typeof OpportunitiesRoute
   QueuesRoute: typeof QueuesRoute
   ReportsRoute: typeof ReportsRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   SupervisorRoute: typeof SupervisorRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCompaniesRoute: typeof AdminCompaniesRoute
-  SettingsBillingRoute: typeof SettingsBillingRoute
-  SettingsDeveloperRoute: typeof SettingsDeveloperRoute
-  SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -305,6 +315,13 @@ declare module '@tanstack/react-router' {
       path: '/supervisor'
       fullPath: '/supervisor'
       preLoaderRoute: typeof SupervisorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -393,24 +410,24 @@ declare module '@tanstack/react-router' {
     }
     '/settings/marketplace': {
       id: '/settings/marketplace'
-      path: '/settings/marketplace'
+      path: '/marketplace'
       fullPath: '/settings/marketplace'
       preLoaderRoute: typeof SettingsMarketplaceRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/settings/developer': {
       id: '/settings/developer'
-      path: '/settings/developer'
+      path: '/developer'
       fullPath: '/settings/developer'
       preLoaderRoute: typeof SettingsDeveloperRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/settings/billing': {
       id: '/settings/billing'
-      path: '/settings/billing'
+      path: '/billing'
       fullPath: '/settings/billing'
       preLoaderRoute: typeof SettingsBillingRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/dashboard/hub': {
       id: '/dashboard/hub'
@@ -466,6 +483,22 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface SettingsRouteChildren {
+  SettingsBillingRoute: typeof SettingsBillingRoute
+  SettingsDeveloperRoute: typeof SettingsDeveloperRoute
+  SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsBillingRoute: SettingsBillingRoute,
+  SettingsDeveloperRoute: SettingsDeveloperRoute,
+  SettingsMarketplaceRoute: SettingsMarketplaceRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
@@ -478,13 +511,11 @@ const rootRouteChildren: RootRouteChildren = {
   OpportunitiesRoute: OpportunitiesRoute,
   QueuesRoute: QueuesRoute,
   ReportsRoute: ReportsRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   SupervisorRoute: SupervisorRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCompaniesRoute: AdminCompaniesRoute,
-  SettingsBillingRoute: SettingsBillingRoute,
-  SettingsDeveloperRoute: SettingsDeveloperRoute,
-  SettingsMarketplaceRoute: SettingsMarketplaceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
