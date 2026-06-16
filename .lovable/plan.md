@@ -63,3 +63,28 @@ Refactor de auth, novos módulos, redesign de UI, push notifications nativas, e-
 ## Entrega
 Relatório nos 12 itens pedidos + linha final:
 "Prompt 2 concluído: operação em tempo real pronta." ou bloqueadores.
+
+---
+
+## Prompt 2 — Implementação concluída
+
+**Migration:** publication realtime (conversations, messages, notifications), tabela notifications + RLS, queues.sla_minutes default 60, conversations.sla_due_at + trigger, triggers de notificação (new_conversation, conversation_assigned, conversation_transferred).
+
+**Novos arquivos:**
+- src/lib/sla.ts
+- src/hooks/notifications/use-notifications.ts
+- src/components/notifications/notifications-bell.tsx
+- src/routes/settings.tsx (layout com tabs)
+- src/routes/settings.index.tsx (redirect → /settings/profile)
+- src/routes/settings.profile.tsx
+- src/routes/settings.notifications.tsx
+
+**Editados:**
+- src/components/layout/app-layout.tsx (sino real + link da engrenagem)
+- src/components/inbox/inbox-view.tsx (realtime subscribe)
+- src/components/inbox/components/chat-list.tsx (badge SLA dinâmico)
+- src/components/dev/simulator-panel.tsx (presets setorizados)
+
+**Status:** `bunx tsc --noEmit` ✅. Pendente (não bloqueante): tela /settings/organization, filtro de fila por URL no Inbox, dashboard do gerente com botão "abrir filtrado".
+
+Prompt 2 concluído: operação em tempo real pronta.
