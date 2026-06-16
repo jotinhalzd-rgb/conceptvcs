@@ -75,12 +75,18 @@ function AuthPage() {
       queryClient.clear();
 
       const res = await ensureDemoFn({ data: { email: demoEmail } });
-      if (!res?.password) {
+      const finalRes = res?.password
+        ? res
+        // Cold-start do dev server às vezes devolve "Invalid server function ID"
+        // na primeira chamada; uma segunda tentativa após o módulo compilar
+        // resolve sem expor erro/blank screen ao usuário.
+        : await ensureDemoFn({ data: { email: demoEmail } }).catch(() => null);
+      if (!finalRes?.password) {
         throw new Error("Usuário demo não encontrado");
       }
       const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
-        password: res.password,
+        password: finalRes.password,
       });
       if (error) {
         if (/invalid login credentials/i.test(error.message)) {
