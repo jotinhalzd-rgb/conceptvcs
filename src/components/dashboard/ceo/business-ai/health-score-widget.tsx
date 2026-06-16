@@ -47,14 +47,12 @@ export const HealthScoreWidget = () => {
         </div>
 
         <div className="flex items-end gap-3 mb-8 relative z-10">
-          <span className="text-6xl font-black text-white tracking-tighter">{score}</span>
-          <div className="flex flex-col mb-1.5">
-            <span className="text-xs font-black text-white/40 leading-none">/100</span>
-            <div className="flex items-center gap-1 text-emerald-400 mt-1">
-              <ArrowUpRight className="w-3 h-3" />
-              <span className="text-[10px] font-black">4.2%</span>
+          <span className="text-6xl font-black text-white tracking-tighter">{hasScore ? score : "—"}</span>
+          {hasScore && (
+            <div className="flex flex-col mb-1.5">
+              <span className="text-xs font-black text-white/40 leading-none">/100</span>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -63,19 +61,21 @@ export const HealthScoreWidget = () => {
           <div>
             <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Nível de Risco</p>
             <span className={cn("text-[10px] font-black uppercase tracking-[0.1em]", getStatusColor(status))}>
-              {status === 'healthy' ? 'Excelente' : status === 'warning' ? 'Monitorando' : 'Crítico'}
+              {status === 'healthy' ? 'Excelente' : status === 'warning' ? 'Monitorando' : status === 'critical' ? 'Crítico' : 'Sem dados'}
             </span>
           </div>
           <div>
-            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Eficiência Operacional</p>
-            <span className="text-[10px] font-black text-white uppercase tracking-[0.1em]">92.4%</span>
+            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Última medição</p>
+            <span className="text-[10px] font-black text-white uppercase tracking-[0.1em]">
+              {health?.calculated_at ? new Date(health.calculated_at).toLocaleDateString() : "—"}
+            </span>
           </div>
         </div>
 
         {/* Mini Mini Progress Bars */}
         <div className="flex gap-1 h-1">
           {[1,2,3,4,5,6,7,8,9,10].map(i => (
-            <div key={i} className={cn("flex-1 rounded-full", i <= score/10 ? (status === 'healthy' ? 'bg-emerald-500' : status === 'warning' ? 'bg-amber-500' : 'bg-rose-500') : 'bg-white/5')} />
+            <div key={i} className={cn("flex-1 rounded-full", hasScore && i <= (score as number)/10 ? (status === 'healthy' ? 'bg-emerald-500' : status === 'warning' ? 'bg-amber-500' : 'bg-rose-500') : 'bg-white/5')} />
           ))}
         </div>
       </div>
