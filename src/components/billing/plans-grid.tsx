@@ -3,6 +3,7 @@ import { usePlans, useCurrentSubscription } from "@/hooks/billing/use-billing";
 import { Check, Zap, Rocket, ShieldCheck, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const PlansGrid = () => {
   const { data: plans, isLoading } = usePlans();
@@ -76,6 +77,13 @@ export const PlansGrid = () => {
                   ? "bg-transparent border-2 border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/5" 
                   : "bg-white text-[#020617] hover:bg-slate-200"
               )}
+              onClick={() =>
+                toast.message(isCurrent ? "Plano atual" : "Solicitação de upgrade", {
+                  description: isCurrent
+                    ? "Você já está neste plano. A gestão completa requer gateway de pagamento configurado."
+                    : "Gateway de pagamento ainda não configurado. Nenhuma cobrança foi iniciada.",
+                })
+              }
             >
               {isCurrent ? "Gerenciar Assinatura" : "Fazer Upgrade"}
             </Button>
