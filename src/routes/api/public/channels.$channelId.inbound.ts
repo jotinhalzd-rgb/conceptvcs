@@ -280,7 +280,7 @@ export const Route = createFileRoute("/api/public/channels/$channelId/inbound")(
           channel_id: channel.id,
           organization_id: orgId,
           provider,
-          payload: { from, body, mediaUrl, mediaKind, message_id: messageId },
+          payload: maskSensitive({ from, body, mediaUrl, mediaKind, message_id: messageId }) as any,
           status: "processed",
         } as any);
 
