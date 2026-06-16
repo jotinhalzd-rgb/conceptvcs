@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoutingRulesTab } from "./routing-rules-tab";
+import { QueueEditDialog } from "./queue-edit-dialog";
 
 function formatDuration(seconds: number) {
   if (!seconds) return "—";
@@ -45,12 +46,30 @@ const colorClass = (color?: string) => {
 };
 
 const QueueCard = ({ q }: { q: QueueWithStats }) => (
+  <QueueCardInner q={q} />
+);
+
+function QueueCardInner({ q }: { q: QueueWithStats }) {
+  const [editOpen, setEditOpen] = useState(false);
+  return (
+  <>
   <Card className="bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05] transition-all group">
     <CardContent className="p-6">
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-3">
           <div className={cn("w-3 h-3 rounded-full shadow-[0_0_8px]", colorClass(q.color))} />
           <h4 className="text-lg font-black text-white">{q.name}</h4>
+          {q.is_default && (
+            <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 text-[9px] font-black uppercase tracking-widest">
+              Padrão
+            </span>
+          )}
+          <span className={cn(
+            "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest",
+            q.assignment_mode === "auto" ? "bg-emerald-500/15 text-emerald-300" : "bg-slate-500/15 text-slate-300"
+          )}>
+            {q.assignment_mode === "auto" ? "Auto" : "Manual"}
+          </span>
         </div>
         <div className="flex gap-2">
           <div className="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-bold text-slate-400 uppercase">
@@ -79,13 +98,20 @@ const QueueCard = ({ q }: { q: QueueWithStats }) => (
           <Users className="w-4 h-4 text-slate-500" />
           <span className="text-xs font-bold text-slate-400">{q.agents_count} Atendentes</span>
         </div>
-        <button className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.05] transition-all">
+        <button
+          onClick={() => setEditOpen(true)}
+          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.05] transition-all"
+          aria-label="Editar fila"
+        >
           <Settings2 className="w-4 h-4" />
         </button>
       </div>
     </CardContent>
   </Card>
-);
+    <QueueEditDialog open={editOpen} onOpenChange={setEditOpen} queue={q} />
+  </>
+  );
+}
 
 export function QueuesManagement() {
   const { data: queues, isLoading } = useQueues();
