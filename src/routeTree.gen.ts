@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as SupervisorRouteImport } from './routes/supervisor'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -39,6 +40,11 @@ import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as ApiPublicChannelsChannelIdInboundRouteImport } from './routes/api/public/channels.$channelId.inbound'
 
+const VoiceRoute = VoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupervisorRoute = SupervisorRouteImport.update({
   id: '/supervisor',
   path: '/supervisor',
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
+  '/voice': typeof VoiceRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
@@ -229,6 +236,7 @@ export interface FileRoutesByTo {
   '/queues': typeof QueuesRoute
   '/reports': typeof ReportsRoute
   '/supervisor': typeof SupervisorRoute
+  '/voice': typeof VoiceRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRouteWithChildren
   '/supervisor': typeof SupervisorRoute
+  '/voice': typeof VoiceRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/companies': typeof AdminCompaniesRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/supervisor'
+    | '/voice'
     | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/queues'
     | '/reports'
     | '/supervisor'
+    | '/voice'
     | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/supervisor'
+    | '/voice'
     | '/admin/audit'
     | '/admin/channels'
     | '/admin/companies'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   SupervisorRoute: typeof SupervisorRoute
+  VoiceRoute: typeof VoiceRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCompaniesRoute: typeof AdminCompaniesRoute
@@ -394,6 +407,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/voice': {
+      id: '/voice'
+      path: '/voice'
+      fullPath: '/voice'
+      preLoaderRoute: typeof VoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/supervisor': {
       id: '/supervisor'
       path: '/supervisor'
@@ -658,6 +678,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRouteWithChildren,
   SupervisorRoute: SupervisorRoute,
+  VoiceRoute: VoiceRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCompaniesRoute: AdminCompaniesRoute,
