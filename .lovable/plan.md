@@ -1,111 +1,163 @@
-# Prompt 3/3 — Acabamento de Venda
+# Plano — Regra Mestra Atualizada: Implementar, Não Excluir
 
-Objetivo: deixar o OneContact OS pronto para piloto comercial. Nada de features novas; só acabamento, ligação de botões, métricas honestas, QA multi-perfil e build limpo.
+Objetivo: substituir toda a estratégia anterior de "esconder/marcar como Labs" por **implementação real** de cada botão, tela e módulo visível. Manter padrão visual premium, RLS, multi-tenant e qualidade de dados (real, demo marcado, ou EmptyState).
 
-## Parte 1 — Varredura de botões (sem ação morta)
+## Fase 0 — Varredura (antes de codar)
 
-Auditar áreas: AppLayout (sino, engrenagem, Quick Launch, QuickActionsBar), Inbox, Customer 360, CRM, Filas, Canais, Campanhas, Knowledge, Billing, Marketplace, Webhooks, AI Studio, Hub, Relatórios, Admin, Settings.
+Rodar buscas no `src/` e listar tudo que precisa ser corrigido:
+- `onClick={() => {}}` e botões sem `onClick`/`type="submit"`
+- Strings: "em breve", "coming soon", "próxima sprint", "não implementado", "placeholder", "TODO"
+- Toasts genéricos do tipo "em breve"
+- `<Link to="...">` para rotas inexistentes
+- Botões que só fazem `console.log`
 
-Para cada botão visível, aplicar uma destas regras (sem exceção):
-- ✅ ligar à ação real (modal, mutação, navegação)
-- 🟡 manter com toast de feedback claro ("Em preparação para o piloto")
-- 🔴 remover ou desabilitar com tooltip explicativo
-- ⚠️ mover para seção Avançado/Labs
+Gerar lista única que será o backlog desta entrega.
 
-Botões críticos garantidos: login rápido, logout, voltar, abrir Inbox, simular mensagem, enviar mensagem, nota interna, assumir/transferir/encerrar conversa, criar/editar cliente, criar/editar oportunidade, mover Kanban, criar/editar fila, configurar/testar canal, nova campanha, filtros, exportar, configurações, notificações.
+## Fase 1 — Fluxo Omnichannel (Inbox) — prioridade máxima
 
-## Parte 2 — Campanhas
+Em `src/components/inbox/`:
+- Anexo: input file + upload para bucket `message-attachments` + mensagem `type=image/document`
+- Áudio: gravação via MediaRecorder + upload + mensagem `type=audio`
+- Emoji: popover com picker leve (sem dep nova se possível) inserindo no textarea
+- Nota interna: mutation em `internal_notes` (hook já existe)
+- Assumir/Transferir/Encerrar: validar mutations existentes em `use-conversation-actions`, ligar botões soltos, adicionar `ConfirmDialog` no encerrar
+- Filtros (status, fila, canal, agente): aplicar em `useConversations` via `queryKey`
+- SLA: badge já existe; garantir tooltip com tempo restante
+- Realtime e notificações: já existem; validar
 
-Decisão: **Opção B** (mover para "Em preparação") salvo se já estiver funcional.
-- Ocultar botões decorativos.
-- EmptyState com texto: "Campanhas omnichannel estão em preparação. O piloto atual foca em atendimento, filas e CRM."
+## Fase 2 — Customer 360
 
-## Parte 3 — CRM e Customer 360
+Em `src/components/customer-360/`:
+- Editar cliente: dialog com `contact-form`, mutation em `contacts`
+- Adicionar tag: popover + tabela `tags` + `conversation_tags`/`contact_tags`
+- Criar tarefa: dialog → `crm_tasks`
+- Criar oportunidade: dialog reaproveitando `DealForm` → `deals`
+- Timeline: ler `customer_events_unified` (já existe trigger); empty state real
+- Botões de IA sem chave: trocar por "Configurar IA" abrindo `/dashboard/ai-studio`
 
-CRM: validar criar/editar negócio, persistência do Kanban, filtros (manter ou remover), Exportar (ligar ou remover), DemoBadge em dados seed, EmptyState.
-Customer 360: criar tarefa/oportunidade/observação ligadas ou com feedback; remover botões de IA quando não houver IA real; nenhum score falso como real; DemoBadge.
+## Fase 3 — CRM
 
-## Parte 4 — Billing / Marketplace / Webhooks / Hub / AI Studio
+Em `src/components/crm/`:
+- Novo/Editar/Excluir negócio: dialogs + mutations (DealForm pronto)
+- Mover Kanban: garantir persistência (mutation update `stage_id`)
+- Filtros: status, pipeline, responsável, valor — aplicar em `useDeals`
+- Excluir com `ConfirmDialog`
+- Exportar CSV: gerar a partir dos `deals` em memória
 
-Não são coração do piloto.
-- Billing: marcar como Demo/Preparação se não houver cobrança real.
-- Marketplace/Webhooks: botões abrem config real, ficam desabilitados com tooltip, ou vão para Labs.
-- AI Studio: implementar mínimo OU ocultar "Em breve" OU marcar como Labs.
-- Hub: mover para Avançado/Labs se conceitual.
+## Fase 4 — Canais
 
-## Parte 5 — Métricas do Dashboard
+Em `src/components/channels/`:
+- Configurar/editar canal: dialog com `connect-modal` por provider
+- Testar canal: chamar edge function existente (`sim-webhook` para simulator)
+- Ativar/desativar: mutation `is_active`
+- Status visual real + badge "Pendente de configuração" quando faltar credencial
+- Para providers reais sem credencial: dialog explica e abre formulário de credenciais
 
-Arquivo principal: `src/hooks/dashboard/use-dashboard-stats.ts` + widgets CEO.
-- Remover hardcodes (uptime, SLA fixo, variações, health artificial).
-- Migration: `ALTER TABLE stages ADD COLUMN is_won boolean DEFAULT false;` e marcar estágio ganho no seed demo.
-- Calcular receita ganha via `stages.is_won` (não UUID fixo).
-- Widgets puramente demonstrativos recebem DemoBadge + nota "Indicadores demonstrativos".
-- Sem dado → EmptyState.
+## Fase 5 — Filas e Setores
 
-## Parte 6 — Relatórios
+Em `src/components/queues/queues-management.tsx`:
+- CRUD completo (criar/editar/excluir fila) com `ConfirmDialog`
+- Gerenciar `queue_members` (adicionar/remover agentes)
+- Editar `sla_minutes`, `assignment_mode`, `is_default`
+- Botão "Abrir Inbox filtrado" → navega para `/inbox?queue_id=...`
+- Transferência entre filas (já existe `transfer-modal`)
 
-Cada gráfico/card/tabela: dado real, dado demo marcado, ou EmptyState. Exportar: ligar ou remover. Filtros idem.
+## Fase 6 — Campanhas
 
-## Parte 7 — Segurança e multi-tenant
+Em `src/components/campaigns/`:
+- Criar/editar/duplicar/excluir campanha → `campaigns` table
+- Ativar/pausar: mutation `status`
+- Wizard já existe; conectar submit a mutation real
+- Filtros e relatório básico (contagem por status) — `campaign_analytics` se existir, senão EmptyState
 
-Validar: RLS preservado, `organization_id`/`company_id` em toda tabela nova, sem credenciais de canal no frontend, sem `service_role` no client, sem vazamento entre orgs, escopos por papel corretos. Rodar `supabase--linter`. Documentar (não apagar) qualquer `.env` versionado.
+## Fase 7 — Configurações
 
-## Parte 8 — QA multi-perfil
+Já implementado em `/settings/{profile,notifications}`. Adicionar/validar:
+- Organização: editar nome em `organizations`
+- Preferências: idioma, tema (persistir em `profiles` ou localStorage)
+- Segurança: trocar senha via `supabase.auth.updateUser`
 
-Perfis: CEO Master, Empresa Demo, Gerente Demo, Supervisor IA, Atendente Demo.
-Para cada um: login → nome → role → dashboard → sidebar → permissões → logout → sem cache herdado.
+## Fase 8 — Billing / Marketplace / Developer / Hub / AI Studio / Automação
 
-## Parte 9 — QA do fluxo comercial
+**Sem provedor externo = fluxo mínimo real, nunca decorativo.**
 
-Via Playwright headless (localhost:8080), com sessão Supabase pré-injetada:
-1. Empresa Demo: dashboard → filas (Financeiro/Suporte/Vendas) → canais → Inbox → simular "Quero falar com o financeiro" → conversa cai em Financeiro → notificação → realtime ok.
-2. Atendente Demo: Inbox → ver conversa → assumir/responder → nota interna → criar oportunidade → Customer 360 → CRM → mover Kanban.
-3. Gerente Demo: Filas → SLA → transferir → notificação.
-4. CEO Master: visão global, DemoBadges, sem 404/tela branca.
+Billing (`billing-view`, `plans-grid`, `invoice-list`):
+- Listar `billing_plans_v2`
+- Selecionar plano → criar `billing_subscriptions_v2` com `status='pending_configuration'`
+- Listar `billing_invoices_v2` reais ou EmptyState
+- Botão "Configurar provedor de pagamento" abre dialog explicando Stripe/Paddle
 
-## Parte 10 — QA de rotas
+Marketplace (`marketplace-view`, `app-card`):
+- Listar `hub_marketplace_assets`
+- Instalar → cria `hub_installs_marketplace` + `connected_integrations` com status
+- Detalhes via dialog
 
-Abrir cada rota e confirmar render: `/auth`, `/dashboard`, `/inbox`, `/customers`, `/crm`, `/queues`, `/reports`, `/campaigns`, `/knowledge`, `/supervisor`, `/admin/companies`, `/admin/channels`, `/admin/audit`, `/settings`, `/settings/profile`, `/settings/notifications`, `/settings/billing`, `/settings/developer`, `/settings/marketplace`. Rotas inexistentes → ajustar links para rota válida. Quick Launch sem 404.
+Developer (`api-key-manager`, `webhook-manager`):
+- Gerar API key real → `api_keys` (mostrar 1x)
+- CRUD `webhook_subscriptions`
 
-## Parte 11 — Responsividade
+Hub (`business-hub-view`): listar `hub_connections`, conectar/desconectar
 
-Testar desktop/notebook/tablet/mobile nos pontos críticos (sidebar, topbar, sino, engrenagem, softphone, QuickActionsBar, Inbox, Customer 360, CRM Kanban, Filas, Canais, Relatórios). Sem sobreposição, sem corte, sem loading infinito, sem área vazia sem EmptyState.
+AI Studio (`agent-editor`, `agent-list`, `training-center`):
+- Listar/criar/editar `ai_agents`
+- Upload conhecimento → `agent_knowledge_base`
+- Logs: `ai_analytical_logs` ou EmptyState
+- Quando faltar `LOVABLE_API_KEY` em runtime: badge "Configurar IA"
 
-## Parte 12 — Build final
+Automação (`workflow-builder`): salvar `automation_workflows_v2` + nodes
+
+## Fase 9 — Eliminar linguagem proibida
+
+Substituir globalmente:
+- "Em breve" → "Configurar agora" / "Pendente de configuração"
+- "Coming soon" → idem
+- "TODO" visível → remover ou implementar
+- "Não implementado" → fluxo mínimo
+
+## Fase 10 — Segurança e Multi-tenant
+
+Para cada tabela tocada/criada:
+- `organization_id` obrigatório
+- RLS por `current_user_org()`
+- GRANTs `authenticated` + `service_role`
+- `created_at`/`updated_at` + trigger
+
+Rodar `supabase--linter` ao final.
+
+## Fase 11 — Testes
 
 ```
 bunx tsc --noEmit
 bun run build
-bun run lint   # se existir
 ```
-Corrigir só bloqueantes; warnings cosméticos ficam.
 
-## Parte 13 — Relatório final
+QA manual via Playwright (sessão Supabase pré-injetada) nos fluxos críticos: Inbox simular→assumir→nota→oportunidade; CRM criar→mover; Filas criar→adicionar membro→transferir; Canais configurar; Billing selecionar plano.
 
-Tabela por módulo: status (✅/🟡/🔴/⚠️) · o que funciona · o que foi corrigido · pendência · bloqueia venda?
+## Fase 12 — Relatório Final
 
-Entrega complementar:
-1. relatório de QA
-2. pendências não bloqueantes
-3. roteiro de demonstração
-4. ordem de cliques para venda
-5. frase principal de venda
-6. próximos passos pós-piloto
+Tabela por módulo: ✅ funcional · 🟡 mínimo (depende de externo) · 🔴 bloqueia · ⚠️ pós-piloto.
 
-Fechamento exigido:
-> "OneContact OS aprovado para piloto comercial." **ou** "OneContact OS ainda possui bloqueadores para piloto comercial: ..."
+Incluir: botões corrigidos, tabelas usadas/criadas, hooks reaproveitados, arquivos alterados, pendências externas (Stripe, WhatsApp Cloud, e-mail transacional, voz), build status.
 
-## Fora de escopo
-
-- Novos módulos, refactor de stack, mudanças de UX além do necessário.
-- Não tocar em RLS, login demo, filas, roteamento, realtime, notificações, Inbox, CRM.
-- Sem push nativo, sem e-mail real, sem integração WhatsApp produtiva.
+Veredito: **"OneContact OS aprovado com funcionalidades reais implementadas."** ou lista de bloqueadores.
 
 ## Ordem de execução
 
-1. Parte 5 (migration `is_won` + métricas honestas) — primeiro porque é migration.
-2. Partes 1–4, 6 (acabamento de UI por módulo, em paralelo onde possível).
-3. Parte 7 (linter + revisão multi-tenant).
-4. Partes 8–11 (QA Playwright multi-perfil + rotas + responsivo).
-5. Parte 12 (build).
-6. Parte 13 (relatório final + veredito).
+1. Fase 0 (varredura — gera backlog real)
+2. Fases 1→7 sequenciais (núcleo do produto)
+3. Fase 8 em paralelo onde possível (módulos independentes)
+4. Fase 9 (limpeza de linguagem) varrendo o repo
+5. Fase 10 (lint segurança)
+6. Fase 11 (build + QA)
+7. Fase 12 (relatório)
+
+## Fora de escopo
+
+- Integração produtiva real com Stripe/Paddle, WhatsApp Cloud, e-mail SMTP, gateway de voz, IA com chave de cliente. Para esses: fluxo mínimo + status `pending_configuration` + tela para configurar depois.
+- Refactor de stack, troca de UI library, mudança de auth.
+
+## Riscos e mitigação
+
+- **Escopo enorme**: priorizar Fases 1–5 (coração comercial). Fases 8 entregam mínimo viável.
+- **Migrations novas**: cada tabela nova com GRANT + RLS no mesmo arquivo.
+- **Quebrar realtime/RLS já funcionando**: nunca alterar policies existentes sem motivo, só somar.
