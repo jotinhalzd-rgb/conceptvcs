@@ -11,7 +11,7 @@ type ActionResult = {
   type: string;
   status: "success" | "error" | "skipped";
   message: string;
-  detail?: unknown;
+  detail?: Record<string, string | number | boolean | null>;
 };
 
 export type TestAutomationResult = {
