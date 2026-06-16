@@ -1,30 +1,66 @@
-# QA Final — Pilot Launch
+# Smoke Test Final Multi-Perfil — Pré-Piloto
 
-Validação final e correção dos bloqueadores conhecidos. Sem novos módulos.
+## Objetivo
+Validação final visual e funcional. Sem novos módulos, sem refactor — apenas reproduzir os 5 fluxos, registrar status e corrigir somente bloqueadores.
 
-## Bloqueadores a corrigir agora
+## Estratégia de execução
+Usar Playwright headless contra `localhost:8080`, um script por perfil, reaproveitando os acessos rápidos DEV/PREVIEW para login. Screenshot a cada passo crítico, console + network capturados em log por perfil.
 
-### 1. `src/pages/queues.tsx` — StatsBox hardcoded
-Trocar os 4 stats (482 / 2m 14s / 18% / 42/50) por valores zerados + `DemoBadge` no header da seção, ou ocultar quando não houver fila real. Implementação: marcar visualmente cada StatsBox como demo (badge inline) já que as filas inteiras são demonstração.
+```
+/tmp/browser/smoke/
+  run_atendente.py
+  run_empresa.py
+  run_gerente.py
+  run_ceo.py
+  run_supervisor.py
+  screenshots/<perfil>/NN_passo.png
+  logs/<perfil>.log
+```
 
-### 2. CEO widgets com números fake
-- `src/components/dashboard/ceo/oil-command-center.tsx`
-- `src/components/dashboard/ceo/business-ai/health-score-widget.tsx`
+## Etapas
 
-Adicionar `DemoBadge` no header destes widgets para indicar claramente que são exibições de demonstração no piloto. Sem refatorar lógica.
+### 1. Preparação (sem mudanças de código)
+- Confirmar dev server na porta 8080.
+- `bunx tsc --noEmit` — baseline verde.
+- Auditar `useQuickLaunch` + sidebar para garantir que todas as rotas obrigatórias existem em `src/routes/`.
 
-### 3. Quick Launch — auditar rotas
-Reabrir `src/hooks/core/use-quick-launch.ts` e confirmar:
-- Toda ação aponta a rota existente em `src/routes/`.
-- "Simular mensagem" só listada em `import.meta.env.DEV || MODE==='preview'`.
+### 2. Execução dos 5 perfis
+Para cada perfil, rodar o fluxo descrito no briefing, capturando:
+- URL final de cada passo
+- Screenshot
+- Console errors / network 4xx-5xx
+- Persistência após reload (Inbox nota interna, CRM Kanban)
 
-## Validação automatizada
+Critérios de falha imediata:
+- Tela branca / loading infinito (>5s sem render)
+- Role/nome do perfil incorreto na sidebar
+- Empresa Demo carregando Master View
+- Atendente vendo widgets CEO
+- Botão crítico sem feedback (dead button)
+- 404 a partir de Quick Launch / QuickActionsBar
 
-- `bunx tsc --noEmit` deve passar.
-- Smoke via Playwright (headless) cobrindo: login `/auth` → `/dashboard` → `/inbox` → `/customers` → `/crm` → `/reports`. Screenshot por etapa, verificar ausência de tela branca/console errors.
+### 3. Rotas obrigatórias
+Loop separado abrindo cada rota da lista (`/auth`, `/dashboard`, `/inbox`, `/customers`, `/crm`, `/queues`, `/reports`, `/campaigns`, `/knowledge`, `/supervisor`, `/admin/companies`, `/admin/channels`, `/admin/audit`, `/settings/billing`, `/settings/developer`, `/settings/marketplace`) como CEO Master, screenshot + check de root error boundary.
 
-## Relatório final
-Tabela por módulo com status (✅ / 🟡 / 🔴 / ⚠️), problema, correção, pendência.
+### 4. Responsividade
+Reexecutar trecho curto (dashboard + inbox + CRM + customer 360 + filas) em três viewports:
+- 1440x900 (desktop)
+- 1280x800 (notebook)
+- 390x844 (mobile)
+Verificar overflow de sidebar/softphone sobre botões críticos.
+
+### 5. Correções
+Apenas bloqueadores 🔴 (tela branca, role errada, crash, botão morto sem feedback). Sem polish, sem renomear, sem refactor.
+
+### 6. Build final
+- `bunx tsc --noEmit`
+- `bun run build` se configurado
+- Apenas erros bloqueantes corrigidos.
+
+## Entrega
+Tabela final por (perfil × fluxo) com Status / Problema / Correção / Pendência / Bloqueia? e veredito:
+- "ONECONTACT OS aprovado para apresentação piloto", ou
+- "ONECONTACT OS ainda possui bloqueadores" + lista.
 
 ## Fora de escopo
-Novo CRUD de filas, refatoração CEO, mudanças de auth/RLS, novos dashboards.
+Novos módulos, refactor profundo, mudanças de UX, RLS/segurança, troca de libs, novas features.
