@@ -1,95 +1,111 @@
-# Onda C — Voice + Billing + White Label + Validação Final Prompt 2/3
+## Prompt 3/3 — QA Final, Acabamento e Preparação para Piloto
 
-Escopo aprovado: C1 Voice real, C2 Billing real, C3 White Label real, C4 validação final. Sem tocar no núcleo omnichannel (A1–A4, Inbox, CRM, Campanhas, Canais, Filas, Marketplace, inbound, RLS, Business Hub Onda B). Sem iniciar Prompt 3/3.
+**Sem novos módulos. Sem novas features. Sem refator amplo.** Apenas varredura, correção de regressões, consistência e validação. Núcleo omnichannel e módulos avançados (A1–A4, Ondas B e C) permanecem intocados, exceto correções pontuais.
 
-## C1 — Voice
+---
 
-**Hook `src/hooks/voice/use-voice.ts` (reescrever):**
-- `useVoiceExtensions` (já existe) — manter, escopar por `organization_id`.
-- Adicionar: `useCreateExtension`, `useUpdateExtension`, `useDeleteExtension`, `useToggleExtensionStatus`.
-- `useIvrFlows`, `useCreateIvrFlow`, `useUpdateIvrFlow`, `useDeleteIvrFlow`, `useToggleIvrFlow`.
-- `useCallLogs` (já existe) — adicionar filtros (período, status, número).
-- `useVoiceProviderStatus` — deriva pending_configuration de `channels` tipo `voice` ou da própria extensão (sem credencial → pending).
+### Bloco 1 — Varredura global (read-only → fix pontual)
 
-**`src/components/voice/pbx-management.tsx` (reescrever):**
-- Lista real de `voice_extensions` da org.
-- Drawer/Dialog de criar/editar: `extension_number`, `user_id` (select dos profiles da org), `provider` (`twilio` | `manual`), `identifier` (DID/número), `default_queue_id` (select de `queues`), `status`.
-- Toggle ativar/desativar, excluir com `AlertDialog`.
-- Badge de status real. Se provider exige credencial e não há → badge `pending_configuration` + tooltip "Configure credencial Twilio em Marketplace/Canais".
-- Empty state honesto.
+Buscas obrigatórias com `rg` em `src/`:
+- `"Em breve"`, `"coming soon"`, `"não implementado"`, `"próxima sprint"`
+- `TODO`, `FIXME` visíveis em UI
+- `onClick={() => {}}`, `onClick={() => null}`, handlers no-op
+- `console.log` sem `import.meta.env.DEV`
+- `toast(` genérico sem ação real associada
+- `<Link to="` apontando para rotas inexistentes (cruzar com `routeTree.gen.ts`)
+- imports não usados que disparam erro de build
 
-**`src/components/voice/ivr-builder.tsx` (reescrever):**
-- Lista real de `ivr_flows` da org.
-- Editor simples: `name`, `description`, `channel_id`, `queue_id`, `is_active`, `flow_config` (textarea JSON com preview validado via `JSON.parse` antes de salvar).
-- Criar/editar/duplicar/excluir com confirmação. Sem builder visual complexo.
+Para cada ocorrência: corrigir no arquivo, sem remover funcionalidade existente.
 
-**`src/components/voice/call-log-list.tsx` (reescrever):**
-- Tabela real de `call_logs` filtrada por org via join em `contacts`/`profiles`.
-- Filtros: período (date range), `status` (select), busca por número.
-- Empty state honesto. Sem chamada fake.
+### Bloco 2 — QA multi-perfil
 
-**`src/components/voice/softphone-widget.tsx` (reescrever):**
-- Ler `useVoiceProviderStatus`. Se sem provider/extensão própria do usuário → mostrar estado `pending_configuration` com link para `/admin/channels` ou PBX. Sem dialer ativo.
-- Se configurado: dialer manual valida formato E.164; botão "Testar configuração" chama serverFn que apenas valida credencial/formato (não disca). Mantém UI atual mas remove o `setIsCalling(true)` fake e o avatar "Roberto Almeida".
+Verificar para CEO Master, Empresa Demo, Gerente, Atendente, Supervisor IA:
+- login → dashboard correto (sem tela branca)
+- sidebar filtrada por papel (já existente — só validar)
+- rotas bloqueadas mostram empty state, não crash
+- logout limpa sessão
 
-**ServerFn:** `src/lib/voice/voice-test.functions.ts` — `validateVoiceConfig({ extensionId })`: valida presença de credencial/identifier, retorna `{ ok, missing[] }`. Sem chamada externa real.
+Correções apenas onde houver tela branca, loop ou erro de RLS.
 
-## C2 — Billing
+### Bloco 3 — QA fluxo comercial "financeiro"
 
-**Hook `src/hooks/billing/use-billing.ts` (estender):**
-- `usePlans`, `useCurrentSubscription`, `useUsageMeters`, `useInvoices` (já existem) — manter.
-- Adicionar: `usePaymentGatewayStatus` — lê `connected_integrations`/secret presence via serverFn → retorna `{ configured: boolean, provider?: string, missing: string[] }`.
-- `useUpdateSubscriptionPlanRequest` — apenas marca request em `billing_subscriptions_v2` (status `pending_configuration`) sem cobrar.
+Validar end-to-end (Canais → Filas → inbound sim-webhook "quero falar com o financeiro" → roteamento por keyword → notificação no sino → Inbox → resposta + anexo + áudio + emoji + nota → Customer 360 → CRM → Campanha → Relatórios → CSV).
 
-**`src/components/billing/billing-view.tsx` (revisar):**
-- Remover banner "Restam 4 dias" e qualquer métrica hardcoded.
-- Se sem gateway: banner "Gateway de pagamento não configurado" + botão abrindo modal real (salva pending_configuration em `connected_integrations`).
-- Empty state honesto para sem assinatura.
+Corrigir somente quebras encontradas no caminho.
 
-**`src/components/billing/plans-grid.tsx`:** marcar plano atual real; CTA "Fazer Upgrade" → abre modal que salva intenção `pending_configuration` (não cobra). Não fingir assinatura.
+### Bloco 4 — QA módulos avançados
 
-**`src/components/billing/invoice-list.tsx` (revisar):** apenas faturas reais; empty honesto; download só se `pdf_url` real.
+Smoke test rápido: AI Studio, Automação, Developer (API keys + webhooks), Notificações, Business Hub, OIL/Advisor, Voice, Billing, White Label.
+Garantir empty states honestos e `pending_configuration` onde falta provedor.
 
-**`src/components/billing/usage-meter.tsx` (revisar):** apenas `billing_usage_meters` reais; "sem dados de uso ainda" se vazio.
+### Bloco 5 — Consistência de UX (pontual)
 
-**ServerFn:** `src/lib/billing/gateway.functions.ts` — `getGatewayStatus()` e `saveGatewayConfigRequest({ provider })` (apenas grava intenção; não chama Stripe/Paddle).
+Padronizar somente o que estiver visivelmente fora:
+- empty states usando `EmptyState` (já existe em `src/components/ui/empty-state.tsx`)
+- confirmação destrutiva em delete (AlertDialog onde faltar)
+- botões primários/secundários consistentes
+- loading skeletons no padrão `animate-pulse bg-white/[0.02]`
 
-## C3 — White Label
+Sem redesign.
 
-**Hook novo `src/hooks/settings/use-white-label.ts`:**
-- `useWhiteLabelConfig` — `white_label_configs_v2` por org (maybeSingle).
-- `useUpsertWhiteLabelConfig` — upsert real.
-- `useUploadLogo` — upload em `message-attachments` bucket sob path `white-label/{org_id}/logo-{ts}.{ext}`; retorna URL.
-- `useVerifyDomain` — serverFn que apenas grava status `pending_configuration` e devolve instruções DNS (A/CNAME). Sem fingir ativo.
+### Bloco 6 — Rotas e navegação
 
-**Componente novo `src/components/settings/white-label-view.tsx`:**
-- Form: `product_name`, `logo_url` (upload + preview + remover), `accent_color` (color picker), `theme` (light/dark/auto), `custom_domain` (input + status badge + instruções DNS).
-- Preview ao vivo do header com accent/logo aplicados localmente (sem mexer no tema global).
-- Botão "Resetar" com confirmação.
-- RLS: já existe; garantir filter por `organization_id`. Sem vazamento.
+Cruzar sidebar (`app-layout.tsx`) e todos os `<Link to="...">` contra `src/routes/`. Corrigir links órfãos; garantir que `SmartBackButton` funciona onde já está em uso.
 
-**Rota:** `src/routes/settings.white-label.tsx` (lazy import) + item no sidebar de settings.
+### Bloco 7 — Segurança/RLS
 
-**Migration (se necessário):** garantir colunas `product_name`, `logo_url`, `accent_color`, `theme`, `custom_domain`, `domain_status` em `white_label_configs_v2`. Se já existem, sem migration. RLS por `organization_id` confirmada/adicionada.
+Confirmar via `supabase--linter` que tabelas novas (voice_extensions, ivr_flows, call_logs, white_label_configs_v2, notifications, user_notification_preferences) têm:
+- RLS habilitada
+- política scoped a `organization_id` / `user_id`
+- GRANT correto
 
-## C4 — Validação final Prompt 2/3
+Se linter apontar algo nas tabelas que tocamos, corrigir via migration nova.
 
-```
-bunx tsc --noEmit
+### Bloco 8 — Performance leve
+
+- `enabled: !!orgId` em queries dependentes (auditoria rápida em `src/hooks/`)
+- sem refetchInterval agressivo
+- sem listas sem paginação/filtro visíveis no piloto
+
+### Bloco 9 — Higiene de produção
+
+- `console.log` restantes → envolver em `if (import.meta.env.DEV)` ou remover
+- preservar `console.error`
+- limpar imports não usados que gerem warning de build
+
+### Bloco 10 — Validação final
+
+```bash
 rg -n "Em breve|coming soon|não implementado|próxima sprint" src/
-rg -n "TODO" src/
 rg -n "onClick=\{\(\) => \{\}\}|onClick=\{\(\) => null\}" src/
-rg -n "console\.log" src/
+rg -n "console\.log\(" src/ | rg -v "import.meta.env.DEV"
+rg -n "TODO|FIXME" src/
+bunx tsc --noEmit
 ```
 
-QA regressão (clicar e confirmar não-quebra): AI Studio, Automação + logs, Developer (API Keys, webhook logs, rotação secret), Notificações (sino, lista, preferências), Business Hub, OIL/Advisor, Voice (PBX, IVR, logs, softphone pending), Billing (plano, uso, faturas, gateway pending), White Label (logo upload, domínio pending), Inbox (anexo/áudio/emoji), CRM, Campanhas, Relatórios, CSV export, login/logout demo, sidebar, Marketplace ↔ Canais, endpoint inbound, fluxo "falar com financeiro", filas/regras, Customer 360, RLS.
+E `supabase--linter` para RLS.
 
-QA multi-perfil: CEO Master, Empresa Demo, Gerente Demo, Atendente Demo, Supervisor IA — navegação básica sem tela branca.
+---
 
-## Fora de escopo
+### Entregáveis
 
-Prompt 3/3, refactor de núcleo omnichannel, novos módulos, cobrança real, discagem real, ativação real de domínio.
+1. Relatório final com status **APROVADO PARA PILOTO** ou **BLOQUEADO**.
+2. Lista de correções aplicadas (arquivo + motivo).
+3. Resultado de cada busca proibida (idealmente 0 hits).
+4. Resultado `tsc --noEmit`.
+5. Resultado do linter RLS.
+6. Riscos não-bloqueantes e recomendações pós-piloto.
 
-## Entregáveis do relatório final
+### Fora de escopo (não fazer)
 
-Arquivos alterados, migrations (se houver), hooks/componentes novos, como testar cada bloco, o que ficou pending_configuration, confirmação sem dado fake, núcleo intocado, resultado tsc/build/buscas, riscos remanescentes. Pedir validação antes de Prompt 3/3.
+- Novos módulos, novas rotas, novas tabelas (exceto correção RLS pontual).
+- Refator de núcleo omnichannel.
+- Integração real com Stripe/Twilio/Meta (segue `pending_configuration`).
+- Redesign visual.
+- Prompt 4.
+
+### Estimativa de arquivos tocados
+
+10–25 arquivos com edições cirúrgicas (textos, handlers, links, console). Possivelmente 1 migration se o linter apontar RLS faltando.
+
+Aguardando aprovação para iniciar a varredura.
