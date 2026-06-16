@@ -2,6 +2,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/auth/use-auth";
+import {
+  inferProviderFromAsset,
+  isChannelAsset,
+} from "@/lib/channels/legacy-map";
 
 export function useHubAssets() {
   return useQuery({
@@ -26,7 +30,8 @@ export function useHubInstalls() {
         .from("hub_installs_marketplace")
         .select(`
           *,
-          asset:hub_assets_marketplace(*)
+          asset:hub_assets_marketplace(*),
+          channel:channels(id, name, provider, status, is_active)
         `)
         .order("installed_at", { ascending: false });
 
@@ -115,10 +120,11 @@ export function useInstallAsset() {
   return useMutation({
     mutationFn: async (asset: any) => {
       if (!orgId) throw new Error("Organização não encontrada");
-      const status = assetRequiresExternalProvider(asset)
+      const channelMapping = isChannelAsset(asset) ? inferProviderFromAsset(asset) : null;
+      const status = channelMapping || assetRequiresExternalProvider(asset)
         ? "pending_configuration"
         : "installed";
-      const { data, error } = await supabase
+      const { data: install, error } = await supabase
         .from("hub_installs_marketplace")
         .insert([
           {
@@ -131,11 +137,45 @@ export function useInstallAsset() {
         .select()
         .single();
       if (error) throw error;
-      return data;
+
+      // Channel asset: create the paired channels row and cross-link.
+      if (channelMapping) {
+        const { data: channel, error: chErr } = await supabase
+          .from("channels")
+          .insert({
+            organization_id: orgId,
+            provider: channelMapping.providerId,
+            channel_type: channelMapping.channelType,
+            name: asset.asset_title,
+            status: "pending_configuration",
+            is_active: false,
+            marketplace_install_id: install.id,
+            settings: {
+              channel_type: channelMapping.channelType,
+              config: {},
+              source: "marketplace",
+              asset_id: asset.id,
+            },
+            credentials: {},
+          })
+          .select()
+          .single();
+        if (chErr) throw chErr;
+        await supabase
+          .from("hub_installs_marketplace")
+          .update({ channel_id: channel.id })
+          .eq("id", install.id);
+        return { ...install, channel_id: channel.id, channel };
+      }
+
+      return install;
     },
-    onSuccess: (_d, asset) => {
+    onSuccess: (data: any, asset) => {
       queryClient.invalidateQueries({ queryKey: ["hub-installs"] });
-      const pending = assetRequiresExternalProvider(asset);
+      queryClient.invalidateQueries({ queryKey: ["channels"] });
+      const pending =
+        isChannelAsset(asset) ||
+        assetRequiresExternalProvider(asset);
       toast.success(
         pending
           ? `${asset.asset_title} instalado — configuração de provedor pendente.`
@@ -151,6 +191,7 @@ export function useUninstallAsset() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (installId: string) => {
+      // Channel was created via marketplace? Detach via SET NULL FK; keep channel row + history.
       const { error } = await supabase
         .from("hub_installs_marketplace")
         .delete()
@@ -160,6 +201,7 @@ export function useUninstallAsset() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hub-installs"] });
+      queryClient.invalidateQueries({ queryKey: ["channels"] });
       toast.success("Integração removida.");
     },
     onError: (e: any) => toast.error("Erro ao remover: " + e.message),
