@@ -91,6 +91,7 @@ export function AppLayout() {
     { icon: MessageSquare, label: "Oportunidades", href: "/opportunities", group: "Operação" },
     { icon: Rocket, label: "Campanhas", href: "/campaigns", group: "Operação" },
     { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Operação" },
+    { icon: Phone, label: "Voz / PBX", href: "/voice", group: "Operação" },
 
     // ADMINISTRAÇÃO
     ...(isCEOMaster ? [
