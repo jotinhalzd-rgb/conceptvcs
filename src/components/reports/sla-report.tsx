@@ -23,17 +23,17 @@ export function SlaReport() {
     const withSla = convs.filter((c: any) => c.sla_due_at);
     let inSla = 0, outSla = 0;
     for (const c of withSla) {
-      const due = new Date(c.sla_due_at).getTime();
-      const ref = c.closed_at ? new Date(c.closed_at).getTime() : now;
+      const due = new Date(c.sla_due_at as string).getTime();
+      const ref = c.closed_at ? new Date(c.closed_at as string).getTime() : now;
       if (ref <= due) inSla++; else outSla++;
     }
     const tmrSamples = convs
       .filter((c: any) => c.first_response_at && c.waiting_since)
-      .map((c: any) => (new Date(c.first_response_at).getTime() - new Date(c.waiting_since).getTime()) / 60000);
+      .map((c: any) => (new Date(c.first_response_at as string).getTime() - new Date(c.waiting_since as string).getTime()) / 60000);
     const tmr = tmrSamples.length ? (tmrSamples.reduce((a, b) => a + b, 0) / tmrSamples.length) : null;
     const tmaSamples = convs
       .filter((c: any) => c.closed_at && c.created_at)
-      .map((c: any) => (new Date(c.closed_at).getTime() - new Date(c.created_at).getTime()) / 60000);
+      .map((c: any) => (new Date(c.closed_at as string).getTime() - new Date(c.created_at as string).getTime()) / 60000);
     const tma = tmaSamples.length ? (tmaSamples.reduce((a, b) => a + b, 0) / tmaSamples.length) : null;
     return { withSla: withSla.length, inSla, outSla, tmr, tma };
   }, [convs]);
@@ -43,8 +43,8 @@ export function SlaReport() {
     const map = new Map<string | null, number>();
     for (const c of convs) {
       if (!c.sla_due_at) continue;
-      const due = new Date(c.sla_due_at).getTime();
-      const ref = c.closed_at ? new Date(c.closed_at).getTime() : now;
+      const due = new Date(c.sla_due_at as string).getTime();
+      const ref = c.closed_at ? new Date(c.closed_at as string).getTime() : now;
       if (ref > due) map.set(c.queue_id ?? null, (map.get(c.queue_id ?? null) ?? 0) + 1);
     }
     return Array.from(map.entries())
@@ -56,7 +56,7 @@ export function SlaReport() {
     return convs
       .filter((c: any) => c.status === "open" || c.status === "pending")
       .slice()
-      .sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .sort((a: any, b: any) => new Date(a.created_at as string).getTime() - new Date(b.created_at as string).getTime())
       .slice(0, 10);
   }, [convs]);
 
@@ -64,8 +64,8 @@ export function SlaReport() {
     try {
       const now = Date.now();
       const rows = convs.filter((c: any) => c.sla_due_at).map((c: any) => {
-        const due = new Date(c.sla_due_at).getTime();
-        const ref = c.closed_at ? new Date(c.closed_at).getTime() : now;
+        const due = new Date(c.sla_due_at as string).getTime();
+        const ref = c.closed_at ? new Date(c.closed_at as string).getTime() : now;
         return {
           id: c.id,
           fila: queueName(c.queue_id),
