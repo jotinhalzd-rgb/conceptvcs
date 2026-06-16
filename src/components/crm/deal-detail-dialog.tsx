@@ -7,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUpdateDeal, useDeleteDeal, useDuplicateDeal, usePipelines, useStages, useCRMTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/crm/use-deals";
 import { useContacts } from "@/hooks/crm/use-contacts";
-import { Trash2, Copy, Check, Plus } from "lucide-react";
+import { useOrgUsers } from "@/hooks/crm/use-org-users";
+import { Trash2, Copy, Check, Plus, ExternalLink, MessageSquare, User as UserIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   deal: any | null;
@@ -21,6 +24,7 @@ export function DealDetailDialog({ deal, open, onOpenChange }: Props) {
   const dup = useDuplicateDeal();
   const { data: pipelines } = usePipelines();
   const { contacts } = useContacts();
+  const { data: orgUsers } = useOrgUsers();
   const [form, setForm] = useState<any>(null);
   const { data: stages } = useStages(form?.pipeline_id);
   const { data: tasks } = useCRMTasks(deal?.id);
@@ -33,11 +37,11 @@ export function DealDetailDialog({ deal, open, onOpenChange }: Props) {
     if (deal) setForm({
       id: deal.id,
       title: deal.title ?? "",
-      description: deal.description ?? "",
       value: deal.value ?? 0,
       probability: deal.probability ?? 50,
       status: deal.status ?? "open",
       contact_id: deal.contact_id ?? "",
+      responsible_id: deal.responsible_id ?? "",
       pipeline_id: deal.pipeline_id ?? "",
       stage_id: deal.stage_id ?? "",
       expected_close_date: deal.expected_close_date ?? "",
@@ -47,7 +51,19 @@ export function DealDetailDialog({ deal, open, onOpenChange }: Props) {
   if (!form) return null;
 
   const save = async () => {
-    await update.mutateAsync({ ...form, value: Number(form.value), probability: Number(form.probability) });
+    const payload = {
+      id: form.id,
+      title: form.title,
+      value: Number(form.value) || 0,
+      probability: Number(form.probability) || 0,
+      status: form.status,
+      contact_id: form.contact_id || null,
+      responsible_id: form.responsible_id || null,
+      pipeline_id: form.pipeline_id || null,
+      stage_id: form.stage_id || null,
+      expected_close_date: form.expected_close_date || null,
+    };
+    await update.mutateAsync(payload);
     onOpenChange(false);
   };
 
@@ -57,14 +73,36 @@ export function DealDetailDialog({ deal, open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="text-xl font-black uppercase tracking-tight italic">Editar Negócio</DialogTitle>
         </DialogHeader>
+
+        {/* Vínculos rápidos */}
+        <div className="flex flex-wrap items-center gap-2 pb-2">
+          {deal?.contact_id && (
+            <Link
+              to="/customers"
+              search={{ contact: deal.contact_id } as any}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-500/20"
+            >
+              <UserIcon className="w-3 h-3" /> Customer 360
+            </Link>
+          )}
+          {deal?.origin_conversation_id && (
+            <Link
+              to="/inbox"
+              search={{ conversation: deal.origin_conversation_id } as any}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/20"
+            >
+              <MessageSquare className="w-3 h-3" /> Conversa de origem
+            </Link>
+          )}
+          {deal?.origin_conversation_id && (
+            <Badge variant="outline" className="border-emerald-500/30 text-emerald-300 text-[9px] font-black uppercase">Origem omnichannel</Badge>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="col-span-2">
             <Label className="text-[10px] font-black uppercase text-slate-400">Título</Label>
             <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="bg-white/5 border-white/10 text-white" />
-          </div>
-          <div className="col-span-2">
-            <Label className="text-[10px] font-black uppercase text-slate-400">Descrição</Label>
-            <Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="bg-white/5 border-white/10 text-white" />
           </div>
           <div>
             <Label className="text-[10px] font-black uppercase text-slate-400">Valor</Label>
@@ -80,6 +118,15 @@ export function DealDetailDialog({ deal, open, onOpenChange }: Props) {
               <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue placeholder="Selecionar"/></SelectTrigger>
               <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
                 {contacts?.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-[10px] font-black uppercase text-slate-400">Responsável</Label>
+            <Select value={form.responsible_id} onValueChange={v => setForm({ ...form, responsible_id: v })}>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue placeholder="Sem responsável"/></SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
+                {(orgUsers ?? []).map((u: any) => <SelectItem key={u.id} value={u.id}>{u.full_name || u.id.slice(0,6)}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
