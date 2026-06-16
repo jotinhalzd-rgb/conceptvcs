@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUpdateDeal, useDeleteDeal, useDuplicateDeal, usePipelines, useStages, useCRMTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/crm/use-deals";
 import { useContacts } from "@/hooks/crm/use-contacts";
