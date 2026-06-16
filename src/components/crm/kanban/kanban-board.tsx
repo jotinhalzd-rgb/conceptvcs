@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { useStages, useDeals, useUpdateDealStage } from "@/hooks/crm/use-deals";
+import { useStages, useDeals, useUpdateDealStage, type DealFilters } from "@/hooks/crm/use-deals";
 import { KanbanColumn } from "./kanban-column";
 import { Loader2, Target } from "lucide-react";
 import { DealDetailDialog } from "../deal-detail-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface KanbanBoardProps {
   pipelineId?: string;
+  filters?: DealFilters;
+  onCreateDeal?: (stageId?: string) => void;
+  onClearFilters?: () => void;
+  filtersActive?: boolean;
 }
 
-export const KanbanBoard = ({ pipelineId }: KanbanBoardProps) => {
+export const KanbanBoard = ({ pipelineId, filters, onCreateDeal, onClearFilters, filtersActive }: KanbanBoardProps) => {
   const { data: stages, isLoading: loadingStages } = useStages(pipelineId);
-  const { data: deals, isLoading: loadingDeals } = useDeals(pipelineId);
+  const { data: deals, isLoading: loadingDeals } = useDeals(pipelineId, filters);
   const updateStage = useUpdateDealStage();
   const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
 
@@ -29,12 +33,11 @@ export const KanbanBoard = ({ pipelineId }: KanbanBoardProps) => {
       <div className="p-8">
         <EmptyState
           icon={Target}
-          title="Nenhuma oportunidade criada ainda"
-          description="Crie sua primeira oportunidade para acompanhar negociações no Kanban."
-          action={{
-            label: "Criar oportunidade",
-            onClick: () => toast.info("Use o botão Novo Negócio acima para criar uma oportunidade."),
-          }}
+          title={filtersActive ? "Nenhum resultado para os filtros" : "Nenhuma oportunidade criada ainda"}
+          description={filtersActive ? "Ajuste ou limpe os filtros para ver mais negócios." : "Crie sua primeira oportunidade para acompanhar negociações no Kanban."}
+          action={filtersActive
+            ? { label: "Limpar filtros", onClick: () => onClearFilters?.() }
+            : { label: "Criar oportunidade", onClick: () => onCreateDeal?.() }}
         />
       </div>
     );
@@ -64,6 +67,7 @@ export const KanbanBoard = ({ pipelineId }: KanbanBoardProps) => {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, stage.id)}
             onCardClick={(d) => setSelectedDeal(d)}
+            onAddDeal={(stageId) => onCreateDeal?.(stageId)}
           />
         ))}
       </div>
