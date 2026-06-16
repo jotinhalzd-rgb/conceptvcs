@@ -87,17 +87,25 @@ export function useUpsertChannel() {
       };
 
       if (input.id) {
-        const updatePayload: Record<string, any> = {
-          name: input.name,
-          identifier: input.identifier ?? null,
-          settings,
-          status,
-          updated_at: new Date().toISOString(),
-        };
-        // Only overwrite credentials when at least one secret was provided.
-        if (input.credentials && Object.values(input.credentials).some((v) => `${v ?? ""}`.trim() !== "")) {
-          updatePayload.credentials = input.credentials;
-        }
+        const hasNewSecrets =
+          input.credentials &&
+          Object.values(input.credentials).some((v) => `${v ?? ""}`.trim() !== "");
+        const updatePayload = hasNewSecrets
+          ? {
+              name: input.name,
+              identifier: input.identifier ?? null,
+              settings,
+              status,
+              credentials: input.credentials,
+              updated_at: new Date().toISOString(),
+            }
+          : {
+              name: input.name,
+              identifier: input.identifier ?? null,
+              settings,
+              status,
+              updated_at: new Date().toISOString(),
+            };
         const { data, error } = await supabase
           .from("channels")
           .update(updatePayload)
