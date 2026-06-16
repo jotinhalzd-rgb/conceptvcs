@@ -9,11 +9,11 @@ export function useDealsReport(filters: ReportFilters) {
     queryFn: async () => {
       let q = supabase
         .from("deals")
-        .select("id, title, value, status, stage_id, assigned_to, contact_id, created_at, stages(name)");
+        .select("id, title, value, status, stage_id, responsible_id, contact_id, created_at, stages(name)");
       if (filters.from) q = q.gte("created_at", filters.from);
       if (filters.to) q = q.lte("created_at", filters.to);
       if (filters.dealStatus) q = q.eq("status", filters.dealStatus);
-      if (filters.agentId) q = q.eq("assigned_to", filters.agentId);
+      if (filters.agentId) q = q.eq("responsible_id", filters.agentId);
       const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
