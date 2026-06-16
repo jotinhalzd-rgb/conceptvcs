@@ -17,6 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { SmartBackButton } from "@/components/layout/back-button";
+import {
+  AGENT_TEMPLATES,
+  useAgents,
+  useInstallAgentTemplate,
+  type AgentTemplate,
+} from "@/hooks/ai/use-agents";
+import { Loader2, CheckCircle2 } from "lucide-react";
 
 export const AIStudioView = () => {
   const [activeTab, setActiveTab] = useState("agents");
@@ -26,6 +33,19 @@ export const AIStudioView = () => {
   const handleEdit = (agent: any) => {
     setEditingAgent(agent);
     setIsCreating(true);
+  };
+
+  const { agents } = useAgents();
+  const installTemplate = useInstallAgentTemplate();
+
+  const handleInstallTemplate = async (tpl: AgentTemplate) => {
+    const existing = agents?.find((a: any) => a.name === tpl.name);
+    if (existing) {
+      handleEdit(existing);
+      return;
+    }
+    const created = await installTemplate.mutateAsync(tpl);
+    if (created) handleEdit(created);
   };
 
   return (
@@ -116,10 +136,42 @@ export const AIStudioView = () => {
                 </TabsContent>
 
                 <TabsContent value="marketplace" className="m-0">
-                  <div className="p-12 text-center">
-                    <Library className="w-16 h-16 text-slate-800 mx-auto mb-6" />
-                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">Biblioteca de Especialistas</h3>
-                    <p className="text-slate-500 max-w-md mx-auto mt-2">Em breve: Instale agentes pré-treinados para farmácias, clínicas e e-commerces com um clique.</p>
+                  <div className="p-8">
+                    <div className="mb-8">
+                      <h3 className="text-xl font-black text-white uppercase tracking-tighter">Biblioteca de Especialistas</h3>
+                      <p className="text-slate-500 text-sm mt-2">Instale agentes pré-treinados e refine no editor.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {AGENT_TEMPLATES.map((tpl) => {
+                        const installed = agents?.find((a: any) => a.name === tpl.name);
+                        const isPending = installTemplate.isPending && installTemplate.variables?.slug === tpl.slug;
+                        return (
+                          <div key={tpl.slug} className="bg-[#030712] border border-white/5 rounded-2xl p-6 flex flex-col hover:border-indigo-500/30 transition-all">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="w-12 h-12 rounded-xl bg-indigo-600/10 border border-indigo-600/20 flex items-center justify-center">
+                                <Sparkles className="w-5 h-5 text-indigo-400" />
+                              </div>
+                              {installed && (
+                                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Instalado
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">{tpl.sector}</p>
+                            <h4 className="text-base font-black text-white mb-2">{tpl.name}</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed mb-6 flex-1">{tpl.description}</p>
+                            <Button
+                              onClick={() => handleInstallTemplate(tpl)}
+                              disabled={isPending}
+                              className="bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest text-[10px] h-10 rounded-xl gap-2"
+                            >
+                              {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                              {installed ? "Editar agente" : "Instalar agente"}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>

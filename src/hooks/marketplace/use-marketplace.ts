@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/auth/use-auth";
 
 export function useHubAssets() {
   return useQuery({
@@ -96,3 +97,71 @@ export function useWebhookSubscriptions() {
   });
 }
 
+
+const externalCategories = new Set(["telecom", "finance", "marketing"]);
+
+export function assetRequiresExternalProvider(asset: any): boolean {
+  if (!asset) return false;
+  if (asset.asset_type_code === "integration") return true;
+  return externalCategories.has(asset.asset_category_code);
+}
+
+export function useInstallAsset() {
+  const queryClient = useQueryClient();
+  const { data: profile } = useProfile();
+  // @ts-ignore
+  const orgId = profile?.organization_id || profile?.company_id;
+
+  return useMutation({
+    mutationFn: async (asset: any) => {
+      if (!orgId) throw new Error("Organização não encontrada");
+      const status = assetRequiresExternalProvider(asset)
+        ? "pending_configuration"
+        : "installed";
+      const { data, error } = await supabase
+        .from("hub_installs_marketplace")
+        .insert([
+          {
+            organization_id: orgId,
+            asset_id: asset.id,
+            installed_by_profile_id: profile?.id,
+            current_install_status: status,
+          },
+        ])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_d, asset) => {
+      queryClient.invalidateQueries({ queryKey: ["hub-installs"] });
+      const pending = assetRequiresExternalProvider(asset);
+      toast.success(
+        pending
+          ? `${asset.asset_title} instalado — configuração de provedor pendente.`
+          : `${asset.asset_title} instalado com sucesso.`
+      );
+    },
+    onError: (e: any) =>
+      toast.error("Erro ao instalar: " + (e?.message ?? "desconhecido")),
+  });
+}
+
+export function useUninstallAsset() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (installId: string) => {
+      const { error } = await supabase
+        .from("hub_installs_marketplace")
+        .delete()
+        .eq("id", installId);
+      if (error) throw error;
+      return installId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hub-installs"] });
+      toast.success("Integração removida.");
+    },
+    onError: (e: any) => toast.error("Erro ao remover: " + e.message),
+  });
+}

@@ -1,163 +1,61 @@
-# Plano — Regra Mestra Atualizada: Implementar, Não Excluir
+# Plano — Correção dos 2 itens da Fase 0
 
-Objetivo: substituir toda a estratégia anterior de "esconder/marcar como Labs" por **implementação real** de cada botão, tela e módulo visível. Manter padrão visual premium, RLS, multi-tenant e qualidade de dados (real, demo marcado, ou EmptyState).
+## Item 1 — AI Studio: substituir "Em breve" por instalação real de agente
 
-## Fase 0 — Varredura (antes de codar)
+**Arquivo:** `src/components/ai-studio/ai-studio-view.tsx` (aba `marketplace`)
 
-Rodar buscas no `src/` e listar tudo que precisa ser corrigido:
-- `onClick={() => {}}` e botões sem `onClick`/`type="submit"`
-- Strings: "em breve", "coming soon", "próxima sprint", "não implementado", "placeholder", "TODO"
-- Toasts genéricos do tipo "em breve"
-- `<Link to="...">` para rotas inexistentes
-- Botões que só fazem `console.log`
+A tabela `ai_agents` já existe (12 colunas, RLS habilitada). Reaproveitar o `AgentEditor` que já cobre nome, descrição, instruções, status etc.
 
-Gerar lista única que será o backlog desta entrega.
+Mudanças:
+1. Remover o bloco com a copy "Em breve: Instale agentes pré-treinados..."
+2. Renderizar uma **galeria de templates de agentes pré-definidos** (lista estática local: Atendimento Farmácia, Agendamento Clínica, Suporte E-commerce, SDR B2B — cada um com `name`, `description`, `sector`, `instructions` sugeridas).
+3. Cada card tem botão **"Instalar agente"** → chama mutation `installAgentTemplate` (novo hook `useInstallAgentTemplate` em `src/hooks/ai/use-agents.ts`):
+   - `INSERT` em `ai_agents` com `organization_id = current_user_org()`, `is_active = true`, dados do template.
+   - `onSuccess`: invalidar `["ai-agents"]`, toast de sucesso, abrir o `AgentEditor` no agente recém-criado para refinar (reusa `handleEdit`/`setIsCreating`).
+4. Se já existe agente com mesmo `name+organization_id`, oferecer botão **"Editar agente"** em vez de "Instalar agente" (consultar `useAgents()` que já existe).
+5. Estados: loading no botão durante mutation, toast em erro.
 
-## Fase 1 — Fluxo Omnichannel (Inbox) — prioridade máxima
+Nenhuma migration necessária — `ai_agents` já atende.
 
-Em `src/components/inbox/`:
-- Anexo: input file + upload para bucket `message-attachments` + mensagem `type=image/document`
-- Áudio: gravação via MediaRecorder + upload + mensagem `type=audio`
-- Emoji: popover com picker leve (sem dep nova se possível) inserindo no textarea
-- Nota interna: mutation em `internal_notes` (hook já existe)
-- Assumir/Transferir/Encerrar: validar mutations existentes em `use-conversation-actions`, ligar botões soltos, adicionar `ConfirmDialog` no encerrar
-- Filtros (status, fila, canal, agente): aplicar em `useConversations` via `queryKey`
-- SLA: badge já existe; garantir tooltip com tempo restante
-- Realtime e notificações: já existem; validar
+## Item 2 — Marketplace: `onConnect` real
 
-## Fase 2 — Customer 360
+**Arquivos:**
+- `src/components/marketplace/marketplace-view.tsx`
+- `src/hooks/marketplace/use-marketplace.ts` (adicionar mutations)
+- `src/components/marketplace/install-modal.tsx` (novo)
+- `src/components/marketplace/app-card.tsx` (mostrar status: Instalar / Configurar / Conectado / Remover)
 
-Em `src/components/customer-360/`:
-- Editar cliente: dialog com `contact-form`, mutation em `contacts`
-- Adicionar tag: popover + tabela `tags` + `conversation_tags`/`contact_tags`
-- Criar tarefa: dialog → `crm_tasks`
-- Criar oportunidade: dialog reaproveitando `DealForm` → `deals`
-- Timeline: ler `customer_events_unified` (já existe trigger); empty state real
-- Botões de IA sem chave: trocar por "Configurar IA" abrindo `/dashboard/ai-studio`
+Tabelas existentes: `hub_installs_marketplace` (6 col), `connected_integrations` (10 col). Reaproveitar — sem migration nova.
 
-## Fase 3 — CRM
+Mudanças:
+1. Novo `InstallModal` (Dialog shadcn):
+   - mostra nome/descrição do asset;
+   - lista o que será configurado;
+   - se asset depende de credencial externa (campo no asset OU heurística por categoria `telecom`/`finance`): aviso "Requer configuração de provedor — será marcado como pendente";
+   - botão **Confirmar instalação**.
+2. Novo hook `useInstallAsset()`:
+   - `INSERT` em `hub_installs_marketplace` (`asset_id`, `organization_id`, `installed_at`, `status`);
+   - `INSERT` em `connected_integrations` com `status = 'pending_configuration'` quando precisar de credencial, senão `'installed'`;
+   - invalida `["hub-installs"]` e `["connected-integrations"]`.
+3. Novo hook `useUninstallAsset()`:
+   - `DELETE` em `hub_installs_marketplace` por `asset_id` + `ConfirmDialog`.
+4. Em `marketplace-view.tsx`:
+   - remover `onConnect={(id) => console.log(...)}`;
+   - `onConnect` abre `InstallModal` com asset selecionado;
+   - `AppCard` recebe `install` (registro existente) e mostra badge correto + ações (Configurar / Remover).
+5. `AppCard` "Configurar": abre modal explicativo com link para `/settings/developer` quando depende de API key, ou aviso "Provedor externo — disponível após contratação" (sem fingir conexão).
 
-Em `src/components/crm/`:
-- Novo/Editar/Excluir negócio: dialogs + mutations (DealForm pronto)
-- Mover Kanban: garantir persistência (mutation update `stage_id`)
-- Filtros: status, pipeline, responsável, valor — aplicar em `useDeals`
-- Excluir com `ConfirmDialog`
-- Exportar CSV: gerar a partir dos `deals` em memória
+## Verificação
 
-## Fase 4 — Canais
-
-Em `src/components/channels/`:
-- Configurar/editar canal: dialog com `connect-modal` por provider
-- Testar canal: chamar edge function existente (`sim-webhook` para simulator)
-- Ativar/desativar: mutation `is_active`
-- Status visual real + badge "Pendente de configuração" quando faltar credencial
-- Para providers reais sem credencial: dialog explica e abre formulário de credenciais
-
-## Fase 5 — Filas e Setores
-
-Em `src/components/queues/queues-management.tsx`:
-- CRUD completo (criar/editar/excluir fila) com `ConfirmDialog`
-- Gerenciar `queue_members` (adicionar/remover agentes)
-- Editar `sla_minutes`, `assignment_mode`, `is_default`
-- Botão "Abrir Inbox filtrado" → navega para `/inbox?queue_id=...`
-- Transferência entre filas (já existe `transfer-modal`)
-
-## Fase 6 — Campanhas
-
-Em `src/components/campaigns/`:
-- Criar/editar/duplicar/excluir campanha → `campaigns` table
-- Ativar/pausar: mutation `status`
-- Wizard já existe; conectar submit a mutation real
-- Filtros e relatório básico (contagem por status) — `campaign_analytics` se existir, senão EmptyState
-
-## Fase 7 — Configurações
-
-Já implementado em `/settings/{profile,notifications}`. Adicionar/validar:
-- Organização: editar nome em `organizations`
-- Preferências: idioma, tema (persistir em `profiles` ou localStorage)
-- Segurança: trocar senha via `supabase.auth.updateUser`
-
-## Fase 8 — Billing / Marketplace / Developer / Hub / AI Studio / Automação
-
-**Sem provedor externo = fluxo mínimo real, nunca decorativo.**
-
-Billing (`billing-view`, `plans-grid`, `invoice-list`):
-- Listar `billing_plans_v2`
-- Selecionar plano → criar `billing_subscriptions_v2` com `status='pending_configuration'`
-- Listar `billing_invoices_v2` reais ou EmptyState
-- Botão "Configurar provedor de pagamento" abre dialog explicando Stripe/Paddle
-
-Marketplace (`marketplace-view`, `app-card`):
-- Listar `hub_marketplace_assets`
-- Instalar → cria `hub_installs_marketplace` + `connected_integrations` com status
-- Detalhes via dialog
-
-Developer (`api-key-manager`, `webhook-manager`):
-- Gerar API key real → `api_keys` (mostrar 1x)
-- CRUD `webhook_subscriptions`
-
-Hub (`business-hub-view`): listar `hub_connections`, conectar/desconectar
-
-AI Studio (`agent-editor`, `agent-list`, `training-center`):
-- Listar/criar/editar `ai_agents`
-- Upload conhecimento → `agent_knowledge_base`
-- Logs: `ai_analytical_logs` ou EmptyState
-- Quando faltar `LOVABLE_API_KEY` em runtime: badge "Configurar IA"
-
-Automação (`workflow-builder`): salvar `automation_workflows_v2` + nodes
-
-## Fase 9 — Eliminar linguagem proibida
-
-Substituir globalmente:
-- "Em breve" → "Configurar agora" / "Pendente de configuração"
-- "Coming soon" → idem
-- "TODO" visível → remover ou implementar
-- "Não implementado" → fluxo mínimo
-
-## Fase 10 — Segurança e Multi-tenant
-
-Para cada tabela tocada/criada:
-- `organization_id` obrigatório
-- RLS por `current_user_org()`
-- GRANTs `authenticated` + `service_role`
-- `created_at`/`updated_at` + trigger
-
-Rodar `supabase--linter` ao final.
-
-## Fase 11 — Testes
-
-```
-bunx tsc --noEmit
-bun run build
-```
-
-QA manual via Playwright (sessão Supabase pré-injetada) nos fluxos críticos: Inbox simular→assumir→nota→oportunidade; CRM criar→mover; Filas criar→adicionar membro→transferir; Canais configurar; Billing selecionar plano.
-
-## Fase 12 — Relatório Final
-
-Tabela por módulo: ✅ funcional · 🟡 mínimo (depende de externo) · 🔴 bloqueia · ⚠️ pós-piloto.
-
-Incluir: botões corrigidos, tabelas usadas/criadas, hooks reaproveitados, arquivos alterados, pendências externas (Stripe, WhatsApp Cloud, e-mail transacional, voz), build status.
-
-Veredito: **"OneContact OS aprovado com funcionalidades reais implementadas."** ou lista de bloqueadores.
-
-## Ordem de execução
-
-1. Fase 0 (varredura — gera backlog real)
-2. Fases 1→7 sequenciais (núcleo do produto)
-3. Fase 8 em paralelo onde possível (módulos independentes)
-4. Fase 9 (limpeza de linguagem) varrendo o repo
-5. Fase 10 (lint segurança)
-6. Fase 11 (build + QA)
-7. Fase 12 (relatório)
+- `bunx tsc --noEmit`
+- `bun run build`
+- `rg -n "Em breve|console\.log\(\"Connect" src/` → vazio
+- QA manual: AI Studio → aba Marketplace → instalar template → editor abre; Marketplace → instalar app → card vira "Instalado" → remover.
 
 ## Fora de escopo
 
-- Integração produtiva real com Stripe/Paddle, WhatsApp Cloud, e-mail SMTP, gateway de voz, IA com chave de cliente. Para esses: fluxo mínimo + status `pending_configuration` + tela para configurar depois.
-- Refactor de stack, troca de UI library, mudança de auth.
+Integração real com provedores externos (Stripe, WhatsApp Cloud etc.) — apenas marcar `pending_configuration`.
 
-## Riscos e mitigação
+## Relatório final entregará
 
-- **Escopo enorme**: priorizar Fases 1–5 (coração comercial). Fases 8 entregam mínimo viável.
-- **Migrations novas**: cada tabela nova com GRANT + RLS no mesmo arquivo.
-- **Quebrar realtime/RLS já funcionando**: nunca alterar policies existentes sem motivo, só somar.
+arquivos alterados · hooks/componentes criados · confirmação `rg` vazio · status do build.
