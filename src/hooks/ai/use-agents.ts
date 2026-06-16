@@ -62,11 +62,42 @@ export const useAgents = () => {
     },
   });
 
+  const toggleAgent = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { data, error } = await supabase
+        .from("ai_agents")
+        .update({ is_active, status: is_active ? "active" : "inactive" })
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ai-agents"] });
+    },
+    onError: (e: any) => toast.error("Erro ao atualizar status: " + e.message),
+  });
+
+  const deleteAgent = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("ai_agents").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ai-agents"] });
+      toast.success("Agente excluído.");
+    },
+    onError: (e: any) => toast.error("Erro ao excluir: " + e.message),
+  });
+
   return {
     agents,
     isLoading,
     createAgent,
     updateAgent,
+    toggleAgent,
+    deleteAgent,
   };
 };
 
