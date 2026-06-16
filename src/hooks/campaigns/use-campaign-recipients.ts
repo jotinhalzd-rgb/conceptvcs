@@ -71,7 +71,7 @@ export function useMaterializeRecipients() {
         campaign_id: campaignId,
         organization_id: organizationId,
         event_type: "recipients_materialized",
-        payload: { count: contacts.length, filters },
+        payload: { count: contacts.length, filters: filters as any },
       });
       return contacts.length;
     },
