@@ -1199,77 +1199,216 @@ export type Database = {
           },
         ]
       }
+      campaign_events: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          event_type: string
+          id: string
+          organization_id: string
+          payload: Json | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          organization_id: string
+          payload?: Json | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          organization_id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          contact_id: string
+          created_at: string
+          error: string | null
+          id: string
+          organization_id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          contact_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          organization_id: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          contact_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          organization_id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_recipients_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_recipients_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           ab_test_config: Json | null
+          archived_at: string | null
+          assigned_to: string | null
           budget: number | null
           campaign_type: string | null
           channel: string
-          company_id: string
+          channel_id: string | null
+          company_id: string | null
           content_template: Json | null
           created_at: string | null
           created_by: string | null
           description: string | null
+          error_message: string | null
+          estimated_recipients: number | null
           expected_roi: number | null
           id: string
+          message_content: string | null
           name: string
           objective: string | null
+          organization_id: string | null
           priority: string | null
           scheduled_at: string | null
+          segment_filters: Json | null
           segmentation_filters: Json | null
           segmentation_rules: Json | null
           status: string
           total_cost: number | null
           type: string
           updated_at: string | null
+          variables: Json | null
         }
         Insert: {
           ab_test_config?: Json | null
+          archived_at?: string | null
+          assigned_to?: string | null
           budget?: number | null
           campaign_type?: string | null
           channel: string
-          company_id: string
+          channel_id?: string | null
+          company_id?: string | null
           content_template?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          error_message?: string | null
+          estimated_recipients?: number | null
           expected_roi?: number | null
           id?: string
+          message_content?: string | null
           name: string
           objective?: string | null
+          organization_id?: string | null
           priority?: string | null
           scheduled_at?: string | null
+          segment_filters?: Json | null
           segmentation_filters?: Json | null
           segmentation_rules?: Json | null
           status?: string
           total_cost?: number | null
           type: string
           updated_at?: string | null
+          variables?: Json | null
         }
         Update: {
           ab_test_config?: Json | null
+          archived_at?: string | null
+          assigned_to?: string | null
           budget?: number | null
           campaign_type?: string | null
           channel?: string
-          company_id?: string
+          channel_id?: string | null
+          company_id?: string | null
           content_template?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          error_message?: string | null
+          estimated_recipients?: number | null
           expected_roi?: number | null
           id?: string
+          message_content?: string | null
           name?: string
           objective?: string | null
+          organization_id?: string | null
           priority?: string | null
           scheduled_at?: string | null
+          segment_filters?: Json | null
           segmentation_filters?: Json | null
           segmentation_rules?: Json | null
           status?: string
           total_cost?: number | null
           type?: string
           updated_at?: string | null
+          variables?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       channel_audit_logs_v2: {
         Row: {
