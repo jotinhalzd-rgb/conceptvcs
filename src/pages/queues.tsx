@@ -1,4 +1,5 @@
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
+import { toast } from "sonner";
 import { 
   Users, 
   Clock, 
@@ -8,8 +9,7 @@ import {
   Settings2, 
   Timer,
   ShieldCheck,
-  ChevronRight,
-  Filter
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -79,14 +79,10 @@ export function QueuesView() {
           description="Controle em tempo real da carga de trabalho e eficiência por departamento."
           actions={
             <>
-              <Button
-                variant="ghost"
-                className="rounded-2xl bg-slate-900/75 border border-slate-800 text-slate-200 hover:bg-indigo-950 hover:border-indigo-500/40 hover:text-white font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2"
-              >
-                <Filter className="w-4 h-4" />
-                Filtros
-              </Button>
-              <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2 shadow-lg shadow-indigo-600/20">
+            <Button
+              onClick={() => toast.info("Criação de filas em breve — disponível na próxima sprint.")}
+              className="rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase text-[10px] tracking-widest px-6 h-12 gap-2 shadow-lg shadow-indigo-600/20"
+            >
                 <Plus className="w-4 h-4" />
                 Criar Fila
               </Button>

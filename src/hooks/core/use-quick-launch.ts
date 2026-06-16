@@ -88,7 +88,7 @@ export function useQuickLaunch() {
               subtitle: c.email || "Sem e-mail",
               icon: Users,
               action: () => {
-                navigate({ to: `/customers/${c.id}` });
+                navigate({ to: "/customers", search: { contactId: c.id } as any });
                 trackAction({ id: `contact-${c.id}`, title: c.name, icon: "Users", type: "contact" });
               }
             }))
@@ -104,7 +104,7 @@ export function useQuickLaunch() {
               subtitle: `Status: ${c.status}`,
               icon: MessageSquare,
               action: () => {
-                navigate({ to: `/inbox/${c.id}` });
+                navigate({ to: "/inbox", search: { conversationId: c.id } as any });
                 trackAction({ id: `conv-${c.id}`, title: c.contacts?.name || "Conversa", icon: "MessageSquare", type: "conversation" });
               }
             }))
@@ -157,8 +157,6 @@ export function useQuickLaunch() {
     {
       category: "ADMINISTRAÇÃO",
       items: [
-        { id: "new-user", title: "Novo Usuário", icon: UserPlus, action: () => navigate({ to: "/settings/users" }) },
-        { id: "settings", title: "Configurações", icon: Settings, action: () => navigate({ to: "/settings" }) },
         { id: "billing", title: "Faturamento", icon: CreditCard, action: () => navigate({ to: "/settings/billing" }) }
       ]
     },
