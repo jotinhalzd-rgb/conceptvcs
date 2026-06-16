@@ -77,3 +77,109 @@ export function useCreateQueue() {
     onError: (e: any) => toast.error(`Erro: ${e.message}`),
   });
 }
+
+export interface UpdateQueueInput {
+  id: string;
+  name?: string;
+  department?: string | null;
+  description?: string | null;
+  priority_level?: number;
+  max_capacity?: number;
+  sla_minutes?: number | null;
+  assignment_mode?: "manual" | "auto";
+  is_default?: boolean;
+  is_active?: boolean;
+}
+
+export function useUpdateQueue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: UpdateQueueInput) => {
+      const { id, ...patch } = input;
+      const { error } = await supabase.from("queues").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["queues-with-stats"] });
+      qc.invalidateQueries({ queryKey: ["queues"] });
+      toast.success("Fila atualizada");
+    },
+    onError: (e: any) => toast.error(`Erro: ${e.message}`),
+  });
+}
+
+export function useDeleteQueue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("queues").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["queues-with-stats"] });
+      qc.invalidateQueries({ queryKey: ["queues"] });
+      toast.success("Fila removida");
+    },
+    onError: (e: any) => toast.error(`Erro ao remover: ${e.message}`),
+  });
+}
+
+export function useQueueMembers(queueId?: string) {
+  return useQuery({
+    queryKey: ["queue-members", queueId],
+    enabled: !!queueId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("queue_members")
+        .select("id, user_id, is_active, priority, capacity, profiles:profiles!queue_members_user_id_fkey(full_name, role)")
+        .eq("queue_id", queueId!);
+      if (error) {
+        // fallback without join if FK alias missing
+        const { data: alt, error: e2 } = await supabase
+          .from("queue_members")
+          .select("id, user_id, is_active, priority, capacity")
+          .eq("queue_id", queueId!);
+        if (e2) throw e2;
+        return (alt ?? []) as any[];
+      }
+      return (data ?? []) as any[];
+    },
+  });
+}
+
+export function useAddQueueMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { queue_id: string; user_id: string; organization_id: string }) => {
+      const { error } = await supabase.from("queue_members").insert({
+        queue_id: input.queue_id,
+        user_id: input.user_id,
+        organization_id: input.organization_id,
+        is_active: true,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["queue-members", vars.queue_id] });
+      qc.invalidateQueries({ queryKey: ["queues-with-stats"] });
+      toast.success("Membro adicionado");
+    },
+    onError: (e: any) => toast.error(`Erro: ${e.message}`),
+  });
+}
+
+export function useRemoveQueueMember(queueId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("queue_members").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["queue-members", queueId] });
+      qc.invalidateQueries({ queryKey: ["queues-with-stats"] });
+      toast.success("Membro removido");
+    },
+    onError: (e: any) => toast.error(`Erro: ${e.message}`),
+  });
+}

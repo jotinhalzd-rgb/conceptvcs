@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Copy, PlugZap, ShieldCheck, AlertTriangle, Trash2 } from "lucide-react";
+import { Copy, PlugZap, ShieldCheck, AlertTriangle, Trash2, Eye, EyeOff, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
 import { ProviderFields } from "./provider-fields";
 import {
@@ -76,6 +76,11 @@ export function ChannelConfigDrawer({
   const disconnect = useDisconnectChannel();
   const { data: queues } = useQueues();
 
+  const [webhookSecret, setWebhookSecret] = useState<string>("");
+  const [showSecret, setShowSecret] = useState(false);
+  const [testResult, setTestResult] = useState<string>("");
+  const [testing, setTesting] = useState(false);
+
   const secretsAlreadyStored = !!(channel?.credentials && Object.keys(channel.credentials).length > 0);
 
   useEffect(() => {
@@ -85,6 +90,8 @@ export function ChannelConfigDrawer({
     setConfig((channel?.settings as any)?.config ?? {});
     setCredentials({});
     setDefaultQueueId((channel?.settings as any)?.default_queue_id ?? null);
+    setWebhookSecret((channel?.credentials as any)?.webhook_secret ?? "");
+    setTestResult("");
   }, [open, channel?.id]);
 
   if (!provider) {
@@ -147,9 +154,49 @@ export function ChannelConfigDrawer({
       ? `<script async src="https://widget.onecontact.app/v1.js" data-channel="${channel.id}"></script>`
       : null;
 
-  const webhookUrl = channel?.id
-    ? `https://conceptvcs.lovable.app/api/public/channels/${channel.id}/webhook`
-    : null;
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://conceptvcs.lovable.app";
+  const inboundUrl = channel?.id ? `${origin}/api/public/channels/${channel.id}/inbound` : null;
+
+  const saveWebhookSecret = async (secret: string) => {
+    if (!channel?.id) return;
+    await upsert.mutateAsync({
+      id: channel.id,
+      provider: provider.id,
+      name: name.trim() || channel.name,
+      identifier: identifier.trim() || null,
+      default_queue_id: defaultQueueId,
+      config,
+      credentials: { ...(channel.credentials ?? {}), webhook_secret: secret },
+    });
+    setWebhookSecret(secret);
+  };
+
+  const runInboundTest = async () => {
+    if (!inboundUrl) return;
+    setTesting(true);
+    setTestResult("");
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (webhookSecret) headers["x-webhook-token"] = webhookSecret;
+      const res = await fetch(inboundUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          phone: "+5511999990000",
+          sender_name: "Teste Endpoint",
+          text: "quero falar com o financeiro",
+          provider: "inbound_api_test",
+        }),
+      });
+      const txt = await res.text();
+      setTestResult(`HTTP ${res.status}\n${txt}`);
+    } catch (e: any) {
+      setTestResult(`Erro: ${e?.message ?? e}`);
+    } finally {
+      setTesting(false);
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -268,12 +315,85 @@ export function ChannelConfigDrawer({
           </TabsContent>
 
           <TabsContent value="advanced" className="space-y-4 pt-4">
-            {webhookUrl && (
-              <CopyRow
-                label="Webhook URL"
-                value={webhookUrl}
-                helper="Configure este endpoint no painel do provedor."
-              />
+            {inboundUrl ? (
+              <div className="space-y-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-widest text-slate-200">
+                    Endpoint Inbound
+                  </p>
+                  <Badge className="border-none bg-emerald-500/15 text-emerald-300">
+                    {webhookSecret ? "Endpoint técnico ativo" : "Aguardando token"}
+                  </Badge>
+                </div>
+                <CopyRow label="URL" value={inboundUrl} />
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Webhook Token
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      type={showSecret ? "text" : "password"}
+                      value={webhookSecret}
+                      placeholder="Sem token — gere um para liberar o endpoint."
+                      className="bg-white/[0.03] border-white/10 text-slate-100 font-mono text-[11px]"
+                    />
+                    <Button type="button" variant="ghost" onClick={() => setShowSecret((v) => !v)} className="text-slate-300">
+                      {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        if (!webhookSecret) return;
+                        navigator.clipboard.writeText(webhookSecret);
+                        toast.success("Token copiado");
+                      }}
+                      className="text-slate-300"
+                      disabled={!webhookSecret}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => saveWebhookSecret(crypto.randomUUID().replace(/-/g, ""))}
+                      disabled={upsert.isPending}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white gap-1"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      {webhookSecret ? "Rotacionar" : "Gerar"}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    Envie no header <code>x-webhook-token</code>. Endpoint técnico ativo — provider externo (Meta/Twilio/etc.) ainda exige credenciais reais.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Testar endpoint</p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={runInboundTest}
+                      disabled={testing || !inboundUrl}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      {testing ? "Enviando..." : "Enviar payload de teste"}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    Envia <code>"quero falar com o financeiro"</code> ao endpoint usando o token atual.
+                  </p>
+                  {testResult && (
+                    <pre className="text-[10px] font-mono whitespace-pre-wrap bg-black/30 border border-white/5 rounded p-2 text-slate-300 max-h-48 overflow-auto">
+{testResult}
+                    </pre>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-500">Salve o canal para gerar o endpoint inbound.</p>
             )}
             {snippet && (
               <CopyRow
