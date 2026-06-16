@@ -33,16 +33,19 @@ function isDevHost(host: string | null): boolean {
 export const ensureDemoData = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string }) => ({ email: String(d?.email ?? "") }))
   .handler(async ({ data }) => {
-    const req = getRequest();
-    const host = req?.headers.get("host") ?? null;
-    if (!isDevHost(host)) {
-      throw new Error("Demo acessível apenas em ambientes de desenvolvimento.");
-    }
+    try {
+      const req = getRequest();
+      const host = req?.headers.get("host") ?? null;
+      if (!isDevHost(host)) {
+        return { ok: false as const, error: "Demo acessível apenas em ambientes de desenvolvimento." };
+      }
 
-    const target = DEMO_USERS.find((u) => u.email === data.email);
-    if (!target) throw new Error("Usuário demo inválido.");
+      const target = DEMO_USERS.find((u) => u.email === data.email);
+      if (!target) {
+        return { ok: false as const, error: "Usuário demo inválido." };
+      }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // 1) Demo org
     let { data: org } = await supabaseAdmin
@@ -95,7 +98,11 @@ export const ensureDemoData = createServerFn({ method: "POST" })
     await seedDemoData(supabaseAdmin, orgId);
     await seedDemoOmnichannel(supabaseAdmin, orgId);
 
-    return { ok: true, password: DEMO_PASSWORD };
+      return { ok: true as const, password: DEMO_PASSWORD };
+    } catch (err: any) {
+      console.error("[ensureDemoData] falhou:", err);
+      return { ok: false as const, error: String(err?.message ?? err) };
+    }
   });
 
 async function seedDemoData(db: any, orgId: string) {
