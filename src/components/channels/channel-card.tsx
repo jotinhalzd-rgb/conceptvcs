@@ -20,6 +20,7 @@ import {
   statusColor,
   statusLabel,
 } from "@/lib/channels/status";
+import { Store } from "lucide-react";
 
 interface ChannelCardProps {
   channel: any;
@@ -39,6 +40,7 @@ export const ChannelCard = ({ channel, onConfigure }: ChannelCardProps) => {
   const provider = getProvider(channel.provider);
   const channelType: ChannelType | undefined =
     provider?.channelType ?? (channel?.settings as any)?.channel_type;
+  const fromMarketplace = !!channel?.marketplace_install_id;
 
   const getIcon = (type: ChannelType | undefined) => {
     switch (type) {
@@ -71,6 +73,12 @@ export const ChannelCard = ({ channel, onConfigure }: ChannelCardProps) => {
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{channel.name}</h3>
               {isDemo && <DemoBadge variant="simulated" />}
+              {fromMarketplace && (
+                <Badge className="bg-indigo-500/10 text-indigo-300 border-none text-[8px] font-black px-2 py-0.5 uppercase flex items-center gap-1">
+                  <Store className="w-2.5 h-2.5" />
+                  Marketplace
+                </Badge>
+              )}
             </div>
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
               {provider?.label ?? channel.provider}

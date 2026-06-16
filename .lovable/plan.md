@@ -1,123 +1,96 @@
+## Plano — Fechamento do Núcleo Omnichannel OneContact OS
 
-# Fase E1 — Canais / Integrações por provider
+Escopo: 5 blocos sequenciais. Preservar tudo aprovado (Fases 0, B, C, D, E1). Nada de "Em breve", handler fake, dado fake como produção, ou tela morta.
 
-Objetivo: transformar a Central de Canais em algo configurável de verdade, com persistência real, status confiável e vínculo com filas / Inbox / Marketplace — sem quebrar Fase 0, B, C, D.
+---
 
-## 1. Estrutura de dados (sem migration pesada)
+### BLOCO 1 — Marketplace ↔ Canais
 
-A tabela `public.channels` já tem tudo necessário:
-- `provider`, `name`, `identifier`, `credentials jsonb`, `settings jsonb`, `status`, `is_active`, `last_sync_at`, `error_log`, `organization_id` (com RLS por `current_user_org()` + `is_org_admin()` para writes).
+**Objetivo:** instalar no Marketplace cria/atribui um registro real em `channels`, reutiliza o drawer da Fase E1, status reflete nos dois lados.
 
-Decisões:
-- `settings.default_queue_id` → fila padrão.
-- `settings.channel_type` → `whatsapp | instagram | facebook | email | webchat | voice`.
-- `settings.config` → campos não-secretos por provider (page_id, smtp_host, allowed_domain, etc.).
-- `credentials` → apenas segredos (access_token, api_key, smtp_pass...). Continua só em jsonb (vault não existe no projeto); UI nunca re-exibe valor salvo, só indica "configurado".
-- Status padrão: `disconnected | pending_configuration | configured | connected | error`. Vou normalizar `status` em código (sem migration) e manter compat com `offline/online` legados via mapping.
+**Backend (migration):**
+- Adicionar coluna `channels.marketplace_install_id uuid` (nullable, FK para `hub_installs_marketplace.id`, índice).
+- Adicionar coluna `hub_installs_marketplace.channel_id uuid` (nullable, FK para `channels.id`).
+- Garantir `GRANT`s já existentes; sem nova policy (segue org-scoped).
 
-Sem migration nova — toda persistência é via `channels` existente. Se durante a implementação aparecer falta real (ex.: vincular `hub_installs_marketplace.channel_id`), abro migration mínima e separada.
+**Hooks:**
+- `src/hooks/marketplace/use-marketplace.ts`: ao instalar asset com `category='channel'`/`integration_type='channel'`, dentro da mesma transação chamar `upsertChannel({ provider, channel_type, name, status:'pending_configuration', marketplace_install_id })` e gravar `channel_id` no install. Invalidar queries `channels` e `marketplace`.
+- Mapear providers legados (`meta` → `whatsapp_meta_cloud`, `twilio` → `whatsapp_twilio`) num helper `src/lib/channels/legacy-map.ts`.
 
-## 2. Hooks (`src/hooks/channels/`)
+**UI:**
+- `marketplace-view.tsx` / `app-card.tsx`: estado real "Instalado" / "Configurar" / "Conectado" lendo `channels.status` via join. Botão "Configurar" navega `/channels?channel=<id>` que abre o drawer correto.
+- `channels-view.tsx`: aceitar query `?channel=` e abrir `ChannelConfigDrawer` no carregamento.
+- `channel-card.tsx`: badge "via Marketplace" quando `marketplace_install_id != null`.
+- Provider desconhecido: mostrar CTA "Migrar provedor" abrindo o picker pré-filtrado por `channel_type`.
 
-- Estender `use-channels.ts`:
-  - `useChannels()` mantido.
-  - `useUpsertChannel()` — insert/update com `organization_id` resolvido por profile; recebe `{ id?, channel_type, provider, name, identifier?, settings, credentials, default_queue_id, status }`.
-  - `useDeleteChannel()` — soft via `status='disconnected'` + `is_active=false` (preserva FK com `conversations`).
-  - `useTestChannel()` — valida campos mínimos por provider e atualiza `status` + `last_sync_at` + `error_log`. Sem chamada externa real (não fingir): testes locais de schema/regex + ping HTTP só onde for seguro (ex.: HEAD em SMTP host? não — fica como validação local).
-- Novo `use-channel-providers.ts` — fonte única de catálogo (icon, label, channel_type, campos visíveis, campos secretos, validators zod).
+**Webhook URL:** rota `src/routes/api/public/channels/$channelId/inbound.ts` (POST) — recebe payload, valida assinatura/secret salvo em `channels.credentials.webhook_secret` quando existir, grava em `channel_webhooks_log` e dispara processamento (ver Bloco 3). Sem secret configurado → `status='pending_configuration'`, copy clara na UI.
 
-## 3. Catálogo de providers
+---
 
-`src/lib/channels/providers.ts` (puro, sem IO):
+### BLOCO 2 — Campanhas CRUD real
 
-```text
-whatsapp.meta_cloud   → phone_number_id, business_account_id, verify_token | secret: access_token
-whatsapp.twilio       → from_number, account_sid | secret: auth_token
-whatsapp.360dialog    | secret: api_key
-whatsapp.evolution    → base_url, instance | secret: api_key
-instagram.meta        → page_id, ig_user_id | secret: access_token
-facebook.messenger    → page_id | secret: page_access_token, app_secret
-email.smtp            → from_email, from_name, host, port, username, secure | secret: password
-email.api (resend/ses) → from_email, from_name, region? | secret: api_key
-webchat.native        → widget_name, allowed_domain, theme_color (snippet derivado do id)
-voice.generic         → provider_name, phone_number  (marca dependência externa em texto)
-```
+**Hooks:** `src/hooks/campaigns/use-campaigns.ts` — adicionar `useUpsertCampaign`, `useDuplicateCampaign`, `useArchiveCampaign`, `useDeleteCampaign`, `useEstimateAudience` (count em `contacts` com filtros).
 
-Cada entrada exporta um `zodSchema` para validação cliente + server-side feedback.
+**UI (`src/components/campaigns/`):**
+- `campaign-wizard.tsx`: form real (nome, canal via `channels`, segmento, mensagem, status, data programada, responsável via `useOrgUsers`). Zod validation.
+- `campaign-manager.tsx` / `campaigns-view.tsx`: lista, filtros, ações duplicar/arquivar/excluir com `AlertDialog`.
+- `analytics-dashboard.tsx`: métricas reais via `campaign_analytics`; sem dados → empty state explicando "aguardando envio real".
+- Disparo: se canal vinculado não estiver `connected`, salvar `status='pending_configuration'` com mensagem útil. Nada de fake-send.
 
-## 4. UI — Central de Canais
+---
 
-`src/components/channels/`:
+### BLOCO 3 — Filas, Roteamento, Inbound
 
-- `channels-view.tsx` — adiciona filtro por status + tipo, ações reais nos cards.
-- `channel-card.tsx` — passa a mostrar:
-  - status mapeado (`pending_configuration`, etc.) com cor/badge,
-  - botão principal contextual: `Configurar` (pending), `Reconfigurar` (configured), `Testar` (connected/configured), `Desconectar` (active).
-  - Abre `ChannelConfigDrawer` com o canal preenchido.
-- `connect-modal.tsx` → reescrever como `channel-picker-modal.tsx` (escolhe channel_type + provider) → abre o drawer.
-- Novo `channel-config-drawer.tsx` — `Sheet` lateral com:
-  - cabeçalho: provider + status,
-  - tabs: **Configuração**, **Credenciais**, **Roteamento**, **Avançado** (snippet/webhook URL/desconectar),
-  - render dinâmico baseado em `providers.ts`,
-  - select de `default_queue_id` (usa hook existente `useQueues`),
-  - botão `Testar conexão` (chama `useTestChannel`),
-  - botão `Salvar` (chama `useUpsertChannel`),
-  - botão `Desconectar` com `AlertDialog`.
-- Para Webchat, snippet copiável `<script src=".../widget.js" data-channel="{id}">`.
+**Filas (`src/components/queues/queues-management.tsx`):**
+- Confirmar CRUD real, membros (`queue_members`), modo (`assignment_mode`), `sla_minutes`, `is_active`, prioridade.
 
-## 5. Lógica de status
+**Roteamento:**
+- Tabela `routing_rules` já existe. Migration: garantir colunas `keywords text[]`, `queue_id uuid`, `priority int`, `fallback bool` (só adicionar se faltarem).
+- Nova UI: `src/components/queues/routing-rules.tsx` (CRUD simples) acessível por tab em Filas.
+- Helper server `src/lib/routing/route-message.functions.ts` (`createServerFn`): recebe `{ organization_id, channel_id, text }`, aplica regras por keyword/intenção, retorna `{ queue_id, routing_reason }`. Fallback para fila padrão do canal.
 
-Helper `computeChannelStatus(provider, settings, credentials)`:
-- Faltam campos obrigatórios → `pending_configuration`.
-- Tudo presente, sem teste → `configured`.
-- Após `useTestChannel` ok → `connected` + `last_sync_at = now()`.
-- Erro → `error` + `error_log`.
-- Desconectar → `disconnected` + `is_active=false`.
+**Inbound:**
+- Rota pública `api/public/channels/$channelId/inbound`: cria/atualiza `contacts`, cria `conversations` com `queue_id` + `routing_reason`, insere `messages`. Trigger `notify_conversation_event` (já existe) gera notificações. Realtime já habilitado em `messages`/`conversations` (verificar via migration `ALTER PUBLICATION` se faltar).
+- Simulator (`sim-webhook` edge function) preservado, redirecionado para usar mesmo helper de roteamento.
 
-Sem chamadas externas que finjam sucesso. Texto explícito no card quando aguardando credenciais.
+**Teste "quero falar com o financeiro":** seed migration garante fila "Financeiro" + regra `keywords=['financeiro','financ']` apontando para ela na org demo.
 
-## 6. Integração Marketplace ↔ Canais
+---
 
-- Em `src/pages/settings.marketplace.tsx`: instalar item de canal cria/atualiza linha em `channels` com `status='pending_configuration'` e `settings.marketplace_install_id`.
-- Card do Marketplace passa a refletir status real consultando `channels` por `marketplace_install_id` (sem duplicar).
-- Botão "Configurar" no Marketplace abre o mesmo `ChannelConfigDrawer`.
+### BLOCO 4 — Relatórios
 
-## 7. Integração com Inbox / filas
+**`src/routes/reports.tsx` + novos componentes em `src/components/reports/`:**
+- Hooks `use-reports.ts` agregando via `supabase.rpc` ou `select count` em `conversations`, `messages`, `deals`, `campaigns`.
+- Métricas: volume por fila/canal/atendente, status, SLA (`sla_due_at` vs `closed_at`), AHT, oportunidades, campanhas, série temporal.
+- Filtros: período, fila, canal, atendente, status. Botão limpar.
+- Exportação CSV client-side (Blob) respeitando filtros.
+- Empty states reais.
 
-- Garantir que `conversations.channel_id` continua aceitando os canais novos (FK já existe).
-- `default_queue_id` salvo em `settings` é consumido pelo edge function `send-message-v2` / roteador já existente apenas como hint — sem alterar o roteamento atual nesta fase para não regredir.
+---
 
-## 8. Preservação (não quebrar)
+### BLOCO 5 — QA
 
-- Não tocar em: Inbox (Fase B), Customer 360 (Fase C), CRM (Fase D), AI Studio, sidebar, login demo, perfis, dashboard por role, simulador setorizado, notificações, SLA.
-- `notify_conversation_event` e demais triggers permanecem intocados.
-- Sem mudança de RLS.
+1. `bunx tsc --noEmit`.
+2. `rg -n "Em breve|coming soon|não implementado|próxima sprint|TODO:" src` → 0.
+3. `rg -n "onClick=\{\(\) => \{\}\}|onClick=\{\(\) => null\}" src` → 0.
+4. `rg -n "console\.log" src/components src/hooks` → revisar.
+5. Playwright headless: login demo → configura canal → simula mensagem "financeiro" → valida Inbox → assume → responde → Customer 360 → cria deal → CRM → Relatórios.
 
-## 9. QA final
+---
 
-- `bunx tsc --noEmit`.
-- `rg -n "Em breve|coming soon|não implementado|próxima sprint"` em `src/` → 0.
-- `rg -n "onClick=\\{\\(\\) => \\{\\}\\}"` → 0.
-- `rg -n "onClick=\\{\\(\\) => console\\.log"` → 0.
-- Teste manual: criar WhatsApp Meta sem token → vira `pending_configuration`; preencher → `configured`; testar → `connected`; desconectar → some da lista ativa, conversas antigas preservadas; Webchat com snippet copiável; Marketplace install reflete em Canais.
+### Entregáveis do relatório final
 
-## Arquivos previstos
+Arquivos alterados, migrations, hooks/componentes novos, como testar cada bloco, resultado de typecheck/build, resultado das buscas, riscos.
 
-Novos:
-- `src/lib/channels/providers.ts`
-- `src/lib/channels/status.ts`
-- `src/components/channels/channel-config-drawer.tsx`
-- `src/components/channels/channel-picker-modal.tsx`
-- `src/components/channels/provider-fields.tsx`
+---
 
-Alterados:
-- `src/components/channels/channels-view.tsx`
-- `src/components/channels/channel-card.tsx`
-- `src/components/channels/connect-modal.tsx` (vira wrapper do picker para preservar imports)
-- `src/components/channels/webchat-config.tsx` (passa a render dentro do drawer)
-- `src/hooks/channels/use-channels.ts`
-- `src/pages/settings.marketplace.tsx` (vínculo install→channel)
+### Ordem de execução
 
-Sem migration nesta fase, salvo se durante implementação algo se mostrar tecnicamente necessário — nesse caso, migration mínima isolada com GRANTs e RLS por `organization_id`.
+1. Migration (B1+B3 juntas) → aguardar aprovação.
+2. Hooks + UI Bloco 1.
+3. Hooks + UI Bloco 2.
+4. Roteamento + inbound + UI filas Bloco 3.
+5. Relatórios Bloco 4.
+6. QA Bloco 5 + relatório.
 
-Confirma para eu executar?
+Confirma para eu executar a migration do passo 1?

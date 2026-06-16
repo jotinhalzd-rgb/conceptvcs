@@ -1450,6 +1450,7 @@ export type Database = {
       }
       channels: {
         Row: {
+          channel_type: string | null
           created_at: string | null
           credentials: Json | null
           error_log: string | null
@@ -1459,6 +1460,7 @@ export type Database = {
           is_demo: boolean
           is_test: boolean
           last_sync_at: string | null
+          marketplace_install_id: string | null
           name: string
           organization_id: string
           provider: string
@@ -1467,6 +1469,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          channel_type?: string | null
           created_at?: string | null
           credentials?: Json | null
           error_log?: string | null
@@ -1476,6 +1479,7 @@ export type Database = {
           is_demo?: boolean
           is_test?: boolean
           last_sync_at?: string | null
+          marketplace_install_id?: string | null
           name: string
           organization_id: string
           provider: string
@@ -1484,6 +1488,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          channel_type?: string | null
           created_at?: string | null
           credentials?: Json | null
           error_log?: string | null
@@ -1493,6 +1498,7 @@ export type Database = {
           is_demo?: boolean
           is_test?: boolean
           last_sync_at?: string | null
+          marketplace_install_id?: string | null
           name?: string
           organization_id?: string
           provider?: string
@@ -1501,6 +1507,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "channels_marketplace_install_fk"
+            columns: ["marketplace_install_id"]
+            isOneToOne: false
+            referencedRelation: "hub_installs_marketplace"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "channels_organization_id_fkey"
             columns: ["organization_id"]
@@ -3264,6 +3277,8 @@ export type Database = {
       hub_installs_marketplace: {
         Row: {
           asset_id: string
+          channel_id: string | null
+          config: Json
           current_install_status: string | null
           id: string
           installed_at: string | null
@@ -3272,6 +3287,8 @@ export type Database = {
         }
         Insert: {
           asset_id: string
+          channel_id?: string | null
+          config?: Json
           current_install_status?: string | null
           id?: string
           installed_at?: string | null
@@ -3280,6 +3297,8 @@ export type Database = {
         }
         Update: {
           asset_id?: string
+          channel_id?: string | null
+          config?: Json
           current_install_status?: string | null
           id?: string
           installed_at?: string | null
@@ -3287,6 +3306,13 @@ export type Database = {
           organization_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "hub_installs_channel_fk"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "hub_installs_marketplace_asset_id_fkey"
             columns: ["asset_id"]
@@ -4862,6 +4888,70 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "queue_members_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_routing_rules: {
+        Row: {
+          channel_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_fallback: boolean
+          keywords: string[]
+          name: string
+          organization_id: string
+          priority: number
+          queue_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_fallback?: boolean
+          keywords?: string[]
+          name: string
+          organization_id: string
+          priority?: number
+          queue_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_fallback?: boolean
+          keywords?: string[]
+          name?: string
+          organization_id?: string
+          priority?: number
+          queue_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_routing_rules_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_routing_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_routing_rules_queue_id_fkey"
             columns: ["queue_id"]
             isOneToOne: false
             referencedRelation: "queues"

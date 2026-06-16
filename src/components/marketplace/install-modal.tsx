@@ -14,6 +14,8 @@ import {
   useInstallAsset,
   useUninstallAsset,
 } from "@/hooks/marketplace/use-marketplace";
+import { isChannelAsset } from "@/lib/channels/legacy-map";
+import { useNavigate } from "@tanstack/react-router";
 
 interface InstallModalProps {
   open: boolean;
@@ -25,12 +27,15 @@ interface InstallModalProps {
 export const InstallModal = ({ open, onOpenChange, asset, install }: InstallModalProps) => {
   const installMut = useInstallAsset();
   const uninstallMut = useUninstallAsset();
+  const navigate = useNavigate();
 
   if (!asset) return null;
 
-  const requiresExternal = assetRequiresExternalProvider(asset);
+  const requiresExternal = assetRequiresExternalProvider(asset) || isChannelAsset(asset);
+  const isChannel = isChannelAsset(asset);
   const isInstalled = !!install;
   const status = install?.current_install_status;
+  const channelId = install?.channel_id;
 
   const handleInstall = async () => {
     await installMut.mutateAsync(asset);
@@ -42,6 +47,12 @@ export const InstallModal = ({ open, onOpenChange, asset, install }: InstallModa
     if (!confirm(`Remover ${asset.asset_title}?`)) return;
     await uninstallMut.mutateAsync(install.id);
     onOpenChange(false);
+  };
+
+  const handleConfigure = () => {
+    if (!channelId) return;
+    onOpenChange(false);
+    navigate({ to: "/admin/channels", search: { channel: channelId } as any });
   };
 
   return (
@@ -93,7 +104,16 @@ export const InstallModal = ({ open, onOpenChange, asset, install }: InstallModa
                 {uninstallMut.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                 Remover
               </Button>
-              <Button onClick={() => onOpenChange(false)}>Fechar</Button>
+              {isChannel && channelId ? (
+                <Button
+                  onClick={handleConfigure}
+                  className="bg-indigo-600 hover:bg-indigo-500"
+                >
+                  Configurar canal
+                </Button>
+              ) : (
+                <Button onClick={() => onOpenChange(false)}>Fechar</Button>
+              )}
             </>
           ) : (
             <>

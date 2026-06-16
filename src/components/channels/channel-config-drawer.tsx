@@ -39,6 +39,7 @@ import {
 } from "@/hooks/channels/use-channels";
 import { useQueues } from "@/hooks/queues/use-queues";
 import { getProvider, type ProviderDef } from "@/lib/channels/providers";
+import { mapLegacyProvider } from "@/lib/channels/legacy-map";
 import {
   normalizeStatus,
   statusColor,
@@ -59,10 +60,10 @@ export function ChannelConfigDrawer({
   providerId,
   channel,
 }: ChannelConfigDrawerProps) {
-  const provider: ProviderDef | undefined = useMemo(
-    () => getProvider(channel?.provider ?? providerId),
-    [providerId, channel?.provider],
-  );
+  const provider: ProviderDef | undefined = useMemo(() => {
+    const raw = channel?.provider ?? providerId;
+    return getProvider(raw) ?? getProvider(mapLegacyProvider(raw) ?? undefined);
+  }, [providerId, channel?.provider]);
 
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
