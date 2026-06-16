@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAgents } from "@/hooks/ai/use-agents";
+import { useQueues } from "@/hooks/queues/use-queues";
+import { useChannels } from "@/hooks/channels/use-channels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +18,9 @@ import { Bot, Save, X, BrainCircuit, Sparkles } from "lucide-react";
 
 export const AgentEditor = ({ agent, onCancel }: { agent: any, onCancel: () => void }) => {
   const { createAgent, updateAgent } = useAgents();
+  const { data: queues } = useQueues();
+  const { data: channels } = useChannels();
+  const meta = (agent?.metadata && typeof agent.metadata === "object" ? agent.metadata : {}) as Record<string, any>;
   const [formData, setFormData] = useState({
     name: agent?.name || '',
     description: agent?.description || '',
@@ -24,14 +29,32 @@ export const AgentEditor = ({ agent, onCancel }: { agent: any, onCancel: () => v
     autonomy_level: agent?.autonomy_level || 'assistant',
     system_prompt: agent?.system_prompt || '',
     is_active: agent?.is_active ?? true,
+    status: agent?.status || 'active',
+    queue_id: agent?.queue_id || '',
+    channel_id: agent?.channel_id || '',
+    provider: (meta.provider as string) || 'lovable_ai',
+    model: (meta.model as string) || 'google/gemini-3-flash-preview',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      name: formData.name,
+      description: formData.description,
+      role_type: formData.role_type,
+      tone_of_voice: formData.tone_of_voice,
+      autonomy_level: formData.autonomy_level,
+      system_prompt: formData.system_prompt,
+      is_active: formData.is_active,
+      status: formData.status,
+      queue_id: formData.queue_id || null,
+      channel_id: formData.channel_id || null,
+      metadata: { ...meta, provider: formData.provider, model: formData.model },
+    };
     if (agent?.id) {
-      updateAgent.mutate({ id: agent.id, updates: formData });
+      updateAgent.mutate({ id: agent.id, updates: payload });
     } else {
-      createAgent.mutate(formData);
+      createAgent.mutate(payload);
     }
     onCancel();
   };
@@ -146,6 +169,68 @@ export const AgentEditor = ({ agent, onCancel }: { agent: any, onCancel: () => v
             placeholder="Instruções detalhadas sobre como o agente deve se comportar, o que pode fazer e o que não pode..."
             className="bg-white/5 border-white/10 rounded-xl min-h-[150px] font-mono text-xs leading-relaxed"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Fila vinculada</Label>
+            <Select value={formData.queue_id || "__none"} onValueChange={(v) => setFormData({ ...formData, queue_id: v === "__none" ? "" : v })}>
+              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl"><SelectValue placeholder="Nenhuma" /></SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10">
+                <SelectItem value="__none">Nenhuma</SelectItem>
+                {(queues ?? []).map((q: any) => (
+                  <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Canal vinculado</Label>
+            <Select value={formData.channel_id || "__none"} onValueChange={(v) => setFormData({ ...formData, channel_id: v === "__none" ? "" : v })}>
+              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10">
+                <SelectItem value="__none">Nenhum</SelectItem>
+                {(channels ?? []).map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name || c.identifier || c.id}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Provider</Label>
+            <Select value={formData.provider} onValueChange={(v) => setFormData({ ...formData, provider: v })}>
+              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10">
+                <SelectItem value="lovable_ai">Lovable AI Gateway</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Modelo</Label>
+            <Select value={formData.model} onValueChange={(v) => setFormData({ ...formData, model: v })}>
+              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10">
+                <SelectItem value="google/gemini-3-flash-preview">Gemini 3 Flash (preview)</SelectItem>
+                <SelectItem value="google/gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+                <SelectItem value="google/gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
+                <SelectItem value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Status</Label>
+            <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-[#0f172a] border-white/10">
+                <SelectItem value="active">Ativo</SelectItem>
+                <SelectItem value="inactive">Inativo</SelectItem>
+                <SelectItem value="pending_configuration">Pendente de configuração</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
