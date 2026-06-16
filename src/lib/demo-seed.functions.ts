@@ -454,6 +454,39 @@ async function seedDemoQueuesAndRouting(db: any, orgId: string) {
     }
   }
 
+  // 2b) New org-scoped queue_routing_rules (one row per sector, keywords[])
+  for (const spec of DEMO_QUEUES) {
+    if (spec.keywords.length === 0) continue;
+    const qid = queueIdByName[spec.name];
+    const ruleName = `Demo ${spec.name}`;
+    const { data: existing } = await db
+      .from("queue_routing_rules")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("name", ruleName)
+      .maybeSingle();
+    if (existing?.id) {
+      await db
+        .from("queue_routing_rules")
+        .update({
+          queue_id: qid,
+          keywords: spec.keywords,
+          priority: spec.priority_level * 10,
+          is_active: true,
+        })
+        .eq("id", existing.id);
+    } else {
+      await db.from("queue_routing_rules").insert({
+        organization_id: orgId,
+        name: ruleName,
+        queue_id: qid,
+        keywords: spec.keywords,
+        priority: spec.priority_level * 10,
+        is_active: true,
+      });
+    }
+  }
+
   // 3) queue_members: atendente em Atendimento Geral (auto) + gerente em todas
   const { data: agentProfile } = await db
     .from("profiles").select("id").eq("organization_id", orgId).eq("role", "agent").maybeSingle();
