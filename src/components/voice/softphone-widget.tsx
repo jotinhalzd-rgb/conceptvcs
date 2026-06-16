@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouterState } from "@tanstack/react-router";
 import { 
   Phone, 
   PhoneOff, 
@@ -28,6 +29,7 @@ export const SoftphoneWidget = () => {
   const [isOnHold, setIsOnHold] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [callTimer, setCallTimer] = useState("00:00");
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const toggleCall = () => {
     setIsCalling(!isCalling);
@@ -36,9 +38,12 @@ export const SoftphoneWidget = () => {
     }
   };
 
+  // Não mostrar em telas públicas/auth
+  if (pathname.startsWith("/auth") || pathname.startsWith("/login")) return null;
+
   return (
     <div className={cn(
-      "fixed bottom-6 right-6 z-50 transition-all duration-500",
+      "fixed bottom-24 right-6 md:bottom-6 z-40 transition-all duration-500",
       isMinimized ? "w-14 h-14" : "w-72 h-[420px]"
     )}>
       <AnimatePresence mode="wait">
