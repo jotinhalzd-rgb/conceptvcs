@@ -13,8 +13,7 @@ const sevTone: Record<RealAlert["severity"], string> = {
 };
 
 export const OILCommandCenter = () => {
-  const { alerts, recommendations, isLoading, isError, refetch, status } = useRealAlerts() as ReturnType<typeof useRealAlerts> & { isError?: boolean };
-  const err = (useRealAlerts as any) && Boolean((arguments as any)[0]);
+  const { alerts, recommendations, isLoading, refetch, status } = useRealAlerts();
 
   if (isLoading) {
     return (

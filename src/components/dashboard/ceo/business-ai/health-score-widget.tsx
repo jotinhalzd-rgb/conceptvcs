@@ -7,8 +7,9 @@ import { DemoBadge } from "@/lib/demo-badge";
 export const HealthScoreWidget = () => {
   const { data: health, isLoading } = useBusinessHealth();
 
-  const score = health?.score || 85;
-  const status = health?.status || 'healthy';
+  const score = typeof health?.score === "number" ? health.score : null;
+  const status = (health?.status as string) || "unknown";
+  const hasScore = score !== null;
 
   const getStatusColor = (s: string) => {
     switch (s) {
