@@ -54,6 +54,83 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
     .maybeSingle();
 
   if (!conversation) {
+    // ---- Routing: keyword rules → default queue → optional auto-assignment ----
+    const normalized = (message.body ?? "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+    let routedQueueId: string | null = null;
+    let routingReason: string | null = null;
+
+    if (normalized.length > 0) {
+      const { data: rules } = await supabase
+        .from("routing_rules")
+        .select("keyword, target_queue_id, priority_bonus, is_active, queues!inner(organization_id)")
+        .eq("is_active", true)
+        .eq("queues.organization_id", orgId)
+        .order("priority_bonus", { ascending: false });
+      for (const r of (rules ?? []) as any[]) {
+        const kw = String(r.keyword ?? "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
+        if (kw && normalized.includes(kw)) {
+          routedQueueId = r.target_queue_id;
+          routingReason = `rule:${kw}`;
+          break;
+        }
+      }
+    }
+
+    if (!routedQueueId) {
+      const { data: def } = await supabase
+        .from("queues")
+        .select("id")
+        .eq("organization_id", orgId)
+        .eq("is_default", true)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (def?.id) {
+        routedQueueId = def.id;
+        routingReason = "default";
+      }
+    }
+
+    // Auto-assignment (least-busy) when the routed queue is in auto mode
+    let assignedAgentId: string | null = null;
+    if (routedQueueId) {
+      const { data: q } = await supabase
+        .from("queues")
+        .select("assignment_mode")
+        .eq("id", routedQueueId)
+        .maybeSingle();
+      if (q?.assignment_mode === "auto") {
+        const { data: members } = await supabase
+          .from("queue_members")
+          .select("user_id")
+          .eq("queue_id", routedQueueId)
+          .eq("is_active", true);
+        if (members && members.length > 0) {
+          // pick least-busy by current open/pending load
+          let best: { user_id: string; load: number } | null = null;
+          for (const m of members) {
+            const { count } = await supabase
+              .from("conversations")
+              .select("id", { count: "exact", head: true })
+              .eq("agent_id", m.user_id)
+              .in("status", ["open", "pending", "active"]);
+            const load = count ?? 0;
+            if (!best || load < best.load) best = { user_id: m.user_id, load };
+          }
+          assignedAgentId = best?.user_id ?? null;
+        }
+      }
+    }
+
     const { data: newConv, error: createConvError } = await supabase
       .from("conversations")
       .insert({
@@ -64,12 +141,16 @@ export async function processWhatsAppMessage(supabase: any, message: WhatsAppMes
         last_message_at: message.timestamp,
         last_message_preview: message.body || `[${message.type}]`,
         is_demo: isDemo,
+        queue_id: routedQueueId,
+        agent_id: assignedAgentId,
+        routing_reason: routingReason,
       })
       .select("id")
       .single();
 
     if (createConvError) throw createConvError;
     conversation = newConv;
+    console.log(JSON.stringify({ processor: providerName, routed: { queue_id: routedQueueId, agent_id: assignedAgentId, reason: routingReason } }));
   } else {
     await supabase
       .from("conversations")
