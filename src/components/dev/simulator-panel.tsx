@@ -7,12 +7,34 @@ import { isDevEnvironment } from "@/lib/dev-mode";
 
 const SIM_CHANNEL_IDENTIFIER = "demo-sim-wa";
 
+const PRESETS: { sector: string; label: string; messages: string[] }[] = [
+  { sector: "Financeiro", label: "Financeiro", messages: [
+    "Quero falar com o financeiro",
+    "Preciso da segunda via do boleto",
+    "Minha fatura esta errada",
+  ]},
+  { sector: "Suporte", label: "Suporte", messages: [
+    "Estou com problema no sistema",
+    "Preciso de ajuda",
+    "O sistema nao funciona",
+  ]},
+  { sector: "Vendas", label: "Vendas", messages: [
+    "Quero comprar um plano",
+    "Qual o preco?",
+    "Quero uma proposta",
+  ]},
+  { sector: "Geral", label: "Atendimento Geral", messages: [
+    "Ola, preciso de atendimento",
+  ]},
+];
+
 export function SimulatorPanel() {
   const enabled = isDevEnvironment();
   const qc = useQueryClient();
   const [body, setBody] = useState("Olá, preciso de ajuda agora.");
   const [pickedPhone, setPickedPhone] = useState<string>("");
   const [sending, setSending] = useState(false);
+  const [sector, setSector] = useState<string>("Geral");
 
   const { data: channel } = useQuery({
     enabled,
@@ -82,6 +104,27 @@ export function SimulatorPanel() {
         <span>Simulador de Webhook</span>
         <span className="text-amber-400/70">DEMO</span>
       </div>
+      <div className="flex gap-1 flex-wrap">
+        {PRESETS.map((p) => (
+          <button
+            key={p.sector}
+            onClick={() => setSector(p.sector)}
+            className={`text-[10px] font-bold uppercase px-2 py-1 rounded border ${sector === p.sector ? "bg-amber-500/30 text-amber-100 border-amber-500/40" : "bg-white/5 text-slate-300 border-white/10"}`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <select
+        onChange={(e) => { if (e.target.value) setBody(e.target.value); }}
+        className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white"
+        defaultValue=""
+      >
+        <option value="">Mensagens prontas ({sector})</option>
+        {(PRESETS.find((p) => p.sector === sector)?.messages ?? []).map((m) => (
+          <option key={m} value={m}>{m}</option>
+        ))}
+      </select>
       <select
         value={pickedPhone}
         onChange={(e) => setPickedPhone(e.target.value)}

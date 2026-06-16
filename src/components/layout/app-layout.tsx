@@ -40,6 +40,7 @@ import { SoftphoneWidget } from "@/components/voice/softphone-widget";
 import { ProfileAwareContainer } from "@/components/mobile/layout/profile-aware-container";
 import { CommandCenter } from "./command-center";
 import { DeveloperPanel } from "@/components/dev/developer-panel";
+import { NotificationsBell } from "@/components/notifications/notifications-bell";
 
 export function AppLayout() {
 
@@ -329,13 +330,10 @@ export function AppLayout() {
 
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.05] relative h-11 w-11 transition-all">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-[#020617] ring-1 ring-indigo-500/50" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.05] h-11 w-11 transition-all">
+                  <NotificationsBell />
+                  <Link to="/settings/profile" className="rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.05] h-11 w-11 transition-all inline-flex items-center justify-center" aria-label="Configurações">
                     <Settings className="h-5 w-5" />
-                  </Button>
+                  </Link>
                 </div>
                 <div className="h-8 w-px bg-white/[0.08] mx-1" />
                 <Button 

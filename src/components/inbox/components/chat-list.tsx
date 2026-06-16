@@ -6,6 +6,7 @@ import { MessageSquare, MessageCircle, Mail, Globe, Inbox as InboxIcon } from "l
 import { EmptyState } from "@/components/ui/empty-state";
 import { DemoBadge, isDemoRecord } from "@/lib/demo-badge";
 import { useNavigate } from "@tanstack/react-router";
+import { getSlaState, slaBadgeClass, slaLabel } from "@/lib/sla";
 
 interface ChatListProps {
   conversations: any[];
@@ -88,9 +89,15 @@ export const ChatList = ({ conversations, selectedId, onSelect }: ChatListProps)
                 <Badge className="bg-[#1E293B] text-[#94A3B8] border-none text-[8px] font-bold px-1 py-0 uppercase">
                   {chat.queues?.name || "Sem Fila"}
                 </Badge>
-                {chat.sla_status === 'breached' && (
-                  <Badge className="bg-rose-500/10 text-rose-400 border-none text-[8px] font-bold px-1 py-0">SLA Estourado</Badge>
-                )}
+                {(() => {
+                  const s = getSlaState(chat.sla_due_at, chat.created_at);
+                  if (s === "none" || s === "ok") return null;
+                  return (
+                    <Badge className={`${slaBadgeClass(s)} border text-[8px] font-bold px-1 py-0 uppercase`}>
+                      {slaLabel(s)}
+                    </Badge>
+                  );
+                })()}
                 {(chat.is_demo || chat.is_test || isDemoRecord({
                   email: chat?.contacts?.email,
                   metadata: chat?.metadata,
