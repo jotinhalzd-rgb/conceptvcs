@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useChannels } from "@/hooks/channels/use-channels";
 import { ChannelCard } from "./channel-card";
 import { 
@@ -17,6 +17,7 @@ import { ChannelConfigDrawer } from "./channel-config-drawer";
 import { SmartBackButton } from "@/components/layout/back-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { normalizeStatus, type ChannelStatus } from "@/lib/channels/status";
+import { useSearch, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,21 @@ export const ChannelsView = () => {
   const [editingChannel, setEditingChannel] = useState<any | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ChannelStatus | "all">("all");
+
+  // Deep link from Marketplace: /admin/channels?channel=<id>
+  const routerState = useRouterState({ select: (s) => s.location.search });
+  const navigate = useNavigate();
+  const targetChannelId = (routerState as any)?.channel as string | undefined;
+
+  useEffect(() => {
+    if (!targetChannelId || !channels) return;
+    const match = channels.find((c: any) => c.id === targetChannelId);
+    if (match) {
+      setEditingChannel(match);
+      // Clear the query param so re-renders don't fight user actions
+      navigate({ to: ".", search: {} as any, replace: true });
+    }
+  }, [targetChannelId, channels, navigate]);
 
   const filtered = useMemo(() => {
     const list = channels ?? [];
