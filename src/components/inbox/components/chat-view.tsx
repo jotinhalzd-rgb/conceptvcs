@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   Send, 
   Paperclip, 
   Mic, 
-  Smile, 
   PanelRightClose, 
   PanelRightOpen,
   Lock,
   User,
   ShieldCheck,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Square,
+  Loader2
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -21,6 +22,9 @@ import { useCloseConversation, useAssignToMe } from "@/hooks/inbox/use-conversat
 import { TransferModal } from "./transfer-modal";
 import { Badge } from "@/components/ui/badge";
 import { useEffect } from 'react';
+import { useAttachmentUpload } from "@/hooks/inbox/use-attachment-upload";
+import { EmojiPopover } from "./emoji-popover";
+import { toast } from "sonner";
 
 interface ChatViewProps {
   chat: any;
@@ -47,6 +51,11 @@ export const ChatView = ({
   const sendMessageMutation = useSendMessage();
   const closeMutation = useCloseConversation();
   const assignMutation = useAssignToMe();
+  const uploadMutation = useAttachmentUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunks = useRef<BlobPart[]>([]);
 
   const handleSendMessage = () => {
     if (!inputMessage.trim() || sendMessageMutation.isPending) return;
@@ -67,6 +76,78 @@ export const ChatView = ({
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const insertEmoji = (emoji: string) => {
+    setInputMessage((prev) => prev + emoji);
+  };
+
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !chat?.id) return;
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Arquivo acima de 20MB");
+      return;
+    }
+    try {
+      const { url, kind, name } = await uploadMutation.mutateAsync({
+        file,
+        conversationId: chat.id,
+      });
+      sendMessageMutation.mutate({
+        conversationId: chat.id,
+        body: name,
+        type: messageType,
+        mediaUrl: url,
+        mediaKind: kind,
+      });
+    } catch {
+      /* toast already triggered in hook */
+    }
+  };
+
+  const startRecording = async () => {
+    if (!chat?.id) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      recordedChunks.current = [];
+      mr.ondataavailable = (ev) => {
+        if (ev.data.size > 0) recordedChunks.current.push(ev.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recordedChunks.current, { type: "audio/webm" });
+        const file = new File([blob], `audio-${Date.now()}.webm`, { type: "audio/webm" });
+        try {
+          const { url } = await uploadMutation.mutateAsync({
+            file,
+            conversationId: chat.id,
+          });
+          sendMessageMutation.mutate({
+            conversationId: chat.id,
+            body: "Áudio",
+            type: messageType,
+            mediaUrl: url,
+            mediaKind: "audio",
+          });
+        } catch {
+          /* hook handles */
+        }
+      };
+      mr.start();
+      recorderRef.current = mr;
+      setIsRecording(true);
+    } catch (err: any) {
+      toast.error("Microfone indisponível: " + (err?.message ?? ""));
+    }
+  };
+
+  const stopRecording = () => {
+    recorderRef.current?.stop();
+    recorderRef.current = null;
+    setIsRecording(false);
   };
 
   useEffect(() => {
@@ -197,7 +278,29 @@ export const ChatView = ({
                       <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Nota Interna</span>
                     </div>
                   )}
-                  {item.body || item.content}
+                  {(() => {
+                    const url = item.metadata?.mediaUrl;
+                    const kind = item.metadata?.mediaKind || item.type;
+                    if (url && kind === 'image') {
+                      return (
+                        <a href={url} target="_blank" rel="noreferrer" className="block">
+                          <img src={url} alt={item.body || 'imagem'} className="max-w-xs rounded-lg" />
+                          {item.body && <div className="mt-1 text-xs opacity-80">{item.body}</div>}
+                        </a>
+                      );
+                    }
+                    if (url && kind === 'audio') {
+                      return <audio src={url} controls className="max-w-xs" />;
+                    }
+                    if (url) {
+                      return (
+                        <a href={url} target="_blank" rel="noreferrer" className="underline">
+                          📎 {item.body || 'Arquivo'}
+                        </a>
+                      );
+                    }
+                    return item.body || item.content;
+                  })()}
                 </div>
                 <span className="text-[10px] text-[#94A3B8] font-bold uppercase">
                   {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -241,8 +344,27 @@ export const ChatView = ({
           "bg-[#0F172A] border rounded-[1.5rem] flex items-center p-1.5 transition-all shadow-inner group",
           messageType === 'internal' ? "border-amber-500/30" : "border-[#1E293B] focus-within:border-[#8B5CF6]/30"
         )}>
-          <Button variant="ghost" size="icon" className="h-10 w-10 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
-            <Paperclip className="w-4 h-4" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+            onChange={handleFilePick}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 text-[#94A3B8] hover:text-white transition-colors rounded-xl"
+            title="Anexar arquivo"
+            disabled={uploadMutation.isPending}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploadMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Paperclip className="w-4 h-4" />
+            )}
           </Button>
           <input 
             className="flex-1 bg-transparent px-3 py-2 text-sm text-[#E2E8F0] placeholder:text-[#94A3B8] focus:outline-none" 
@@ -253,12 +375,22 @@ export const ChatView = ({
             disabled={sendMessageMutation.isPending}
           />
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
-              <Mic className="w-4 h-4" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={isRecording ? stopRecording : startRecording}
+              title={isRecording ? "Parar gravação" : "Gravar áudio"}
+              className={cn(
+                "h-9 w-9 transition-colors rounded-xl",
+                isRecording
+                  ? "bg-rose-500/15 text-rose-400 hover:text-rose-300 animate-pulse"
+                  : "text-[#94A3B8] hover:text-white"
+              )}
+            >
+              {isRecording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#94A3B8] hover:text-white transition-colors rounded-xl">
-              <Smile className="w-4 h-4" />
-            </Button>
+            <EmojiPopover onPick={insertEmoji} />
             <Button 
               onClick={handleSendMessage}
               disabled={sendMessageMutation.isPending || !inputMessage.trim()}
