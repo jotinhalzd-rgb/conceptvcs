@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { KanbanBoard } from "./kanban/kanban-board";
 import { DealList } from "./deal-list";
 import { 
   Plus, 
   Search, 
-  Filter, 
+  X,
   Target, 
   DollarSign,
   ChevronDown,
@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { usePipelines, useCRMGoals, useCRMForecast, useCreateDeal, useDeals, useComputedForecast, useCreatePipeline } from "@/hooks/crm/use-deals";
+import { usePipelines, useCRMGoals, useCRMForecast, useCreateDeal, useDeals, useComputedForecast, useCreatePipeline, type DealFilters } from "@/hooks/crm/use-deals";
+import { useOrgUsers } from "@/hooks/crm/use-org-users";
 import { Input as UInput } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
@@ -26,6 +27,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -52,18 +56,34 @@ export const CRMView = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isPipelineOpen, setIsPipelineOpen] = useState(false);
   const [newPipelineName, setNewPipelineName] = useState("");
+  const [prefillStageId, setPrefillStageId] = useState<string | undefined>();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [responsibleFilter, setResponsibleFilter] = useState<string>("all");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
+  const { data: orgUsers } = useOrgUsers();
+
+  const filters: DealFilters = useMemo(() => ({
+    search: searchTerm || undefined,
+    status: statusFilter !== "all" ? (statusFilter as any) : undefined,
+    responsible_id: responsibleFilter !== "all" ? responsibleFilter : undefined,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+  }), [searchTerm, statusFilter, responsibleFilter, fromDate, toDate]);
+  const filtersActive = !!(filters.search || filters.status || filters.responsible_id || filters.fromDate || filters.toDate);
+  const clearFilters = () => {
+    setSearchTerm(""); setStatusFilter("all"); setResponsibleFilter("all"); setFromDate(""); setToDate("");
+  };
+  const openCreateForStage = (stageId?: string) => { setPrefillStageId(stageId); setIsCreateOpen(true); };
 
   const activePipeline = pipelines?.find(p => p.id === selectedPipelineId) || pipelines?.[0];
   const activeGoal = goals?.[0];
   const activeForecast = forecast?.[0];
 
   const pipelineTitle = (activePipeline as any)?.title || (activePipeline as any)?.name || "Selecione o Pipeline";
-  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredDealsCount = deals?.filter(d => 
-    d.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (d.contacts as any)?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  ).length || 0;
+  const filteredDealsCount = deals?.length ?? 0;
 
   return (
     <GlobalErrorBoundary name="CRM">
@@ -179,7 +199,11 @@ export const CRMView = () => {
                 </DialogHeader>
                 <DealForm 
                   onSubmit={async (data) => {
-                    await createDealMutation.mutateAsync(data);
+                    const payload = { ...data };
+                    if (prefillStageId && !payload.stage_id) payload.stage_id = prefillStageId;
+                    if (activePipeline?.id && !payload.pipeline_id) payload.pipeline_id = activePipeline.id;
+                    await createDealMutation.mutateAsync(payload);
+                    setPrefillStageId(undefined);
                     setIsCreateOpen(false);
                   }} 
                 />
@@ -203,34 +227,66 @@ export const CRMView = () => {
         </header>
 
         {/* Barra de Filtros */}
-        <div className="h-14 border-b border-white/5 flex items-center justify-between px-8 bg-[#020817] shrink-0">
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
-              <input 
-                placeholder="Pesquisar negócios..." 
-                className="bg-transparent border-none text-[11px] font-medium text-slate-300 placeholder:text-slate-600 focus:outline-none pl-9 w-64"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+        <div className="border-b border-white/5 flex flex-wrap items-center gap-3 px-8 py-3 bg-[#020817] shrink-0">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600 group-focus-within:text-indigo-400" />
+            <UInput
+              placeholder="Pesquisar título..."
+              className="bg-white/[0.03] border-white/10 text-xs text-slate-200 pl-9 w-60 h-9 rounded-lg"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black text-slate-500 gap-2">
-              <Filter className="w-3.5 h-3.5" />
-              Filtros Avançados
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-9 w-36 bg-white/[0.03] border-white/10 text-xs text-slate-300"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
+              <SelectItem value="all">Todos status</SelectItem>
+              <SelectItem value="open">Aberto</SelectItem>
+              <SelectItem value="won">Ganho</SelectItem>
+              <SelectItem value="lost">Perdido</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={responsibleFilter} onValueChange={setResponsibleFilter}>
+            <SelectTrigger className="h-9 w-48 bg-white/[0.03] border-white/10 text-xs text-slate-300"><SelectValue placeholder="Responsável" /></SelectTrigger>
+            <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
+              <SelectItem value="all">Todos responsáveis</SelectItem>
+              {(orgUsers ?? []).map((u: any) => (
+                <SelectItem key={u.id} value={u.id}>{u.full_name || u.id.slice(0, 6)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <UInput type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-9 w-40 bg-white/[0.03] border-white/10 text-xs text-slate-300" />
+          <UInput type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-9 w-40 bg-white/[0.03] border-white/10 text-xs text-slate-300" />
+          {filtersActive && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-9 text-[10px] font-black text-slate-400 gap-1 uppercase tracking-widest">
+              <X className="w-3.5 h-3.5" /> Limpar filtros
             </Button>
-            <div className="w-px h-4 bg-white/5 mx-2" />
-            <span className="text-[10px] font-bold text-slate-600 uppercase tabular-nums tracking-widest">
-              Visualizando {filteredDealsCount} negócios
-            </span>
+          )}
+          <div className="ml-auto text-[10px] font-bold text-slate-600 uppercase tabular-nums tracking-widest">
+            {filteredDealsCount} negócios
           </div>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          {viewMode === 'kanban' && <KanbanBoard pipelineId={activePipeline?.id} />}
-          {viewMode === 'list' && <DealList pipelineId={activePipeline?.id} />}
+          {viewMode === 'kanban' && (
+            <KanbanBoard
+              pipelineId={activePipeline?.id}
+              filters={filters}
+              onCreateDeal={openCreateForStage}
+              onClearFilters={clearFilters}
+              filtersActive={filtersActive}
+            />
+          )}
+          {viewMode === 'list' && (
+            <DealList
+              pipelineId={activePipeline?.id}
+              filters={filters}
+              onCreateDeal={() => openCreateForStage()}
+              onClearFilters={clearFilters}
+              filtersActive={filtersActive}
+            />
+          )}
           {viewMode === 'forecast' && (
             <div className="p-12 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-700">
                <div className="flex items-center justify-between">

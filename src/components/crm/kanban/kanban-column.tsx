@@ -1,6 +1,6 @@
 import React from 'react';
 import { KanbanCard } from "./kanban-card";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface KanbanColumnProps {
@@ -9,9 +9,10 @@ interface KanbanColumnProps {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onCardClick?: (deal: any) => void;
+  onAddDeal?: (stageId: string) => void;
 }
 
-export const KanbanColumn = ({ stage, deals, onDragOver, onDrop, onCardClick }: KanbanColumnProps) => {
+export const KanbanColumn = ({ stage, deals, onDragOver, onDrop, onCardClick, onAddDeal }: KanbanColumnProps) => {
   const totalValue = deals.reduce((acc, deal) => acc + (Number(deal.value) || 0), 0);
 
   return (
@@ -28,11 +29,14 @@ export const KanbanColumn = ({ stage, deals, onDragOver, onDrop, onCardClick }: 
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-white">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-slate-500 hover:text-white"
+            onClick={() => onAddDeal?.(stage.id)}
+            aria-label="Adicionar negócio nesta etapa"
+          >
             <Plus className="w-3.5 h-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-white">
-            <MoreHorizontal className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
