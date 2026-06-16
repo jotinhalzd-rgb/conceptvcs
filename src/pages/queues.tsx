@@ -1,23 +1,13 @@
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
-import { toast } from "sonner";
-import { 
-  Users, 
-  Clock, 
-  Activity, 
-  Plus, 
-  MoreVertical, 
-  Settings2, 
-  Timer,
-  ShieldCheck,
-  ChevronRight
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { StatsBox } from "@/components/dashboard/widgets/stats-box";
-import { PageHeader } from "@/components/layout/page-header";
-import { DemoBadge } from "@/lib/demo-badge";
+import { QueuesManagement } from "@/components/queues/queues-management";
+
+export function QueuesView() {
+  return (
+    <GlobalErrorBoundary name="QueuesView">
+      <QueuesManagement />
+    </GlobalErrorBoundary>
+  );
+}
 
 const QueueCard = ({ name, color, sla, priority, volume, tmr, supervisor }: any) => (
   <Card className="bg-white/[0.02] border-white/[0.08] hover:border-white/[0.15] transition-all group shadow-xl">
