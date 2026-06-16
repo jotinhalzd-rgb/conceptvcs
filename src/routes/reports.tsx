@@ -4,14 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { format, subDays, startOfDay } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart3, TrendingUp, MessageSquare, Clock } from "lucide-react";
+import { BarChart3, TrendingUp, MessageSquare, Clock, LineChart as LineChartIcon } from "lucide-react";
 import { SmartBackButton } from "@/components/layout/back-button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/reports")({ component: ReportsPage });
 
 const COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
 
 function ReportsPage() {
+  const navigate = useNavigate();
   const since = subDays(new Date(), 14).toISOString();
 
   const conversationsQ = useQuery({
@@ -95,6 +98,22 @@ function ReportsPage() {
         <div className="h-64 flex items-center justify-center">
           <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
         </div>
+      ) : (conversationsQ.data?.length ?? 0) === 0 &&
+        (messagesQ.data?.length ?? 0) === 0 &&
+        (dealsQ.data?.length ?? 0) === 0 ? (
+        <EmptyState
+          icon={LineChartIcon}
+          title="Sem dados suficientes ainda"
+          description="Conecte um canal, inicie atendimentos e crie oportunidades para gerar relatórios confiáveis."
+          action={{
+            label: "Abrir Inbox",
+            onClick: () => navigate({ to: "/inbox" }),
+          }}
+          secondaryAction={{
+            label: "Configurar canal",
+            onClick: () => navigate({ to: "/admin/channels" }),
+          }}
+        />
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
