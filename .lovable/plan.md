@@ -1,107 +1,140 @@
-## Sprint Final — Estabilização para Piloto
+## UX Omnichannel First — Simplificação para Piloto
 
-Escopo: somente correções. Sem módulos novos, sem refactor amplo. Foco no fluxo Login → Dashboard → Inbox → Conversa Demo → Customer 360 → CRM.
+Escopo: somente reorganização visual, copy e empty states. Sem novos módulos, sem refactor profundo, sem mexer em segurança/RLS.
+
+Mensagem central: "Centralize seus canais, atenda melhor seus clientes e transforme conversas em vendas."
+
+Fluxo prioritário: **Canal → Inbox → Customer 360 → CRM → Relatórios**.
 
 ---
 
-### 1. Acessos Rápidos Demo (`src/routes/auth.tsx`)
-- Garantir os 5 cards: CEO Master, Empresa Demo, Gerente Demo, Atendente Demo, Supervisor IA — com email/senha/role corretos.
-- Sequência rígida em `handleDemoLogin`:
-  1. `queryClient.cancelQueries()` + `queryClient.clear()`
-  2. `localStorage.removeItem("onecontact_dev_role")`
-  3. `supabase.auth.signOut()`
-  4. `ensureDemoData`
-  5. `signInWithPassword`
-  6. Validar `user.email === demoEmail`; se diferente → signOut + erro.
-  7. `invalidateQueries` + navigate `/dashboard`.
-- Loading state com timeout de 15s para não travar.
+### 1. Sidebar reorganizada (`src/components/layout/app-layout.tsx`)
+Manter todas as rotas. Reagrupar visualmente:
 
-### 2. Dashboard por Role (`src/pages/dashboard.tsx`)
-- Substituir o hardcoded `<CEODashboard />` por switch baseado em `profile.role`:
-  - `ceo_master` → `CEODashboard`
-  - `ceo` | `admin` → `CompanyDashboard`
-  - `manager` → `ManagerDashboard`
-  - `agent` → `AgentDashboard`
-  - `supervisor` → `ManagerDashboard` (placeholder existente) ou Supervisor view se disponível
-- Fallback seguro + estado de loading enquanto `profile` carrega.
+- **PRINCIPAL**: Início, Inbox, Clientes, CRM, Canais, Relatórios
+- **OPERAÇÃO**: Filas, Tarefas, Campanhas
+- **ADMINISTRAÇÃO**: Usuários, Empresas, Billing, Configurações
+- **AVANÇADO / LABS**: IA Studio, Knowledge Hub, OIL (renomear "Insights IA"), EIN ("Inteligência Executiva"), Business Hub ("Marketplace"), Developer
 
-### 3. Sidebar (`src/components/layout/app-layout.tsx`)
-- Já corrigido nome/role dinâmicos. Reforçar:
-  - `isCEOMaster` apenas para `ceo_master`.
-  - Empresa Demo nunca vê menus de Governança Global (já filtrado por `isCEOMaster`).
-- Manter rodapé limpo; nenhum FAB dentro do `<aside>`.
+CEO Master mantém Governança Global em PRINCIPAL. Filtragem por role já existe.
 
-### 4. Softphone (`src/components/voice/softphone-widget.tsx`)
-- Já movido para `right-6`. Adicionar:
-  - `bottom-24` em telas pequenas para evitar conflito com botão Lovable.
-  - Tag "Beta" / tooltip "Discador em desenvolvimento" no click se sem função real.
-  - Ocultar quando `pathname === "/auth"`.
+### 2. Home / Dashboard objetivo
+Cada dashboard ganha um "QuickActionsBar" no topo com 6 cards:
+Abrir Inbox · Simular mensagem · Criar cliente · Criar oportunidade · Conectar canal · Ver CRM.
 
-### 5. Developer Panel
-- Garantir que ao trocar role override:
-  - dispara `onecontact:dev-role-change` (já feito).
-  - Botão "Restaurar perfil real" → `localStorage.removeItem("onecontact_dev_role")` + `queryClient.invalidateQueries(["profile"])`.
-- Badge visual quando override ativo (já existe via `_dev_role_override`).
+Componente novo: `src/components/dashboard/widgets/quick-actions-bar.tsx`. Reutilizado em CEO/Company/Manager/Agent dashboards.
 
-### 6. Botão Voltar Global (`src/hooks/use-smart-back-navigation.ts` + `back-button.tsx`)
-- Lógica:
-  - Se `document.referrer` interno e não-auth → voltar.
-  - Senão → `/dashboard`.
-  - Bloquear retorno para `/auth`, `/login`, `/register`, `/reset-password`.
-- Adicionar `<SmartBackButton />` nos headers das páginas listadas (queues, inbox, customers, crm, reports, campaigns, knowledge, supervisor, admin/*, settings/*).
+### 3. Home por perfil
+Ajustar conteúdo de cada dashboard existente:
+- **AgentDashboard**: minhas conversas, aguardando, tarefas hoje, SLA em risco, botão Abrir Inbox.
+- **ManagerDashboard**: filas, equipe, SLA, conversas abertas, oportunidades, tarefas.
+- **CompanyDashboard**: conversas, clientes, oportunidades, receita prevista, canais conectados, relatórios.
+- **CEODashboard**: empresas, operação global, organizações, auditoria, saúde plataforma.
 
-### 7. Quick Launch (`src/hooks/core/use-quick-launch.ts` ou equivalente)
-- Auditar comandos. Remover/ocultar os que apontam para rotas inexistentes.
-- Trocar `/customers/:id` → `/customers?contactId=<id>`; `/inbox/:id` → `/inbox?conversationId=<id>`.
-- Manter apenas: Abrir Inbox, Buscar cliente, Novo cliente, Nova oportunidade, Simular mensagem, Conectar canal, Criar tarefa, Ir para CRM, Ir para Filas.
+### 4. Checklist de primeiro uso
+Novo componente `src/components/dashboard/widgets/onboarding-checklist.tsx`:
+- 7 itens (config empresa, conectar canal, criar fila, criar cliente, simular msg, criar oportunidade, convidar equipe).
+- Estado persistido em `localStorage` (`onecontact_onboarding`).
+- Renderizado em CompanyDashboard e ManagerDashboard. Recolhe quando 100%.
 
-### 8. Tela de Filas (`src/pages/queues.tsx` + `src/components/queues/queues-management.tsx`)
-- Header: título + `<SmartBackButton />`.
-- Botões: Criar Fila → modal funcional; Filtros → popover ou remover; Gerenciar → drawer ou remover.
-- Remover elementos brancos soltos no topo.
-- Badge "DEMO" em filas seed.
+### 5–6. Inbox como centro + empty states
+Em `src/components/inbox/components/chat-view.tsx`:
+- Empty state elegante quando sem seleção: título "Selecione uma conversa", subtítulo orientativo, mini-stats (abertas, aguardando, SLA risco, não atribuídas).
+- Garantir header da conversa exibe: canal, cliente, status, responsável, SLA, badge DEMO quando aplicável.
 
-### 9. Validações (Playwright)
-- Script único cobrindo: login em cada um dos 5 perfis demo → assert sidebar nome+role → assert dashboard correto → navegar Inbox/CRM/Queues → testar Voltar.
-- Screenshots em `/tmp/browser/sprint-final/`.
+### 7. Badge DEMO / SIMULADO
+Adicionar utilitário `src/lib/demo-badge.tsx` (componente Badge reutilizável). Marcar em:
+- `chat-list.tsx` (item da lista)
+- `chat-view.tsx` (header)
+- `customer-panel.tsx` (Customer 360)
 
-### 10. Build & Lint
-- Build automático do harness. Corrigir erros críticos; warnings podem ficar.
+Heurística: conversa demo quando contato/canal pertence a `onecontact-demo-corp` ou flag em metadata.
+
+### 8. Customer 360 limpo (`src/components/customer-360/customer-view.tsx`)
+Ordem fixa: nome, telefone, canal principal, tags, últimas conversas, negócios, tarefas, observações, histórico.
+Remover/condicionar: Health Score, NPS, timeline Shopify/Stripe e insights IA — só renderizar se houver dado real; senão empty state "Este cliente ainda não possui histórico suficiente."
+
+### 9. CRM mais objetivo (`src/components/crm/crm-view.tsx`)
+- Tagline no header: "Transforme conversas em oportunidades."
+- Botão "Novo Negócio" em destaque.
+- Remover métricas avançadas sem dado real.
+- Badge DEMO no card kanban quando aplicável.
+
+### 10. Canais (`src/components/channels/channels-view.tsx`)
+Tagline: "Como conecto meu WhatsApp ou outro canal?"
+Card padronizado: nome, provider, status, última sincronização, botões Conectar/Testar, logs básicos, badge DEMO/SIMULADO no simulador.
+
+### 11. Filas
+Já corrigido em sprint anterior. Adicionar tagline "Distribua atendimentos entre equipes." e wire `Gerenciar` para drawer informativo (toast info se sem ação).
+
+### 12. Relatórios (`src/routes/reports.tsx` / `src/components/reports/...`)
+Se sem dados: empty state "Sem dados suficientes ainda. Conecte um canal e comece a atender para gerar métricas."
+Remover números fake hardcoded — usar hook real com fallback empty.
+
+### 13. Quick Launch enxuto (`src/hooks/core/use-quick-launch.ts`)
+Manter apenas: Abrir Inbox, Buscar cliente, Novo cliente, Nova oportunidade, Simular mensagem, Conectar canal, Criar tarefa, Ir para CRM, Ir para Filas, Ir para Configurações.
+Remover comandos sem implementação real.
+
+### 14. Linguagem
+Renomear labels visíveis na sidebar e nav:
+- OIL → "Insights IA" (em Avançado)
+- EIN → "Inteligência Executiva" (em Avançado)
+- Business Hub → "Marketplace" (em Avançado)
+- Developer → escondido fora de DEV
+
+### 15. Cabeçalhos padronizados
+`PageHeader` (já existe) — auditar todas as rotas internas (queues, inbox, customers, crm, reports, campaigns, knowledge, supervisor, admin/*, settings/*) para garantir: Voltar + título + descrição curta + ação principal evidente.
+
+### 16. Empty states padronizados
+Novo componente `src/components/ui/empty-state.tsx` (título, descrição, ícone, ação CTA). Aplicar em Inbox, Clientes, CRM, Canais, Relatórios.
+
+### 17. Design system
+Sem mudanças nos tokens. Auditar consistência: botão primário (`bg-indigo-600`), secundário (`ghost`), destrutivo (`rose`), cards (`bg-white/[0.02] border-white/[0.05]`), badges, loading/skeleton. Documentar em `docs/architecture/DESIGN-TOKENS.md` (opcional).
+
+### 19. Validação Playwright
+Script único cobrindo os três perfis (Atendente, Empresa, CEO Master) e o fluxo de 12 passos do Atendente. Screenshots em `/tmp/browser/ux-piloto/`.
 
 ---
 
 ### Arquivos a alterar
-- `src/routes/auth.tsx`
-- `src/pages/dashboard.tsx`
-- `src/components/layout/app-layout.tsx` (ajustes finos)
-- `src/components/voice/softphone-widget.tsx`
-- `src/hooks/use-smart-back-navigation.ts`
-- `src/components/layout/back-button.tsx`
-- Headers das páginas internas (adicionar BackButton)
+- `src/components/layout/app-layout.tsx` (sidebar reagrupada + labels)
+- `src/components/dashboard/widgets/quick-actions-bar.tsx` (novo)
+- `src/components/dashboard/widgets/onboarding-checklist.tsx` (novo)
+- `src/components/dashboard/{agent,manager,company,ceo}/*.tsx`
+- `src/components/inbox/components/{chat-view,chat-list,customer-panel}.tsx`
+- `src/components/customer-360/customer-view.tsx`
+- `src/components/crm/crm-view.tsx`
+- `src/components/channels/channels-view.tsx`
+- `src/components/reports/...` ou `src/routes/reports.tsx`
+- `src/components/ui/empty-state.tsx` (novo)
+- `src/lib/demo-badge.tsx` (novo)
 - `src/hooks/core/use-quick-launch.ts`
-- `src/pages/queues.tsx` + `src/components/queues/queues-management.tsx`
-- `src/components/dev/developer-panel.tsx` (ajuste de invalidate)
+- `src/pages/queues.tsx`
 
 ### Fora de escopo
-- RLS / schema / migrations
-- Novos módulos
-- Refactor de Inbox/CRM internos
-- Telefonia real
+- Novos módulos / dashboards
+- Refactor de arquitetura
+- Mudanças em RLS, schema, auth
+- Telefonia real, IA real, integrações externas
+- Marketplace, Global, White Label no fluxo principal
 
 ### Ordem de execução
-1. Dashboard por role (#2) — destrava percepção de identidade.
-2. Demo login flow (#1) — garante perfil correto carregado.
-3. Sidebar + Softphone polish (#3, #4).
-4. Smart Back + Quick Launch (#6, #7).
-5. Filas (#8).
-6. Dev Panel (#5).
-7. Validação Playwright (#9).
+1. Sidebar reagrupada + labels (#1, #14) — impacto visual imediato.
+2. Empty state component + Quick Actions Bar (#16, #2) — bases reutilizáveis.
+3. Dashboards por perfil (#3, #4) — entrega de valor.
+4. Inbox + badge DEMO (#5, #6, #7).
+5. Customer 360 limpo (#8).
+6. CRM + Canais + Relatórios (#9, #10, #12).
+7. Quick Launch + Filas polish (#13, #11).
+8. Validação Playwright (#19).
 
 ### Critérios de aceite
-- Atendente Demo → sidebar "Atendente Demo / ATENDENTE", abre AgentDashboard.
-- Empresa Demo → CompanyDashboard, sem menus Governança Global.
-- CEO Master → CEODashboard + menus Governança.
-- Softphone não sobrepõe sidebar nem botão Lovable.
-- Botão Voltar presente e funcional nas páginas listadas, nunca leva a /auth.
-- Quick Launch sem comandos quebrados.
-- /queues sem botões mortos.
+- Sidebar tem 4 grupos claros, Developer só em DEV.
+- Cada dashboard mostra Quick Actions Bar funcional.
+- Checklist visível para CEO/Admin/Gerente, persistente.
+- Inbox sem seleção mostra empty state com mini-stats.
+- Conversas/canais demo têm badge visível.
+- Customer 360 sem dado fake — empty state quando vazio.
+- Relatórios sem dado mostram CTA "Conectar canal".
+- Quick Launch sem comandos mortos.
+- Nomes amigáveis (Insights IA, Inteligência Executiva, Marketplace) substituem siglas no fluxo principal.

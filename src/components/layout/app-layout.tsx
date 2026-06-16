@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth, useProfile } from "@/hooks/auth/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { isDevEnvironment } from "@/lib/dev-mode";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -72,30 +73,37 @@ export function AppLayout() {
   };
 
 
+  const devEnv = isDevEnvironment();
+
   const navItems = [
-    { icon: LayoutDashboard, label: "Executive Dashboard", href: "/dashboard", group: "Governança" },
+    // PRINCIPAL
+    { icon: LayoutDashboard, label: "Início", href: "/dashboard", group: "Principal" },
+    { icon: Inbox, label: "Inbox", href: "/inbox", group: "Principal" },
+    { icon: Users, label: "Clientes", href: "/customers", group: "Principal" },
+    { icon: Briefcase, label: "CRM", href: "/crm", group: "Principal" },
+    { icon: Globe, label: "Canais", href: "/admin/channels", group: "Principal" },
+    { icon: BarChart3, label: "Relatórios", href: "/reports", group: "Principal" },
+
+    // OPERAÇÃO
+    { icon: LifeBuoy, label: "Filas", href: "/queues", group: "Operação" },
+    { icon: MessageSquare, label: "Oportunidades", href: "/opportunities", group: "Operação" },
+    { icon: Rocket, label: "Campanhas", href: "/campaigns", group: "Operação" },
+    { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Operação" },
+
+    // ADMINISTRAÇÃO
     ...(isCEOMaster ? [
-      { icon: Briefcase, label: "Gestão de Empresas", href: "/admin/companies", group: "Governança" },
-      { icon: ShieldCheck, label: "Auditoria Global", href: "/admin/audit", group: "Governança" },
-      { icon: Globe, label: "Gestão de Canais", href: "/admin/channels", group: "Governança" },
-
+      { icon: Briefcase, label: "Empresas", href: "/admin/companies", group: "Administração" },
+      { icon: ShieldCheck, label: "Auditoria Global", href: "/admin/audit", group: "Administração" },
     ] : []),
-    { icon: Inbox, label: "Inbox Universal 2.0", href: "/inbox", group: "Operação" },
-    { icon: LifeBuoy, label: "Filas de Atendimento", href: "/queues", group: "Operação" },
-    { icon: Rocket, label: "Campaigns 2.0", href: "/campaigns", group: "Operação" },
-    { icon: ShieldCheck, label: "Supervisor IA", href: "/supervisor", group: "Governança" },
-    { icon: MessageSquare, label: "Opportunities", href: "/opportunities", group: "Inteligência" },
-    { icon: Users, label: "Customer 360", href: "/customers", group: "CRM" },
-    { icon: Briefcase, label: "CRM Financeiro", href: "/crm", group: "CRM" },
-    { icon: CreditCard, label: "Assinatura e Billing", href: "/settings/billing", group: "Configurações" },
-    { icon: Globe, label: "Business Hub", href: "/dashboard/hub", group: "Ecossistema" },
-    { icon: Sparkles, label: "AI Studio 3.0", href: "/dashboard/ai-studio", group: "Inteligência" },
+    { icon: CreditCard, label: "Billing", href: "/settings/billing", group: "Administração" },
 
-    { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Inteligência" },
-    { icon: BarChart3, label: "Relatórios BI", href: "/reports", group: "Análise" },
-
-
-
+    // AVANÇADO / LABS
+    { icon: Sparkles, label: "Insights IA", href: "/dashboard/ai-studio", group: "Avançado" },
+    { icon: Zap, label: "Knowledge Hub", href: "/knowledge", group: "Avançado" },
+    { icon: Globe, label: "Marketplace", href: "/dashboard/hub", group: "Avançado" },
+    ...(devEnv ? [
+      { icon: Settings, label: "Developer", href: "/settings/developer", group: "Avançado" },
+    ] : []),
   ];
 
   useEffect(() => {
