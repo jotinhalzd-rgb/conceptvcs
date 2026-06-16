@@ -19,16 +19,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SmartBackButton } from "@/components/layout/back-button";
 
 
-export const InboxView = () => {
+export const InboxView = ({ initialConversationId }: { initialConversationId?: string } = {}) => {
   return (
     <GlobalErrorBoundary name="Inbox">
-      <InboxContent />
+      <InboxContent initialConversationId={initialConversationId} />
     </GlobalErrorBoundary>
   );
 };
 
-const InboxContent = () => {
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+const InboxContent = ({ initialConversationId }: { initialConversationId?: string }) => {
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(initialConversationId ?? null);
+  useEffect(() => {
+    if (initialConversationId) setSelectedChatId(initialConversationId);
+  }, [initialConversationId]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCustomer360, setShowCustomer360] = useState(false);
   const [showAICopilot, setShowAICopilot] = useState(true);

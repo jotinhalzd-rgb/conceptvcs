@@ -37,9 +37,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SmartBackButton } from "@/components/layout/back-button";
 
-export function Customer360View() {
+export function Customer360View({ initialContactId }: { initialContactId?: string } = {}) {
   const { contacts, isLoading, createContact, updateContact, deleteContact } = useContacts();
-  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(initialContactId ?? null);
+
+  useEffect(() => {
+    if (initialContactId) setSelectedContactId(initialContactId);
+  }, [initialContactId]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
