@@ -48,9 +48,24 @@ export function DealForm({ onSubmit, isLoading }: DealFormProps) {
   const selectedPipelineId = form.watch("pipeline_id");
   const { data: stages } = useStages(selectedPipelineId);
 
+  const handleSubmit = (raw: any) => {
+    const cleaned: any = {
+      title: raw.title,
+      value: Number(raw.value) || 0,
+      probability: Number(raw.probability) || 0,
+      status: raw.status || "open",
+      contact_id: raw.contact_id || null,
+      pipeline_id: raw.pipeline_id || null,
+      stage_id: raw.stage_id || null,
+      responsible_id: raw.responsible_id || null,
+      expected_close_date: raw.expected_close_date || null,
+    };
+    onSubmit(cleaned);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-4">
         <FormField
           control={form.control}
           name="title"
