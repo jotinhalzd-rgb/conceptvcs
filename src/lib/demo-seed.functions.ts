@@ -365,3 +365,144 @@ async function seedDemoOmnichannel(db: any, orgId: string) {
     }
   }
 }
+
+const DEMO_QUEUES: Array<{
+  name: string;
+  department: string;
+  color: string;
+  priority_level: number;
+  assignment_mode: "manual" | "auto";
+  is_default: boolean;
+  keywords: string[];
+}> = [
+  { name: "Financeiro",        department: "finance",  color: "emerald", priority_level: 2, assignment_mode: "manual", is_default: false, keywords: ["financeiro","boleto","pagamento","cobranca","fatura","nota fiscal","segunda via","reembolso"] },
+  { name: "Suporte",           department: "support",  color: "amber",   priority_level: 3, assignment_mode: "manual", is_default: false, keywords: ["suporte","erro","problema","ajuda","nao funciona","reclamacao"] },
+  { name: "Vendas",            department: "sales",    color: "indigo",  priority_level: 2, assignment_mode: "manual", is_default: false, keywords: ["comprar","preco","plano","proposta","orcamento","contratar","venda"] },
+  { name: "Atendimento Geral", department: "general",  color: "purple",  priority_level: 1, assignment_mode: "auto",   is_default: true,  keywords: [] },
+];
+
+async function seedDemoQueuesAndRouting(db: any, orgId: string) {
+  // 1) Upsert demo queues (idempotent by org+name)
+  const queueIdByName: Record<string, string> = {};
+  for (const spec of DEMO_QUEUES) {
+    const { data: existing } = await db
+      .from("queues")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("name", spec.name)
+      .maybeSingle();
+    let id = existing?.id as string | undefined;
+    if (!id) {
+      const { data: created, error } = await db
+        .from("queues")
+        .insert({
+          organization_id: orgId,
+          name: spec.name,
+          department: spec.department,
+          color: spec.color,
+          priority_level: spec.priority_level,
+          assignment_mode: spec.assignment_mode,
+          is_default: spec.is_default,
+          is_active: true,
+          is_demo: true,
+        })
+        .select("id")
+        .single();
+      if (error) throw new Error(`Falha ao criar fila demo (${spec.name}): ${error.message}`);
+      id = created.id;
+    } else {
+      await db
+        .from("queues")
+        .update({
+          assignment_mode: spec.assignment_mode,
+          is_default: spec.is_default,
+          is_active: true,
+          is_demo: true,
+        })
+        .eq("id", id);
+    }
+    queueIdByName[spec.name] = id!;
+  }
+
+  // 2) Routing rules — need a company_id (routing_rules.company_id NOT NULL).
+  // Use any company already in the demo org; if none, skip routing rules.
+  const { data: company } = await db
+    .from("companies")
+    .select("id")
+    .eq("organization_id", orgId)
+    .maybeSingle();
+  if (company?.id) {
+    for (const spec of DEMO_QUEUES) {
+      const qid = queueIdByName[spec.name];
+      for (const kw of spec.keywords) {
+        const { data: existing } = await db
+          .from("routing_rules")
+          .select("id")
+          .eq("company_id", company.id)
+          .eq("target_queue_id", qid)
+          .eq("keyword", kw)
+          .maybeSingle();
+        if (existing) continue;
+        await db.from("routing_rules").insert({
+          company_id: company.id,
+          target_queue_id: qid,
+          keyword: kw,
+          priority_bonus: spec.priority_level,
+          is_active: true,
+        });
+      }
+    }
+  }
+
+  // 3) queue_members: atendente em Atendimento Geral (auto) + gerente em todas
+  const { data: agentProfile } = await db
+    .from("profiles").select("id").eq("organization_id", orgId).eq("role", "agent").maybeSingle();
+  const { data: managerProfile } = await db
+    .from("profiles").select("id").eq("organization_id", orgId).eq("role", "manager").maybeSingle();
+
+  async function upsertMember(queueId: string, userId: string) {
+    const { data: exists } = await db
+      .from("queue_members")
+      .select("id")
+      .eq("queue_id", queueId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (exists) return;
+    await db.from("queue_members").insert({
+      organization_id: orgId,
+      queue_id: queueId,
+      user_id: userId,
+      is_active: true,
+    });
+  }
+
+  if (agentProfile?.id) {
+    await upsertMember(queueIdByName["Atendimento Geral"], agentProfile.id);
+  }
+  if (managerProfile?.id) {
+    for (const name of Object.keys(queueIdByName)) {
+      await upsertMember(queueIdByName[name], managerProfile.id);
+    }
+  }
+
+  // 4) Garantir queue_id nas conversas demo existentes pelo preview/contato
+  const previewToQueue: Array<{ match: RegExp; queue: string }> = [
+    { match: /financeiro|boleto|fatura|pagamento|segunda via/i, queue: "Financeiro" },
+    { match: /problema|erro|suporte|ajuda|reclama/i,            queue: "Suporte" },
+    { match: /comprar|plano|proposta|preco|orcamento|comercial/i, queue: "Vendas" },
+  ];
+  const { data: demoConvs } = await db
+    .from("conversations")
+    .select("id, last_message_preview, queue_id")
+    .eq("organization_id", orgId)
+    .eq("is_demo", true);
+  for (const c of (demoConvs ?? []) as any[]) {
+    if (c.queue_id) continue;
+    const hit = previewToQueue.find((r) => r.match.test(c.last_message_preview ?? ""));
+    const targetQ = queueIdByName[hit?.queue ?? "Atendimento Geral"];
+    await db.from("conversations").update({
+      queue_id: targetQ,
+      routing_reason: hit ? `seed:${hit.queue}` : "seed:default",
+    }).eq("id", c.id);
+  }
+}
