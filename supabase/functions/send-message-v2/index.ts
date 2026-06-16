@@ -30,7 +30,7 @@ serve(async (req) => {
   }
 
   try {
-    const { conversationId, body, type = 'public', mediaUrl } = await req.json();
+    const { conversationId, body, type = 'public', mediaUrl, mediaKind } = await req.json();
 
     const authHeader = req.headers.get('Authorization')!;
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
@@ -91,7 +91,7 @@ serve(async (req) => {
     const result = await provider.sendMessage(
       conversation.contacts.phone,
       mediaUrl || body,
-      mediaUrl ? 'image' : 'text',
+      mediaUrl ? (mediaKind || 'image') : 'text',
       { ...channel.credentials, identifier: channel.identifier }
     );
 
@@ -104,12 +104,12 @@ serve(async (req) => {
         conversation_id: conversationId,
         organization_id: conversation.organization_id,
         body: body,
-        type: mediaUrl ? 'media' : 'text',
+        type: mediaUrl ? (mediaKind || 'media') : 'text',
         sender_profile_id: user.id,
         provider_message_id: result.sid,
         delivery_status: isSimulated ? 'simulated_sent' : 'sent',
         is_demo: isSimulated,
-        metadata: { mediaUrl, provider: providerKey, simulated: isSimulated }
+        metadata: { mediaUrl, mediaKind: mediaKind || (mediaUrl ? 'image' : null), provider: providerKey, simulated: isSimulated }
       })
       .select().single();
 
