@@ -24,6 +24,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as SettingsProfileRouteImport } from './routes/settings.profile'
 import { Route as SettingsMarketplaceRouteImport } from './routes/settings.marketplace'
 import { Route as SettingsDeveloperRouteImport } from './routes/settings.developer'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
@@ -108,6 +109,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const SettingsProfileRoute = SettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const SettingsMarketplaceRoute = SettingsMarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
 }
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/dashboard': typeof DashboardIndexRoute
   '/settings': typeof SettingsIndexRoute
 }
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/developer': typeof SettingsDeveloperRoute
   '/settings/marketplace': typeof SettingsMarketplaceRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
 }
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
+    | '/settings/profile'
     | '/dashboard/'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
+    | '/settings/profile'
     | '/dashboard'
     | '/settings'
   id:
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/settings/billing'
     | '/settings/developer'
     | '/settings/marketplace'
+    | '/settings/profile'
     | '/dashboard/'
     | '/settings/'
   fileRoutesById: FileRoutesById
@@ -425,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/settings/marketplace': {
       id: '/settings/marketplace'
       path: '/marketplace'
@@ -504,6 +523,7 @@ interface SettingsRouteChildren {
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsDeveloperRoute: typeof SettingsDeveloperRoute
   SettingsMarketplaceRoute: typeof SettingsMarketplaceRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
@@ -511,6 +531,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsDeveloperRoute: SettingsDeveloperRoute,
   SettingsMarketplaceRoute: SettingsMarketplaceRoute,
+  SettingsProfileRoute: SettingsProfileRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }
 
