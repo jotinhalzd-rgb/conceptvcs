@@ -36,7 +36,12 @@ const QueueCard = ({ name, color, sla, priority, volume, tmr, supervisor }: any)
             </div>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="rounded-xl text-slate-500 hover:text-white hover:bg-white/5 h-10 w-10">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-xl text-slate-500 hover:text-white hover:bg-white/5 h-10 w-10"
+          onClick={() => toast.info("Funcionalidade em preparação para o piloto. Esta fila é demonstrativa.")}
+        >
           <MoreVertical className="w-5 h-5" />
         </Button>
       </div>
@@ -65,7 +70,12 @@ const QueueCard = ({ name, color, sla, priority, volume, tmr, supervisor }: any)
           </div>
           <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">{supervisor}</span>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 gap-1 px-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 gap-1 px-2"
+          onClick={() => toast.info("Funcionalidade em preparação para o piloto. Esta fila é demonstrativa.")}
+        >
           Gerenciar <ChevronRight className="w-3 h-3" />
         </Button>
       </div>
