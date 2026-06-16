@@ -1602,6 +1602,8 @@ export type Database = {
           channel_id: string | null
           error_message: string | null
           id: string
+          metadata: Json | null
+          organization_id: string | null
           payload: Json
           processed_at: string | null
           provider: string
@@ -1611,6 +1613,8 @@ export type Database = {
           channel_id?: string | null
           error_message?: string | null
           id?: string
+          metadata?: Json | null
+          organization_id?: string | null
           payload: Json
           processed_at?: string | null
           provider: string
@@ -1620,6 +1624,8 @@ export type Database = {
           channel_id?: string | null
           error_message?: string | null
           id?: string
+          metadata?: Json | null
+          organization_id?: string | null
           payload?: Json
           processed_at?: string | null
           provider?: string
@@ -1631,6 +1637,13 @@ export type Database = {
             columns: ["channel_id"]
             isOneToOne: false
             referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_webhooks_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
