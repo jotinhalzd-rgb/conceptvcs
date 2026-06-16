@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { usePipelines, useStages } from "@/hooks/crm/use-deals";
 import { useContacts } from "@/hooks/crm/use-contacts";
-import { Textarea } from "@/components/ui/textarea";
+import { useOrgUsers } from "@/hooks/crm/use-org-users";
 
 interface DealFormProps {
   onSubmit: (data: any) => void;
@@ -30,14 +30,15 @@ interface DealFormProps {
 export function DealForm({ onSubmit, isLoading }: DealFormProps) {
   const { data: pipelines } = usePipelines();
   const { contacts } = useContacts();
+  const { data: orgUsers } = useOrgUsers();
   const form = useForm({
     defaultValues: {
       title: "",
-      description: "",
       value: 0,
       pipeline_id: "",
       stage_id: "",
       contact_id: "",
+      responsible_id: "",
       probability: 50,
       status: "open",
       expected_close_date: "",
@@ -60,19 +61,6 @@ export function DealForm({ onSubmit, isLoading }: DealFormProps) {
                 <Input {...field} className="bg-white/[0.03] border-white/10 text-white rounded-xl h-11" placeholder="Ex: Upgrade Enterprise One" />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-slate-400 font-bold uppercase text-[10px]">Descrição</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="bg-white/[0.03] border-white/10 text-white rounded-xl" />
-              </FormControl>
             </FormItem>
           )}
         />
@@ -140,6 +128,28 @@ export function DealForm({ onSubmit, isLoading }: DealFormProps) {
                 </SelectContent>
               </Select>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="responsible_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-slate-400 font-bold uppercase text-[10px]">Responsável</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-white/[0.03] border-white/10 text-white rounded-xl h-11">
+                    <SelectValue placeholder="Selecionar responsável" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-[#0f172a] border-white/10 text-slate-200">
+                  {(orgUsers ?? []).map((u: any) => (
+                    <SelectItem key={u.id} value={u.id}>{u.full_name || u.id.slice(0, 6)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormItem>
           )}
         />
