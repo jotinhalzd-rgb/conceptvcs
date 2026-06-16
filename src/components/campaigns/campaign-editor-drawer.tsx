@@ -97,7 +97,7 @@ export function CampaignEditorDrawer({ open, onOpenChange, campaign }: Props) {
     name: name.trim(),
     description: description.trim() || null,
     channel_id: channelId || null,
-    channel: channel?.type ?? "whatsapp",
+      channel: channel?.channel_type ?? "whatsapp",
     type: campaign?.type ?? "outbound",
     message_content: message,
     segment_filters: filters as any,
