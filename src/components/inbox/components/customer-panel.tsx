@@ -21,6 +21,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { DemoBadge, isDemoRecord } from "@/lib/demo-badge";
+import { Link } from "@tanstack/react-router";
+import { ExternalLink } from "lucide-react";
 
 interface CustomerSidePanelProps {
   chat: any;
@@ -86,6 +88,15 @@ export const CustomerSidePanel = ({ chat, onClose }: CustomerSidePanelProps) => 
 
           {/* Empty state — histórico em construção */}
           <div className="pb-10">
+            {contact?.id && (
+              <Link
+                to="/customers"
+                search={{ contact: contact.id } as any}
+                className="mb-4 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-bold uppercase tracking-widest hover:bg-indigo-500/20 transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" /> Abrir Customer 360
+              </Link>
+            )}
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-3xl p-8 text-center">
               <History className="w-8 h-8 text-slate-600 mx-auto mb-3 opacity-60" />
               <h4 className="text-sm font-bold text-white mb-1">Histórico ainda em construção</h4>
