@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { maskSensitive } from "@/lib/developer/mask";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -33,14 +34,33 @@ export const Route = createFileRoute("/api/public/channels/$channelId/inbound")(
           return json({ error: "Invalid JSON body" }, 400);
         }
 
+        const logEvent = async (
+          orgId: string | null,
+          provider: string,
+          status: string,
+          errorMessage: string | null,
+          extra?: Record<string, unknown>
+        ) => {
+          try {
+            await supabaseAdmin.from("channel_webhooks_log").insert({
+              channel_id: channelId,
+              organization_id: orgId,
+              provider,
+              payload: maskSensitive({ ...(payload ?? {}), ...(extra ?? {}) }) as any,
+              status,
+              error_message: errorMessage,
+            } as any);
+          } catch { /* never break inbound */ }
+        };
+
         const { data: channel, error: chErr } = await supabaseAdmin
           .from("channels")
           .select("id, organization_id, identifier, is_active, is_demo, settings, credentials")
           .eq("id", channelId)
           .maybeSingle();
-        if (chErr) return json({ error: "lookup_failed" }, 500);
-        if (!channel) return json({ error: "channel_not_found" }, 404);
-        if (channel.is_active === false) return json({ error: "channel_inactive" }, 410);
+        if (chErr) { await logEvent(null, "inbound_api", "error", "lookup_failed"); return json({ error: "lookup_failed" }, 500); }
+        if (!channel) { await logEvent(null, "inbound_api", "error", "channel_not_found"); return json({ error: "channel_not_found" }, 404); }
+        if (channel.is_active === false) { await logEvent(channel.organization_id ?? null, "inbound_api", "error", "channel_inactive"); return json({ error: "channel_inactive" }, 410); }
 
         const creds = (channel.credentials as any) ?? {};
         const webhookSecret: string | undefined = creds.webhook_secret;
@@ -48,8 +68,12 @@ export const Route = createFileRoute("/api/public/channels/$channelId/inbound")(
           request.headers.get("x-webhook-token") || payload.verify_token || "";
 
         if (webhookSecret) {
-          if (provided !== webhookSecret) return json({ error: "unauthorized" }, 401);
+          if (provided !== webhookSecret) {
+            await logEvent(channel.organization_id, "inbound_api", "error", "unauthorized");
+            return json({ error: "unauthorized" }, 401);
+          }
         } else if (!channel.is_demo) {
+          await logEvent(channel.organization_id, "inbound_api", "pending", "missing_webhook_secret");
           return json(
             { status: "pending_configuration", error: "missing_webhook_secret" },
             202
@@ -60,7 +84,10 @@ export const Route = createFileRoute("/api/public/channels/$channelId/inbound")(
         const from = String(
           payload.phone || payload.sender_id || payload.email || payload.external_id || ""
         ).trim();
-        if (!from) return json({ error: "missing_sender" }, 400);
+        if (!from) {
+          await logEvent(orgId, "inbound_api", "error", "missing_sender");
+          return json({ error: "missing_sender" }, 400);
+        }
         const body = String(payload.text || payload.body || "").toString();
         const senderName = payload.sender_name ? String(payload.sender_name) : null;
         const provider = String(payload.provider || "inbound_api");
