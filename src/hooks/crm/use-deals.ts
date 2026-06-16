@@ -144,15 +144,28 @@ export function useDeleteStage() {
 }
 
 /* ---------------- DEALS ---------------- */
-export function useDeals(pipelineId?: string) {
+export type DealFilters = {
+  search?: string;
+  status?: "open" | "won" | "lost";
+  responsible_id?: string;
+  fromDate?: string;
+  toDate?: string;
+};
+
+export function useDeals(pipelineId?: string, filters: DealFilters = {}) {
   return useQuery({
-    queryKey: ["deals", pipelineId],
+    queryKey: ["deals", pipelineId, filters],
     queryFn: async () => {
       let query = supabase
         .from("deals")
-        .select(`*, contacts(id, name, email, phone, lead_score), stages(name, order_index)`)
+        .select(`*, contacts(id, name, email, phone, lead_score), stages(name, order_index), responsible:responsible_id ( id, full_name )`)
         .order("created_at", { ascending: false });
       if (pipelineId) query = query.eq("pipeline_id", pipelineId);
+      if (filters.status) query = query.eq("status", filters.status);
+      if (filters.responsible_id) query = query.eq("responsible_id", filters.responsible_id);
+      if (filters.fromDate) query = query.gte("created_at", filters.fromDate);
+      if (filters.toDate) query = query.lte("created_at", filters.toDate);
+      if (filters.search) query = query.ilike("title", `%${filters.search}%`);
       const { data, error } = await query;
       if (error) throw error;
       return data;
