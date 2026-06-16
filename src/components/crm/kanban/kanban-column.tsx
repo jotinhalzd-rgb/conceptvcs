@@ -1,6 +1,6 @@
 import React from 'react';
 import { KanbanCard } from "./kanban-card";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface KanbanColumnProps {
@@ -37,9 +37,6 @@ export const KanbanColumn = ({ stage, deals, onDragOver, onDrop, onCardClick, on
             aria-label="Adicionar negócio nesta etapa"
           >
             <Plus className="w-3.5 h-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-white">
-            <MoreHorizontal className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
