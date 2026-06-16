@@ -20,6 +20,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DemoBadge, isDemoRecord } from "@/lib/demo-badge";
+import {
+  ConversationsCard, NotesCard, CreateOpportunityCard,
+} from "@/components/customer-360/contact-actions";
 
 const TimelineItem = ({ title, description, time, icon: Icon, color }: any) => (
   <div className="flex gap-4 relative pb-6 last:pb-0">
@@ -38,7 +41,10 @@ const TimelineItem = ({ title, description, time, icon: Icon, color }: any) => (
 );
 
 export function Customer360({ contactId }: { contactId?: string }) {
-  const { contact, timeline, deals, tickets, insights, transactions, isLoading } = useCustomer360(contactId);
+  const {
+    contact, timeline, deals, tickets, insights, transactions,
+    conversations, notes, isLoading,
+  } = useCustomer360(contactId);
 
   if (isLoading) {
     return (
@@ -165,6 +171,15 @@ export function Customer360({ contactId }: { contactId?: string }) {
 
       {/* Coluna Central: Timeline Omnichannel */}
       <div className="lg:col-span-2 space-y-6">
+        {contactId && (
+          <CreateOpportunityCard contactId={contactId} />
+        )}
+        {contactId && (
+          <ConversationsCard contactId={contactId} conversations={conversations} />
+        )}
+        {contactId && (
+          <NotesCard contactId={contactId} notes={notes} hasConversation={conversations.length > 0} />
+        )}
         <Card className="bg-white/[0.02] border-white/[0.08] shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
