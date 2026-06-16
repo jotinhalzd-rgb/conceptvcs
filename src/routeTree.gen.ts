@@ -34,6 +34,7 @@ import { Route as DashboardAiStudioRouteImport } from './routes/dashboard.ai-stu
 import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as ApiPublicChannelsChannelIdInboundRouteImport } from './routes/api/public/channels.$channelId.inbound'
 
 const SupervisorRoute = SupervisorRouteImport.update({
   id: '/supervisor',
@@ -160,6 +161,12 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
   path: '/admin/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicChannelsChannelIdInboundRoute =
+  ApiPublicChannelsChannelIdInboundRouteImport.update({
+    id: '/api/public/channels/$channelId/inbound',
+    path: '/api/public/channels/$channelId/inbound',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/settings/profile': typeof SettingsProfileRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/settings/profile': typeof SettingsProfileRoute
   '/dashboard': typeof DashboardIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/settings/profile': typeof SettingsProfileRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/api/public/channels/$channelId/inbound': typeof ApiPublicChannelsChannelIdInboundRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/dashboard/'
     | '/settings/'
+    | '/api/public/channels/$channelId/inbound'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/dashboard'
     | '/settings'
+    | '/api/public/channels/$channelId/inbound'
   id:
     | '__root__'
     | '/'
@@ -321,6 +333,7 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/dashboard/'
     | '/settings/'
+    | '/api/public/channels/$channelId/inbound'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -340,6 +353,7 @@ export interface RootRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCompaniesRoute: typeof AdminCompaniesRoute
+  ApiPublicChannelsChannelIdInboundRoute: typeof ApiPublicChannelsChannelIdInboundRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -519,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/channels/$channelId/inbound': {
+      id: '/api/public/channels/$channelId/inbound'
+      path: '/api/public/channels/$channelId/inbound'
+      fullPath: '/api/public/channels/$channelId/inbound'
+      preLoaderRoute: typeof ApiPublicChannelsChannelIdInboundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -577,6 +598,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCompaniesRoute: AdminCompaniesRoute,
+  ApiPublicChannelsChannelIdInboundRoute:
+    ApiPublicChannelsChannelIdInboundRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
