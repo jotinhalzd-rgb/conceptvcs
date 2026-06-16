@@ -5352,6 +5352,7 @@ export type Database = {
     }
     Functions: {
       current_user_org: { Args: never; Returns: string }
+      current_user_organization_id: { Args: never; Returns: string }
       get_org_by_channel_identifier: {
         Args: { p_identifier: string }
         Returns: string
