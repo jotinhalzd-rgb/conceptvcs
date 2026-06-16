@@ -18,7 +18,7 @@ export class AIService {
    */
   static async analyzeMessage(content: string): Promise<AIAnalysisResult> {
     try {
-      console.log('AI Service: Analisando mensagem...', content.substring(0, 50));
+      if (import.meta.env.DEV) console.log('AI Service: Analisando mensagem...', content.substring(0, 50));
       
       // Simulação de latência de IA
       await new Promise((resolve, reject) => {

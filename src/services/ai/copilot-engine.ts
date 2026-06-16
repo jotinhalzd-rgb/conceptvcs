@@ -22,7 +22,7 @@ export const CopilotEngine = {
       
       if (agent) {
         agentPrompt = agent.system_prompt || "";
-        console.log(`Usando contexto do agente: ${agent.role_type}`);
+        if (import.meta.env.DEV) console.log(`Usando contexto do agente: ${agent.role_type}`);
       }
     }
 
