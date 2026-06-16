@@ -1,100 +1,97 @@
-## Plano — Bloco 3: Filas, Roteamento e Inbound
+# Bloco 3.1 — Fechamento de Inbound + Filas Completas
 
-Objetivo: fechar o coração omnichannel. Mensagem entra → roteia por keyword/intenção → cai na fila certa → atribui (auto/manual) → notifica → aparece no Inbox em realtime → segue para Customer 360 e CRM. Caso de aceite: "quero falar com o financeiro".
+Objetivo: fechar o coração omnichannel — endpoint inbound real + CRUD completo de filas (membros, assignment_mode, default) — sem tocar Campanhas/Relatórios.
 
-Preservar tudo do Bloco 1 (Marketplace↔Canais), E1 (Canais), Fase B (Inbox), Fase C (Customer 360), Fase D (CRM). Zero handler fake, zero "Em breve", zero tela morta.
+## 1. Migration (idempotente)
 
----
+Arquivo: `supabase/migrations/<ts>_bloco_3_1_inbound_queues.sql`
 
-### 1. Migration (única, idempotente)
+- `channels`: garantir `webhook_secret text` em `credentials` (jsonb já existe) — apenas validação no código.
+- `queues`: garantir `assignment_mode text default 'manual' check in ('manual','auto')`, `is_default boolean default false`, `sla_minutes int`, `description text`, `is_active boolean default true` (se faltar).
+- Trigger `enforce_single_default_queue`: ao inserir/atualizar `is_default=true`, zera as demais defaults da mesma `organization_id`.
+- `queue_members`: garantir índice único `(queue_id, user_id)` para evitar duplicidade.
+- Realtime: `queues`, `queue_members`, `queue_routing_rules` no `supabase_realtime` se faltar.
+- GRANTs já existentes preservados; nenhum novo `public.*` criado.
 
-- `queue_routing_rules`: garantir colunas `name text`, `keywords text[]`, `match_mode text default 'any'` (any/all/exact), `intent text`, `channel_id uuid null`, `target_queue_id uuid not null`, `is_fallback bool default false`, `priority int default 0`, `is_active bool default true`, `organization_id uuid not null`. Índice por `(organization_id, is_active, priority desc)`. RLS org-scoped + GRANT.
-- `queues`: garantir `is_default bool default false`, `assignment_mode text default 'manual'` (manual|auto), `sla_minutes int`.
-- `conversations`: garantir `routing_reason text` e índice por `(organization_id, queue_id, status)`.
-- `channels`: garantir `default_queue_id uuid null` (FK queues).
-- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE` para `conversations`, `messages`, `notifications` se faltar.
-- Seed demo: na org demo, garantir fila "Financeiro" + regra `keywords=['financeiro','financ']` → fila Financeiro, priority 100.
+## 2. Endpoint inbound público
 
-### 2. Server function — processor de roteamento
+Arquivo: `src/routes/api/public/channels.$channelId.inbound.ts` (TSS server route).
 
-`src/lib/routing/route-message.functions.ts` (`createServerFn`, `requireSupabaseAuth`):
-- Input: `{ channel_id, contact: {phone?, email?, name?}, text, external_id?, direction:'in' }`.
-- Resolve `organization_id` via channel.
-- Upsert `contacts` (match por phone/email + org).
-- Roteamento:
-  1. Carrega `queue_routing_rules` ativas da org ordenadas por `priority desc`.
-  2. Normaliza texto (lowercase, remove acentos). Match por `keywords` (any/all) e/ou `channel_id`.
-  3. Primeira regra que casa → `target_queue_id`, `routing_reason = 'rule:<name>'`.
-  4. Sem match → `channels.default_queue_id` → `routing_reason='channel_default'`.
-  5. Fallback → regra `is_fallback=true` → `routing_reason='fallback'`.
-- Cria/reutiliza `conversations` aberta para o contato+canal. Grava `queue_id`, `routing_reason`, `channel_id`.
-- Se `queues.assignment_mode='auto'`: escolhe membro ativo com menor carga (`conversations` abertas) e grava `agent_id`. Manual → `agent_id=null`.
-- Insere `messages` (inbound). Trigger existente `notify_conversation_event` gera notificações.
-- Retorna `{ conversation_id, queue_id, agent_id, routing_reason }`.
+Payload aceito (POST JSON):
+```
+{
+  sender_id?, phone?, email?, external_id?,
+  sender_name?, text?, body?,
+  media_url?, media_kind?,
+  provider?, timestamp?, metadata?,
+  verify_token?    // opcional, também aceito via header x-webhook-token
+}
+```
 
-Reaproveitado por: simulador, inbound público, futuros webhooks reais.
+Fluxo:
+1. Carrega `channels` pelo `channelId` (admin client, dentro do handler).
+2. Se não existir / `is_active=false` → 404/410 JSON `{error}`.
+3. Se `credentials.webhook_secret` existir → exigir match com header `x-webhook-token` ou `verify_token` no body; senão 401.
+4. Se não houver `webhook_secret` e canal não estiver `is_demo` → retorna 202 com `status:'pending_configuration'` (não vaza nada).
+5. Monta `WhatsAppMessage` (`from = phone||sender_id||external_id`, `to = channel.identifier`, `body = text||body`, type text/media).
+6. Chama `processWhatsAppMessage(supabaseAdmin, msg, provider||'inbound_api')` — reusa todo roteamento já validado no Bloco 3.
+7. Loga em `channel_webhooks_log` (payload sanitizado, resultado).
+8. Resposta JSON: `{ ok:true, conversation_id, queue_id, routing_reason, assigned_agent_id, message_id }`.
 
-### 3. Inbound público mínimo
+CORS: `OPTIONS` 204 + `Access-Control-Allow-*` no POST.
 
-Rota `src/routes/api/public/channels/$channelId/inbound.ts` (POST):
-- Valida `webhook_secret` em `channels.credentials.webhook_secret` (se setado). Sem secret → 401 com mensagem clara; canal fica `pending_configuration`.
-- Loga em `channel_webhooks_log`.
-- Chama processor via `supabaseAdmin` (carregado dentro do handler).
-- Retorna 200 `{ ok, conversation_id }`.
+## 3. UI — Aba Avançado do canal
 
-### 4. UI Filas — CRUD completo
+`src/components/channels/channel-config-drawer.tsx`:
+- Nova seção "Endpoint Inbound":
+  - URL: `${window.location.origin}/api/public/channels/${channel.id}/inbound` + botão Copiar.
+  - Token: input para gerar/editar `credentials.webhook_secret` (gera via `crypto.randomUUID()`); botão Copiar; mascarado por default com toggle olho.
+  - Status pill: "Endpoint técnico ativo" / "Aguardando token" / "Aguardando credenciais do provider".
+  - Texto curto: "Provider externo ainda exige credenciais reais."
+- Botão "Testar endpoint" → abre painel com curl pronto + dispara fetch local para o próprio endpoint com payload `"quero falar com o financeiro"` e mostra a resposta JSON.
 
-`src/components/queues/queues-management.tsx` (validar/completar):
-- Form criar/editar: nome, setor, descrição, SLA, prioridade, `assignment_mode`, `is_default`, `is_active`.
-- Ação arquivar (`is_active=false`) com `AlertDialog`.
-- Tab "Membros": adicionar/remover via `useOrgUsers`, impedir duplicidade (unique `queue_id+user_id`).
-- Tab "Regras de roteamento": novo componente `routing-rules-tab.tsx` (CRUD `queue_routing_rules`): nome, keywords (chips), match_mode, intent, canal (select de `channels`), fila destino, prioridade, fallback, ativar/desativar, excluir com confirm.
-- Hook `src/hooks/queues/use-routing-rules.ts` com list/upsert/toggle/delete + invalidação.
+## 4. CRUD completo de filas
 
-### 5. Simulador setorizado
+`src/hooks/queues/use-queues.ts` — adicionar `useUpdateQueue`, `useDeleteQueue`, `useSetDefaultQueue`, `useToggleQueueActive`. Todos invalidam `queues-with-stats`.
 
-`src/components/dev/simulator-panel.tsx`:
-- Select de canal (real, da org), input texto, botão Enviar.
-- Chama o mesmo `routeMessage` server fn (direction='in', is_demo=true).
-- Mostra resultado: fila escolhida, `routing_reason`, agent atribuído, link "Abrir no Inbox".
-- Edge function `sim-webhook` redireciona ao mesmo helper (consolidação).
+`src/components/queues/queue-edit-dialog.tsx` (novo): nome, descrição, departamento, prioridade (1-5), `sla_minutes`, `assignment_mode` (Select manual/auto), `is_default` (Switch), `is_active` (Switch), `max_capacity`. Submit → upsert.
 
-### 6. Integração Canais
+`src/components/queues/queue-members-tab.tsx` (novo, dentro do edit dialog em tabs):
+- Lista membros via join `queue_members` + `profiles` da org (usa `useOrgUsers`).
+- Adicionar (Select de profiles que ainda não são membros) → `queue_members.insert`.
+- Remover com confirm.
+- Empty state útil.
 
-- `ChannelConfigDrawer`: aba "Roteamento" já tem default queue — garantir persistência em `channels.default_queue_id` (coluna real) além de `settings.default_queue_id` para compat.
-- Canal `pending_configuration` continua aceitando inbound de simulador (flag demo) mas marca conversation com aviso.
+`src/components/queues/queues-management.tsx`:
+- `QueueCard`: badge `assignment_mode` (Manual/Auto) e badge `Padrão` quando `is_default`; click no Settings2 abre `QueueEditDialog`.
+- Manter tabs Filas/Regras existentes.
 
-### 7. Integração Inbox
+## 5. Inbox/Customer 360/CRM
 
-Verificar `inbox-view.tsx` / `chat-list.tsx`:
-- Exibe `queue.name`, `channel.name`, `agent.full_name`, `status`, badge `routing_reason`.
-- Ação "Assumir" (set `agent_id=auth.uid()`), "Transferir fila", "Resposta", "Nota interna" — tudo já existe; só validar.
-- Realtime nas listas já configurado; adicionar canal `conversations` se faltar.
+Sem alterações estruturais — já consomem `agent_id`, `queue_id`, `routing_reason`, notificações. Apenas verificar que `chat-list` exibe `routing_reason` quando presente (já implementado no Bloco 3).
 
-### 8. Notificações
+## 6. QA
 
-- Trigger `notify_conversation_event` já cobre new_conversation/assigned/transferred. Validar que sino atualiza (`useNotifications` realtime) e clique navega `/inbox?conversation=<id>`.
+- `bunx tsc --noEmit`.
+- `rg -n "Em breve|coming soon|não implementado|próxima sprint|TODO" src/` esperado vazio nos arquivos tocados.
+- `rg -n "onClick=\{\(\) => \{\}\}|console\.log\(" src/components/queues src/components/channels src/routes/api/public` esperado vazio.
+- Teste manual com curl no endpoint:
+```
+curl -X POST $URL/api/public/channels/$ID/inbound \
+  -H 'content-type: application/json' \
+  -H 'x-webhook-token: $TOKEN' \
+  -d '{"phone":"+5511999999999","sender_name":"Teste","text":"quero falar com o financeiro"}'
+```
+- Resposta esperada: `queue_id` = Financeiro, `routing_reason` começa com `rule:`.
 
-### 9. QA final
+## 7. Ordem de execução
 
-1. `bunx tsc --noEmit`.
-2. `rg -n "Em breve|coming soon|não implementado|próxima sprint|TODO:" src` → 0.
-3. `rg -n "onClick=\{\(\) => \{\}\}|onClick=\{\(\) => null\}" src` → 0.
-4. `rg -n "console\.log" src/components src/hooks` → revisar.
-5. Teste manual: criar fila Financeiro + regra → simular "quero falar com o financeiro" → conferir queue_id, routing_reason, notification, Inbox, assumir, responder, nota, Customer 360, criar deal CRM.
+1. Migration (aprovação necessária).
+2. Endpoint + CORS.
+3. Hooks de fila (update/delete/setDefault/toggle).
+4. UI: QueueEditDialog + QueueMembersTab + badges no card.
+5. ChannelConfigDrawer aba Avançado (URL, token, testador).
+6. QA (typecheck + greps + teste manual via curl/UI).
+7. Relatório final.
 
-### 10. Relatório final
-
-Arquivos alterados, migration, novas funções/hooks/componentes, shape de `queue_routing_rules`, comportamento do processor, inbound, distribuição auto, roteiro de teste do "financeiro", typecheck/build, buscas, riscos.
-
----
-
-### Ordem de execução
-
-1. Migration (passo 1) — pedir aprovação.
-2. Processor + inbound (passos 2–3).
-3. UI Filas/Membros/Regras (passo 4).
-4. Simulador + integração canais/inbox/notificações (passos 5–8).
-5. QA + relatório (passos 9–10).
-
-Confirma para eu executar a migration do passo 1?
+Pergunta antes de executar: aprovar a migration (passo 1)?
