@@ -215,9 +215,9 @@ async function seedDemoData(db: any, orgId: string) {
 export const DEMO_SIM_CHANNEL_IDENTIFIER = "demo-sim-wa";
 
 const DEMO_CONVERSATIONS = [
-  { name: "Maria Oliveira",  phone: "+5511988880001", status: "open",    sla: "normal", preview: "Olá, gostaria de saber mais sobre o atendimento." },
-  { name: "João Silva",      phone: "+5511988880002", status: "pending", sla: "normal", preview: "Vocês conseguem me passar uma proposta?" },
-  { name: "Farmácia Central", phone: "+5511988880003", status: "open",   sla: "at_risk", preview: "Preciso falar com o setor comercial." },
+  { name: "Maria Oliveira",  phone: "+5511988880001", status: "new",              sla: "normal",  preview: "Olá, gostaria de saber mais sobre o atendimento." },
+  { name: "João Silva",      phone: "+5511988880002", status: "waiting_customer", sla: "normal",  preview: "Vocês conseguem me passar uma proposta?" },
+  { name: "Farmácia Central", phone: "+5511988880003", status: "active",          sla: "at_risk", preview: "Preciso falar com o setor comercial." },
 ] as const;
 
 async function seedDemoOmnichannel(db: any, orgId: string) {
