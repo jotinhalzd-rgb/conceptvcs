@@ -278,7 +278,29 @@ export const ChatView = ({
                       <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Nota Interna</span>
                     </div>
                   )}
-                  {item.body || item.content}
+                  {(() => {
+                    const url = item.metadata?.mediaUrl;
+                    const kind = item.metadata?.mediaKind || item.type;
+                    if (url && kind === 'image') {
+                      return (
+                        <a href={url} target="_blank" rel="noreferrer" className="block">
+                          <img src={url} alt={item.body || 'imagem'} className="max-w-xs rounded-lg" />
+                          {item.body && <div className="mt-1 text-xs opacity-80">{item.body}</div>}
+                        </a>
+                      );
+                    }
+                    if (url && kind === 'audio') {
+                      return <audio src={url} controls className="max-w-xs" />;
+                    }
+                    if (url) {
+                      return (
+                        <a href={url} target="_blank" rel="noreferrer" className="underline">
+                          📎 {item.body || 'Arquivo'}
+                        </a>
+                      );
+                    }
+                    return item.body || item.content;
+                  })()}
                 </div>
                 <span className="text-[10px] text-[#94A3B8] font-bold uppercase">
                   {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
