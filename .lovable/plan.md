@@ -1,111 +1,107 @@
-## Prompt 3/3 — QA Final, Acabamento e Preparação para Piloto
+## Objetivo
 
-**Sem novos módulos. Sem novas features. Sem refator amplo.** Apenas varredura, correção de regressões, consistência e validação. Núcleo omnichannel e módulos avançados (A1–A4, Ondas B e C) permanecem intocados, exceto correções pontuais.
+Instalar Vitest + Testing Library + jsdom, configurar setup mínimo seguro e escrever uma suíte de testes com cobertura realista (~70%) nas 4 camadas: lib utilitária, server functions, hooks críticos e services. Sem tocar em código de produto, RLS, migrations ou fluxos aprovados.
 
----
+## 1. Dependências (dev)
 
-### Bloco 1 — Varredura global (read-only → fix pontual)
-
-Buscas obrigatórias com `rg` em `src/`:
-- `"Em breve"`, `"coming soon"`, `"não implementado"`, `"próxima sprint"`
-- `TODO`, `FIXME` visíveis em UI
-- `onClick={() => {}}`, `onClick={() => null}`, handlers no-op
-- `console.log` sem `import.meta.env.DEV`
-- `toast(` genérico sem ação real associada
-- `<Link to="` apontando para rotas inexistentes (cruzar com `routeTree.gen.ts`)
-- imports não usados que disparam erro de build
-
-Para cada ocorrência: corrigir no arquivo, sem remover funcionalidade existente.
-
-### Bloco 2 — QA multi-perfil
-
-Verificar para CEO Master, Empresa Demo, Gerente, Atendente, Supervisor IA:
-- login → dashboard correto (sem tela branca)
-- sidebar filtrada por papel (já existente — só validar)
-- rotas bloqueadas mostram empty state, não crash
-- logout limpa sessão
-
-Correções apenas onde houver tela branca, loop ou erro de RLS.
-
-### Bloco 3 — QA fluxo comercial "financeiro"
-
-Validar end-to-end (Canais → Filas → inbound sim-webhook "quero falar com o financeiro" → roteamento por keyword → notificação no sino → Inbox → resposta + anexo + áudio + emoji + nota → Customer 360 → CRM → Campanha → Relatórios → CSV).
-
-Corrigir somente quebras encontradas no caminho.
-
-### Bloco 4 — QA módulos avançados
-
-Smoke test rápido: AI Studio, Automação, Developer (API keys + webhooks), Notificações, Business Hub, OIL/Advisor, Voice, Billing, White Label.
-Garantir empty states honestos e `pending_configuration` onde falta provedor.
-
-### Bloco 5 — Consistência de UX (pontual)
-
-Padronizar somente o que estiver visivelmente fora:
-- empty states usando `EmptyState` (já existe em `src/components/ui/empty-state.tsx`)
-- confirmação destrutiva em delete (AlertDialog onde faltar)
-- botões primários/secundários consistentes
-- loading skeletons no padrão `animate-pulse bg-white/[0.02]`
-
-Sem redesign.
-
-### Bloco 6 — Rotas e navegação
-
-Cruzar sidebar (`app-layout.tsx`) e todos os `<Link to="...">` contra `src/routes/`. Corrigir links órfãos; garantir que `SmartBackButton` funciona onde já está em uso.
-
-### Bloco 7 — Segurança/RLS
-
-Confirmar via `supabase--linter` que tabelas novas (voice_extensions, ivr_flows, call_logs, white_label_configs_v2, notifications, user_notification_preferences) têm:
-- RLS habilitada
-- política scoped a `organization_id` / `user_id`
-- GRANT correto
-
-Se linter apontar algo nas tabelas que tocamos, corrigir via migration nova.
-
-### Bloco 8 — Performance leve
-
-- `enabled: !!orgId` em queries dependentes (auditoria rápida em `src/hooks/`)
-- sem refetchInterval agressivo
-- sem listas sem paginação/filtro visíveis no piloto
-
-### Bloco 9 — Higiene de produção
-
-- `console.log` restantes → envolver em `if (import.meta.env.DEV)` ou remover
-- preservar `console.error`
-- limpar imports não usados que gerem warning de build
-
-### Bloco 10 — Validação final
-
-```bash
-rg -n "Em breve|coming soon|não implementado|próxima sprint" src/
-rg -n "onClick=\{\(\) => \{\}\}|onClick=\{\(\) => null\}" src/
-rg -n "console\.log\(" src/ | rg -v "import.meta.env.DEV"
-rg -n "TODO|FIXME" src/
-bunx tsc --noEmit
+```
+bun add -d vitest @vitest/coverage-v8 @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
 ```
 
-E `supabase--linter` para RLS.
+## 2. Arquivos de configuração
 
----
+- `vitest.config.ts` — environment jsdom, alias `@`, setupFiles, coverage v8 com thresholds 70% nos paths-alvo.
+- `src/test/setup.ts` — `@testing-library/jest-dom`, `cleanup` automático, polyfills (`matchMedia`, `ResizeObserver`, `IntersectionObserver`, `crypto.randomUUID`), mock global de `@/integrations/supabase/client` via `vi.mock` reutilizável.
+- `src/test/helpers/supabase-mock.ts` — factory que retorna um cliente Supabase fake encadeável (`from().select().eq()...`) com `mockResolvedValue` configurável.
+- `src/test/helpers/query-wrapper.tsx` — wrapper com `QueryClientProvider` fresh por teste + `MemoryRouterProvider` mínimo (mock simples de `@tanstack/react-router` quando hook usa `useNavigate`).
+- `package.json` — adicionar `"test": "vitest run"`, `"test:watch": "vitest"`, `"test:coverage": "vitest run --coverage"`. Scripts existentes intactos.
 
-### Entregáveis
+## 3. Testes — Lib utilitária (puros, prioridade alta)
 
-1. Relatório final com status **APROVADO PARA PILOTO** ou **BLOQUEADO**.
-2. Lista de correções aplicadas (arquivo + motivo).
-3. Resultado de cada busca proibida (idealmente 0 hits).
-4. Resultado `tsc --noEmit`.
-5. Resultado do linter RLS.
-6. Riscos não-bloqueantes e recomendações pós-piloto.
+| Arquivo | Casos |
+|---|---|
+| `src/lib/sla.test.ts` | dentro/fora SLA, vencido, sem `sla_due_at`, datas inválidas |
+| `src/lib/reports/csv.test.ts` | linhas vazias, escape de vírgula/aspas/quebra de linha, headers, unicode |
+| `src/lib/channels/status.test.ts` | cada status mapeado, status desconhecido (fallback) |
+| `src/lib/channels/legacy-map.test.ts` | mapeamento legado → novo, valor não mapeado |
+| `src/lib/channels/providers.test.ts` | metadata por provedor, provedor inexistente |
+| `src/lib/notifications/resolve-link.test.ts` | cada `type` resolve URL correta, payload incompleto, tipo desconhecido |
+| `src/lib/notifications/type-map.test.ts` | label/ícone por tipo, fallback |
 
-### Fora de escopo (não fazer)
+## 4. Testes — Server functions (mockando Supabase + fetch)
 
-- Novos módulos, novas rotas, novas tabelas (exceto correção RLS pontual).
-- Refator de núcleo omnichannel.
-- Integração real com Stripe/Twilio/Meta (segue `pending_configuration`).
-- Redesign visual.
-- Prompt 4.
+| Arquivo | Estratégia |
+|---|---|
+| `src/lib/ai/test-agent.functions.test.ts` | mock de `fetch` para Lovable AI Gateway, validar input, retorno de sucesso e erro 401/500. **Nunca chamar provider real.** |
+| `src/lib/automation/test-automation.functions.test.ts` | mock Supabase + payload validation |
+| `src/lib/developer/api-keys.functions.test.ts` | criação/listagem/revogação com mock Supabase, validar formato da key gerada |
+| `src/lib/developer/webhook-test.functions.test.ts` | mock `fetch` para webhook destino, sucesso/timeout/erro |
+| `src/lib/developer/webhook-secret.functions.test.ts` | geração de secret, formato |
+| `src/lib/demo-seed.functions.test.ts` | **pular** se exigir mock excessivo de Supabase admin (reportar como risco) |
 
-### Estimativa de arquivos tocados
+Server fns com `requireSupabaseAuth` testadas chamando o `.handler` diretamente com `context` mockado (`{ supabase: fakeClient, userId: 'test-uid' }`) — evita middleware real.
 
-10–25 arquivos com edições cirúrgicas (textos, handlers, links, console). Possivelmente 1 migration se o linter apontar RLS faltando.
+## 5. Testes — Hooks críticos
 
-Aguardando aprovação para iniciar a varredura.
+Renderizados via `renderHook` com `query-wrapper`. Supabase mockado por teste.
+
+| Hook | Casos cobertos |
+|---|---|
+| `use-auth` | sessão null → user, signOut, error path |
+| `use-conversations` | lista vazia, lista com dados, filtro por queue, erro |
+| `use-send-message` | sucesso (insert), validação de input vazio, erro de RLS |
+| `use-channels` | list, create (mutate), update, erro |
+| `use-queues` | list, default queue, create, erro |
+| `use-billing` | usage, plan, invoices, sem dados |
+
+## 6. Testes — Services
+
+| Arquivo | Casos |
+|---|---|
+| `src/lib/ai/*` (ai-service / copilot-engine se existirem) | mock fetch Gateway, prompt builder, parse de resposta, erro |
+| `src/lib/channels/providers.ts` (já em lib) | reaproveita |
+| `src/lib/campaigns/dispatch.test.ts` | enfileiramento, dry-run, erro de provider mockado |
+
+> Se `ai-service`/`copilot-engine` não existirem como módulos isolados (lógica colada em hook), reportar como risco e cobrir indiretamente via teste do hook.
+
+## 7. Validação final
+
+```bash
+bunx tsc --noEmit
+bun run test
+bun run test:coverage
+rg -n "TODO|FIXME|console\.log\(" src --type ts | head
+```
+
+Build não roda manualmente (harness cuida). Confirmar zero alterações em `src/integrations/supabase/**`, `supabase/migrations/**`, `src/routes/**`.
+
+## 8. Regras de segurança
+
+- **Sem chamadas reais** a Lovable AI Gateway, Supabase, webhooks externos. Todo `fetch` mockado com `vi.stubGlobal('fetch', vi.fn())`.
+- **Sem secrets** em arquivos de teste.
+- **Sem snapshot de UI complexa** — só lógica e contratos.
+- Cada teste isolado: `beforeEach` reseta mocks.
+
+## 9. Pular / reportar como risco
+
+- Componentes React grandes (Inbox, Dashboard, CRM views) — fora do escopo.
+- Hooks que dependem de realtime do Supabase (`channel().on()`) — cobrir apenas a parte síncrona; realtime fica como risco.
+- `demo-seed` se exigir mock de `supabaseAdmin` em demasia.
+
+## 10. Relatório final entregue
+
+- Lista de dependências adicionadas;
+- Arquivos de config criados;
+- Arquivos de teste criados + contagem de `it()`;
+- Camadas cobertas vs puladas (com motivo);
+- Resultado de `tsc --noEmit`;
+- Resultado de `vitest run` (passed/failed/skipped);
+- % de cobertura por path-alvo;
+- Riscos remanescentes (realtime, demo-seed, edge functions externas).
+
+## Não-objetivos
+
+- Cobertura 90%+;
+- Testes E2E (Playwright);
+- Refatorar produto para testabilidade;
+- Mexer em RLS, migrations, rotas, UI.
