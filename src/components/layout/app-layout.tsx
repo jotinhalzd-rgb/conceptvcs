@@ -118,6 +118,16 @@ export function AppLayout() {
     }
   }, [user, authLoading, navigate]);
 
+  // Auto-recolhe sidebar em larguras intermediárias (tablet landscape) para preservar espaço de conteúdo.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 1023px)");
+    const apply = () => { if (mql.matches) setCollapsed(true); };
+    apply();
+    mql.addEventListener("change", apply);
+    return () => mql.removeEventListener("change", apply);
+  }, [setCollapsed]);
+
   const handleLogout = async () => {
     try {
       setLogoutLoading(true);
