@@ -64,7 +64,7 @@ export const AISidebar = ({ chat, onApplyReply }: AISidebarProps) => {
   };
 
   return (
-    <div className="w-[380px] h-full border-l border-white/5 bg-[#030712]/40 flex flex-col shrink-0 animate-in fade-in slide-in-from-right-4 duration-500">
+    <div className="hidden xl:flex w-[340px] 2xl:w-[380px] h-full border-l border-white/5 bg-[#030712]/40 flex-col shrink-0 animate-in fade-in slide-in-from-right-4 duration-500">
       <div className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-[#030712]/60">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">

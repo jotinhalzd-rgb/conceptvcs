@@ -118,6 +118,16 @@ export function AppLayout() {
     }
   }, [user, authLoading, navigate]);
 
+  // Auto-recolhe sidebar em larguras intermediárias (tablet landscape) para preservar espaço de conteúdo.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 1023px)");
+    const apply = () => { if (mql.matches) setCollapsed(true); };
+    apply();
+    mql.addEventListener("change", apply);
+    return () => mql.removeEventListener("change", apply);
+  }, [setCollapsed]);
+
   const handleLogout = async () => {
     try {
       setLogoutLoading(true);
@@ -154,7 +164,7 @@ export function AppLayout() {
         <aside 
           className={cn(
             "relative border-r border-white/5 bg-[#030712] flex flex-col transition-all duration-500 ease-in-out z-30 shadow-2xl",
-            collapsed ? "w-[80px]" : "w-[280px]"
+            collapsed ? "w-20" : "w-64 lg:w-[280px]"
           )}
         >
           {/* Logo Section */}
@@ -316,7 +326,7 @@ export function AppLayout() {
         <div className="flex-1 flex flex-col min-w-0 bg-[#020817]">
           {/* Header */}
           {!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub && (
-            <header className="h-20 border-b border-white/[0.05] flex items-center justify-between px-8 bg-[#020817]/80 backdrop-blur-2xl sticky top-0 z-20">
+            <header className="h-16 md:h-20 border-b border-white/[0.05] flex items-center justify-between gap-3 px-4 md:px-6 lg:px-8 bg-[#020817]/80 backdrop-blur-2xl sticky top-0 z-20">
               <div className="flex items-center gap-6 flex-1">
                 <div 
                   onClick={() => setQuickLaunchOpen(true)}
@@ -332,20 +342,20 @@ export function AppLayout() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-2 md:gap-4 lg:gap-5 shrink-0">
                 <div className="flex items-center gap-1">
                   <NotificationsBell />
                   <Link to="/settings/profile" className="rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.05] h-11 w-11 transition-all inline-flex items-center justify-center" aria-label="Configurações">
                     <Settings className="h-5 w-5" />
                   </Link>
                 </div>
-                <div className="h-8 w-px bg-white/[0.08] mx-1" />
+                <div className="hidden sm:block h-8 w-px bg-white/[0.08] mx-1" />
                 <Button 
                   onClick={() => setQuickLaunchOpen(true)}
-                  className="h-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="h-11 min-w-11 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-2xl px-3 md:px-6 py-2 font-bold shadow-xl shadow-indigo-600/20 gap-2.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Rocket className="w-4 h-4" />
-                  <span>Quick Launch</span>
+                  <span className="hidden md:inline">Quick Launch</span>
                 </Button>
               </div>
             </header>
@@ -354,7 +364,7 @@ export function AppLayout() {
           {/* Main Content Area */}
           <main className={cn(
             "flex-1 overflow-hidden relative",
-            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "p-8 overflow-y-auto no-scrollbar"
+            (!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && "p-4 md:p-6 lg:p-8 overflow-y-auto no-scrollbar"
           )}>
             {/* Background Gradient Spotlights */}
             {(!isInbox && !isCampaigns && !isCustomers && !isQueues && !isCRM && !isHub) && (
