@@ -22,14 +22,12 @@ if (typeof window !== "undefined") {
         dispatchEvent: () => false,
       }) as MediaQueryList;
   }
-  // @ts-expect-error - jsdom doesn't have these
-  window.ResizeObserver ??= class {
+  (window as unknown as { ResizeObserver?: unknown }).ResizeObserver ??= class {
     observe() {}
     unobserve() {}
     disconnect() {}
   };
-  // @ts-expect-error - jsdom doesn't have these
-  window.IntersectionObserver ??= class {
+  (window as unknown as { IntersectionObserver?: unknown }).IntersectionObserver ??= class {
     observe() {}
     unobserve() {}
     disconnect() {}
